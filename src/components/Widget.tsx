@@ -36,12 +36,31 @@ type ResizeHandle = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 
 
 // Fields
 
-interface FieldData {
-	[key: string]: any; // Adjust this more strictly if you know the exact keys
+interface OnWidgetLoadData {
+	[key: string]: any;
 }
 
-// Your API fetch function
-const fetchFields = async (overlay: string, widget: string): Promise<FieldData | undefined> => {
+// Fetch ./data/onWidgetLoad.json, then add fieldData to the object and send it to the widget.
+// Also gonna need to spoof obj.detail.channel.id to work for Twitch, YouTube, Kick, Twitter, and Trovo.
+// Probably no other way than to make an account on all of them and use those IDs within the app
+
+const fetchOnWidgetLoad = async (): Promise<OnWidgetLoadData | undefined> => {
+	try {
+		const res = await fetch(`/api/data/onWidgetLoad`, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+		});
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		const data = await res.json();
+
+		return data;
+	} catch (error) {
+		console.error('[Parent App] Error fetching onWidgetLoad data:', error);
+		return undefined;
+	}
+};
+
+const fetchFields = async (overlay: string, widget: string): Promise<OnWidgetLoadData | undefined> => {
 	try {
 		const res = await fetch(`/api/field-data/${encodeURIComponent(overlay)}/${encodeURIComponent(widget)}`, {
 			method: 'GET',
@@ -92,7 +111,7 @@ const Widget = ({
 
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const hasIframeInitialized = useRef(false);
-	const [widgetFieldData, setWidgetFieldData] = useState<FieldData | undefined>(undefined);
+	const [onWidgetLoadData, setOnWidgetLoadData] = useState<OnWidgetLoadData | undefined>(undefined);
 
 	useEffect(() => {
 		// HMR
@@ -105,13 +124,18 @@ const Widget = ({
 			});
 		}
 
-		const getAndSetFieldData = async () => {
-			const data = await fetchFields('overlay-1', `${template}-${id}`);
-			if (data) {
-				setWidgetFieldData(data);
+		const getOnWidgetLoadData = async () => {
+			const [data, fieldData] = await Promise.all([
+				fetchOnWidgetLoad(),
+				fetchFields('overlay-1', `${template}-${id}`),
+			]);
+
+			if (data && fieldData) {
+				const combinedData = { ...data, fieldData: { ...fieldData } };
+				setOnWidgetLoadData(combinedData);
 			}
 		};
-		getAndSetFieldData();
+		getOnWidgetLoadData();
 	}, []);
 
 	useEffect(() => {
@@ -131,29 +155,21 @@ const Widget = ({
 			switch (type) {
 				case 'iframeInitialized':
 					// console.log('[Parent App] Received iframeInitialized message.');
-					if (!hasIframeInitialized.current && widgetFieldData) {
+					if (!hasIframeInitialized.current && onWidgetLoadData) {
 						// Ensure field data is loaded
 						hasIframeInitialized.current = true;
 						if (iframeRef.current && iframeRef.current.contentWindow) {
 							const messageToSend = {
 								listener: 'onWidgetLoad',
 								detail: {
-									// Pass any other static StreamElements data here (width, height, currency, etc.)
-									// For example:
-									width: 1920,
-									height: 1080,
-									currency: { symbol: '$', name: 'USD' },
-									widgetId: `${template}-${id}`,
-									channel: { username: 'your_mock_channel' },
-									// This is the important part: pass the fetched data
-									fieldData: widgetFieldData,
+									...onWidgetLoadData,
 								},
 							};
-							// console.log('[Parent App] Sending onWidgetLoad message with fieldData:', messageToSend);
+							// console.log('[Parent App] Sending onWidgetLoad message with data:', messageToSend);
 							iframeRef.current.contentWindow.postMessage(messageToSend, '*');
 						}
-					} else if (!widgetFieldData) {
-						console.warn('[Parent App] iframeInitialized received, but field data not yet loaded.');
+					} else if (!onWidgetLoadData) {
+						console.warn('[Parent App] iframeInitialized received, but onWidgetLoad data not yet loaded.');
 					}
 					break;
 				default:
@@ -165,7 +181,7 @@ const Widget = ({
 		return () => {
 			window.removeEventListener('message', handleIncomingMessage);
 		};
-	}, [widgetFieldData]);
+	}, [onWidgetLoadData]);
 
 	// Widget positioning
 

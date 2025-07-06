@@ -118,12 +118,21 @@ app.put('/api/update-widget-settings', async (req, res) => {
     }
 })
 
+app.get('/api/data/:file', async (req, res) => {
+    if (!req.params.file) return res.status(400).json({ error: 'File is required' });
+
+    const dataFile = join(__dirname, "data", `${req.params.file}.json`);
+
+    const dataObject = await fs.readFile(dataFile, 'utf-8');
+
+    res.json(JSON.parse(dataObject))
+})
+
 app.get('/api/field-data/:overlay/:widget', async (req, res) => {
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
 
     const dataFile = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'data.json');
-    console.log(dataFile);
 
     const fieldData = await fs.readFile(dataFile, 'utf-8');
 
