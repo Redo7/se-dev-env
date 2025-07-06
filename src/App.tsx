@@ -1,0 +1,141 @@
+import { useEffect, useState } from 'react';
+import Overlay from './components/Overlay';
+import Widget from './components/Widget';
+import IconPopupButton from './components/Buttons/IconPopupButton';
+import IconPlusSm from './assets/Icons/IconPlusSm';
+import IconPlus from './assets/Icons/IconPlus';
+
+export interface WidgetInstance {
+	id: string;
+	name: string;
+	template: string;
+	src: string;
+
+	width: number;
+	height: number;
+	posX: number;
+	posY: number;
+}
+
+function App() {
+	// const [isDarkMode, setIsDarkMode] = useState(true);
+	const isDarkMode = true;
+	document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+
+	const [widgets, setWidgets] = useState<WidgetInstance[]>([]);
+
+	const getWidgets = async () => {
+		console.log('Retrieving widgets');
+		const res = await fetch('/api/get-widgets');
+		const data: WidgetInstance[] = await res.json();
+		setWidgets(data);
+	};
+
+	useEffect(() => {
+		getWidgets();
+	}, []);
+
+	const addWidget = async (template: string) => {
+		try {
+			const res = await fetch('/api/create-widget', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ template }),
+			});
+
+			if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+			const data = await res.json();
+			// const { id, src, width, height, posX, posY } = data;
+			// const newWidget: WidgetInstance = {
+			// 	id: id,
+			// 	name: template + ' widget',
+			// 	template: template,
+			// 	src: src,
+			// 	width: width,
+			// 	height: height,
+			// 	posX: posX,
+			// 	posY: posY,
+			// };
+			setWidgets((prevWidgets) => [...prevWidgets, data]);
+			console.log('Created ' + data.name);
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const removeWidget = async (template: string, id: string) => {
+		try {
+			await fetch('/api/delete-widget', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ template, id }),
+			}).then((response) => {
+				if (!response.ok) {
+					throw new Error(`Something went wrong while deleting ${template}-${id}`);
+				}
+				console.log(`${template}-${id} deleted successfully.`);
+				getWidgets();
+			});
+		} catch (error) {
+			console.error(`Error removing ${template}-${id}`, error);
+		}
+	};
+
+	const updateWidgetSettings = async (id: string, width: number, height: number, posX: number, posY: number) => {
+		await fetch('/api/update-widget-settings', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id, width, height, posX, posY }),
+		}).then((response) => {
+			if (!response.ok) {
+				throw new Error(`Something went wrong while changing settings for ${id}`);
+			}
+			console.log(`Settings applied successfully.`);
+			// getWidgets();
+		});
+	};
+
+	return (
+		<>
+			<Overlay>
+				<div className="flex gap-16 absolute OverlayButtonContainer depth-shadow">
+					<IconPopupButton
+						popupItems={[
+							{
+								label: 'Chat',
+								icon: <IconPlusSm />,
+								action: () => addWidget('chat'),
+							},
+							{
+								label: 'Goal',
+								icon: <IconPlusSm />,
+								action: () => addWidget('goal'),
+							},
+						]}
+						popupPosition="top">
+						<IconPlus />
+					</IconPopupButton>
+				</div>
+				{widgets.map((widget) => (
+					<Widget
+						key={widget.id}
+						template={widget.template}
+						id={widget.id}
+						src={widget.src}
+						width={widget.width}
+						height={widget.height}
+						initialPosition={{ x: widget.posX, y: widget.posY }}
+						resizable={true}
+						onDelete={() => removeWidget(widget.template, widget.id)}
+						onSettingsChange={(id, width, height, posX, posY) =>
+							updateWidgetSettings(id, width, height, posX, posY)
+						}
+					/>
+				))}
+			</Overlay>
+		</>
+	);
+}
+
+export default App;
