@@ -4,10 +4,15 @@ import '../../App.css';
 
 interface Props {
 	children: React.ReactNode;
+	onClick: () => void;
 }
 
-const IconButton = ({ children }: Props) => {
-	return <button className="depthShadow">{children}</button>;
+const IconButton = ({ children, onClick }: Props) => {
+	return (
+		<button className="regular depth-shadow" onClick={onClick}>
+			{children}
+		</button>
+	);
 };
 
 export default IconButton;

@@ -4,6 +4,9 @@ import Widget from './components/Widget';
 import IconPopupButton from './components/Buttons/IconPopupButton';
 import IconPlusSm from './assets/Icons/IconPlusSm';
 import IconPlus from './assets/Icons/IconPlus';
+import Sidebar from './components/Sidebar';
+import IconButton from './components/Buttons/IconButton';
+import SidebarExpand from './assets/Icons/SidebarExpand';
 
 export interface WidgetInstance {
 	id: string;
@@ -22,6 +25,7 @@ function App() {
 	const isDarkMode = true;
 	document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
 
+	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 	const [widgets, setWidgets] = useState<WidgetInstance[]>([]);
 
 	const getWidgets = async () => {
@@ -96,10 +100,22 @@ function App() {
 		});
 	};
 
+	const handleSidebarToggle = () => {
+		setIsSidebarVisible(!isSidebarVisible);
+	};
+
 	return (
 		<>
 			<Overlay>
-				<div className="flex gap-16 absolute OverlayButtonContainer depth-shadow">
+				<div className="sidebar-button absolute" data-sidebar-visible={isSidebarVisible}>
+					<IconButton onClick={() => handleSidebarToggle()}>
+						<SidebarExpand />
+					</IconButton>
+				</div>
+				<Sidebar isVisible={isSidebarVisible} onToggle={() => handleSidebarToggle()} />
+				<div
+					className="flex gap-16 absolute OverlayButtonContainer depth-shadow"
+					data-sidebar-visible={isSidebarVisible}>
 					<IconPopupButton
 						popupItems={[
 							{

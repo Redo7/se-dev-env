@@ -3,6 +3,8 @@
 button.regular {
     height: 2.25rem;
     aspect-ratio: 1/1;
+    color: #e1e1e1;
+    white-space: nowrap;
 
     border-radius: 0.5rem;
     border: 0.0625rem solid rgba(255, 255, 255, 0.2);
@@ -73,6 +75,7 @@ button.subtle{
     background: linear-gradient(#FFFFFF1a, #ffffff1a);
     border: none;
     border-radius: 0.25rem;
+    padding: 2px;
 
     transition: background 300ms ease, opacity 300ms ease;
 }
