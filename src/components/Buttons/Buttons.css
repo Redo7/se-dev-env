@@ -75,7 +75,7 @@ button.subtle{
     background: linear-gradient(#FFFFFF1a, #ffffff1a);
     border: none;
     border-radius: 0.25rem;
-    padding: 2px;
+    padding: 0.125rem;
 
     transition: background 300ms ease, opacity 300ms ease;
 }

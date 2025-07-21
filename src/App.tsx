@@ -69,6 +69,9 @@ function App() {
 	};
 
 	const removeWidget = async (template: string, id: string) => {
+		console.log('Deleting is disabled');
+		return;
+
 		try {
 			await fetch('/api/delete-widget', {
 				method: 'DELETE',
@@ -96,7 +99,6 @@ function App() {
 				throw new Error(`Something went wrong while changing settings for ${id}`);
 			}
 			console.log(`Settings applied successfully.`);
-			// getWidgets();
 		});
 	};
 

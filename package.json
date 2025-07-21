@@ -16,7 +16,9 @@
     "fs-extra": "^11.3.0",
     "idb-keyval": "^6.2.2",
     "react": "^19.1.0",
+    "react-color-palette": "^7.3.0",
     "react-dom": "^19.1.0",
+    "react-dropdown": "^1.11.0",
     "uuid": "^11.1.0",
     "ws": "^8.18.3"
   },
