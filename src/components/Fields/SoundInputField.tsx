@@ -7,7 +7,7 @@ interface Props {
 	timestampClassName?: string;
 }
 
-const AudioInputField = ({ name, label, value, timestampClassName }: Props) => {
+const SoundInputField = ({ name, label, value, timestampClassName }: Props) => {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const [isPlaying, setIsPlaying] = useState<boolean>(false);
 	const [currentTime, setCurrentTime] = useState<number>(0);
@@ -93,4 +93,4 @@ const AudioInputField = ({ name, label, value, timestampClassName }: Props) => {
 	);
 };
 
-export default AudioInputField;
+export default SoundInputField;

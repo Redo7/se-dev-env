@@ -1,13 +1,16 @@
 import { useRef, useState, type CSSProperties, useEffect, useCallback } from 'react';
 import SubtleButton from './Buttons/SubtleButton';
 import IconTrash from '../assets/Icons/IconTrash';
+import useFields from '../hooks/useFieldData';
 
 interface Props {
+	overlay: string;
 	template: string;
 	id: string;
 	src: string;
 	width: number;
 	height: number;
+	onClick: () => void;
 	onDelete: () => void;
 	onSettingsChange: (id: string, width: number, height: number, posX: number, posY: number) => void;
 
@@ -60,28 +63,14 @@ const fetchOnWidgetLoad = async (): Promise<OnWidgetLoadData | undefined> => {
 	}
 };
 
-const fetchFields = async (overlay: string, widget: string): Promise<OnWidgetLoadData | undefined> => {
-	try {
-		const res = await fetch(`/api/field-data/${encodeURIComponent(overlay)}/${encodeURIComponent(widget)}`, {
-			method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
-		});
-		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-		const data = await res.json();
-		// console.log('[Parent App] Fetched field data:', data);
-		return data;
-	} catch (error) {
-		console.error('[Parent App] Error fetching field data:', error);
-		return undefined; // Return undefined on error
-	}
-};
-
 const Widget = ({
+	overlay,
 	template,
 	id,
 	src,
 	width: initialWidth,
 	height: initialHeight,
+	onClick,
 	onDelete,
 	onSettingsChange,
 	onDragStart,
@@ -117,7 +106,7 @@ const Widget = ({
 		// HMR
 		if (import.meta.hot) {
 			import.meta.hot.on('vite:beforeUpdate', (payload) => {
-				// You can filter payload.updates for specific files if needed
+				// can filter payload.updates for specific files if needed
 				if (iframeRef.current) {
 					iframeRef.current.contentWindow?.location.reload();
 				}
@@ -125,10 +114,7 @@ const Widget = ({
 		}
 
 		const getOnWidgetLoadData = async () => {
-			const [data, fieldData] = await Promise.all([
-				fetchOnWidgetLoad(),
-				fetchFields('overlay-1', `${template}-${id}`),
-			]);
+			const [data, fieldData] = await Promise.all([fetchOnWidgetLoad(), useFields(overlay, `${template}-${id}`)]);
 
 			if (data && fieldData) {
 				const combinedData = { ...data, fieldData: { ...fieldData } };
@@ -341,12 +327,13 @@ const Widget = ({
 			className="widget-container relative depth-shadow"
 			ref={widgetRef}
 			style={combinedStyle}
+			onClick={onClick}
 			onMouseDown={handleMouseDown}>
 			<div className="widget-remove-button absolute top-0 right-0 z-20">
 				<SubtleButton width="2rem" height="2rem" onClick={onDelete}>
 					<IconTrash />
 				</SubtleButton>
-				{/* May want to wait for a confirmation */}
+				{/* May want to introduce a confirmation modal */}
 			</div>
 			<iframe ref={iframeRef} id={id} src={src}></iframe>
 

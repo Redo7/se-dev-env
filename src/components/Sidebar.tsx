@@ -1,15 +1,69 @@
 import '../App.css';
 import SubtleButton from './Buttons/SubtleButton';
 import SidebarCollapse from '../assets/Icons/SidebarCollapse';
-import { useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import FieldGroup from './Fields/FieldGroup';
+import type { WidgetInstance } from '../App';
+import useFields from '../hooks/useFields';
+import componentMap from '../utils/componentMap';
+import useFieldData from '../hooks/useFieldData';
 
+interface StreamElementsField {
+	type: string;
+	label: string;
+	value: any;
+	[key: string]: any;
+}
+
+interface StreamElementsConfig {
+	[key: string]: StreamElementsField;
+}
+
+interface GroupedFields {
+	[groupName: string]: {
+		fieldName: string;
+		fieldConfig: StreamElementsField;
+	}[];
+}
 interface Props {
 	isVisible: boolean;
+	overlay: string;
+	widget: WidgetInstance | undefined;
 	onToggle: () => void;
 }
 
-const Sidebar = ({ isVisible, onToggle }: Props) => {
+const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
+	const [currWidgetFields, setCurrWidgetFields] = useState<StreamElementsConfig>();
+	const [currWidgetFieldData, setCurrWidgetFieldData] = useState<StreamElementsConfig>({});
+	useEffect(() => {
+		if (!widget) return;
+		const fetchFields = async () => {
+			const fields = await useFields(overlay, `${widget.template}-${widget.id}`);
+			setCurrWidgetFields(fields);
+			const fieldData = await useFieldData(overlay, `${widget.template}-${widget.id}`);
+			setCurrWidgetFieldData(fieldData);
+			console.log(fieldData);
+		};
+		fetchFields();
+	}, [widget]);
+
+	const groupedFields = useMemo(() => {
+		const groups: GroupedFields = {};
+		const DEFAULT_GROUP_NAME = 'Fields'; // Name for the default group
+
+		if (currWidgetFields) {
+			Object.entries(currWidgetFields).forEach(([fieldName, fieldConfig]) => {
+				const groupName = fieldConfig.group || DEFAULT_GROUP_NAME;
+
+				if (!groups[groupName]) {
+					groups[groupName] = [];
+				}
+				groups[groupName].push({ fieldName, fieldConfig });
+			});
+		}
+		return groups;
+	}, [currWidgetFields]);
+
 	return (
 		<div className="sidebar depth-shadow" data-sidebar-visible={isVisible}>
 			<div className="sidebar-heading flex">
@@ -19,7 +73,30 @@ const Sidebar = ({ isVisible, onToggle }: Props) => {
 				</SubtleButton>
 			</div>
 			<div className="sidebar-fields-container">
-				<FieldGroup />
+				{Object.entries(groupedFields).map(([groupName, fieldsInGroup]) => (
+					<FieldGroup key={groupName} name={groupName}>
+						{fieldsInGroup.map(({ fieldName, fieldConfig }) => {
+							const Component = componentMap[fieldConfig.type];
+
+							if (!Component) {
+								console.warn(`No component found for type: ${fieldConfig.type}`);
+								return null;
+							}
+
+							const { type, label, value, group, ...restProps } = fieldConfig; // Include 'group' in destructuring to exclude it from restProps
+							return (
+								<div key={fieldName} style={{ marginBottom: '10px' }}>
+									<Component
+										name={fieldName}
+										label={label}
+										value={currWidgetFieldData[fieldName]}
+										{...restProps}
+									/>
+								</div>
+							);
+						})}
+					</FieldGroup>
+				))}
 			</div>
 			<div className="add-group-container">
 				<SubtleButton width="100%">+</SubtleButton>

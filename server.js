@@ -128,11 +128,56 @@ app.get('/api/data/:file', async (req, res) => {
     res.json(JSON.parse(dataObject))
 })
 
-app.get('/api/field-data/:overlay/:widget', async (req, res) => {
+app.post('/api/field-data/:overlay/:widget', async (req, res) => {
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
 
-    const dataFile = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'data.json');
+    const overlayName = req.params.overlay;
+    const widgetName = req.params.widget;
+
+    const widgetSrc = join(__dirname, "overlays", overlayName, widgetName, 'src');
+
+    const dataFilePath = join(widgetSrc, 'data.json');
+    const fieldsFilePath = join(widgetSrc, 'fields.json');
+
+    let fieldData;
+
+    try {
+        fieldData = await fs.readFile(dataFilePath, 'utf-8');
+        res.send(fieldData)
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            console.log(`File not found: ${dataFilePath}. Creating with default content.`);
+            try {
+                // 1. Prepare field data
+                const fieldsFile = fs.readFileSync(fieldsFilePath, 'utf-8');
+                fieldData = generateDataFromFields(JSON.parse(fieldsFile));
+
+                const defaultDataContent = JSON.stringify(fieldData, null, 2);
+
+                // 2. Write the default data to the file
+                await fs.writeFile(dataFilePath, defaultDataContent, 'utf-8');
+
+                // 3. Send the default data back in the response
+                res.type('application/json').send(defaultDataContent);
+                console.log(`File created successfully: ${dataFilePath}`);
+
+            } catch (createError) {
+                console.error(`Error creating file or directory for ${dataFilePath}:`, createError);
+                res.status(500).json({ error: 'Failed to create default data file.' });
+            }
+        } else {
+            console.error(`Error reading ${dataFilePath}:`, error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+})
+
+app.get('/api/fields/:overlay/:widget', async (req, res) => {
+    if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
+    if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
+
+    const dataFile = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'fields.json');
 
     const fieldData = await fs.readFile(dataFile, 'utf-8');
 
@@ -142,3 +187,19 @@ app.get('/api/field-data/:overlay/:widget', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);
 })
+
+function generateDataFromFields(fields) {
+    let fieldData = {};
+    for (const [key, value] of Object.entries(fields)) {
+        if (Object.keys(fields[key]).includes("value") === false && fields[key]["type"] === "number") {
+            fieldData[key] = 0;
+        } else if (Object.keys(fields[key]).includes("value") === false && fields[key]["type"] === "checkbox") {
+            fieldData[key] = false;
+        } else if (Object.keys(fields[key]).includes("value") === false) {
+            fieldData[key] = "";
+        } else {
+            fieldData[key] = value["value"];
+        }
+    }
+    return fieldData;
+}

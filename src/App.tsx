@@ -22,11 +22,13 @@ export interface WidgetInstance {
 
 function App() {
 	// const [isDarkMode, setIsDarkMode] = useState(true);
+	const currOverlay = 'overlay-1';
 	const isDarkMode = true;
 	document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
 
 	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 	const [widgets, setWidgets] = useState<WidgetInstance[]>([]);
+	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
 
 	const getWidgets = async () => {
 		console.log('Retrieving widgets');
@@ -50,17 +52,6 @@ function App() {
 			if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
 			const data = await res.json();
-			// const { id, src, width, height, posX, posY } = data;
-			// const newWidget: WidgetInstance = {
-			// 	id: id,
-			// 	name: template + ' widget',
-			// 	template: template,
-			// 	src: src,
-			// 	width: width,
-			// 	height: height,
-			// 	posX: posX,
-			// 	posY: posY,
-			// };
 			setWidgets((prevWidgets) => [...prevWidgets, data]);
 			console.log('Created ' + data.name);
 		} catch (error) {
@@ -106,6 +97,15 @@ function App() {
 		setIsSidebarVisible(!isSidebarVisible);
 	};
 
+	const handleWidgetClick = (widget: WidgetInstance) => {
+		if (widget.id === activeWidget?.id) {
+			console.log('Active widget clicked');
+			return;
+		}
+		setActiveWidget(widget);
+		console.log(widget);
+	};
+
 	return (
 		<>
 			<Overlay>
@@ -114,7 +114,12 @@ function App() {
 						<SidebarExpand />
 					</IconButton>
 				</div>
-				<Sidebar isVisible={isSidebarVisible} onToggle={() => handleSidebarToggle()} />
+				<Sidebar
+					isVisible={isSidebarVisible}
+					overlay={currOverlay}
+					widget={activeWidget}
+					onToggle={() => handleSidebarToggle()}
+				/>
 				<div
 					className="flex gap-16 absolute OverlayButtonContainer depth-shadow"
 					data-sidebar-visible={isSidebarVisible}>
@@ -138,6 +143,7 @@ function App() {
 				{widgets.map((widget) => (
 					<Widget
 						key={widget.id}
+						overlay={currOverlay}
 						template={widget.template}
 						id={widget.id}
 						src={widget.src}
@@ -145,6 +151,7 @@ function App() {
 						height={widget.height}
 						initialPosition={{ x: widget.posX, y: widget.posY }}
 						resizable={true}
+						onClick={() => handleWidgetClick(widget)}
 						onDelete={() => removeWidget(widget.template, widget.id)}
 						onSettingsChange={(id, width, height, posX, posY) =>
 							updateWidgetSettings(id, width, height, posX, posY)
