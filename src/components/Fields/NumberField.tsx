@@ -13,7 +13,7 @@ interface Props {
 const NumberField = ({ name, label, value = 0 }: Props) => {
 	const [inputValue, setInputValue] = useState<number | ''>(value);
 	const labelChars = label
-		.replace(' ', '\u00a0')
+		.replaceAll(' ', '\u00a0')
 		.split('')
 		.map((e, i) => (
 			<span className="label-char" key={i} style={{ '--index': i } as React.CSSProperties}>

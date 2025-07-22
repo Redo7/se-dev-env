@@ -10,7 +10,7 @@ interface Props {
 const TextField = ({ name, label, value = '' }: Props) => {
 	const [inputValue, setInputValue] = useState(value);
 	const labelChars = label
-		.replace(' ', '\u00a0')
+		.replaceAll(' ', '\u00a0')
 		.split('')
 		.map((e, i) => (
 			<span className="label-char" key={i} style={{ '--index': i } as React.CSSProperties}>
