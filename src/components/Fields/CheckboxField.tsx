@@ -3,10 +3,10 @@ import { useState } from 'react';
 interface Props {
 	name: string;
 	label: string;
-	value?: boolean;
+	value: boolean;
 }
 
-const CheckboxField = ({ name, label, value = false }: Props) => {
+const CheckboxField = ({ name, label, value }: Props) => {
 	const [isChecked, setIsChecked] = useState(value);
 	return (
 		<label className="checkbox-container">

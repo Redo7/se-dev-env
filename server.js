@@ -184,6 +184,31 @@ app.get('/api/fields/:overlay/:widget', async (req, res) => {
     res.send(fieldData)
 })
 
+app.put('/api/update-field-data/:overlay/:widget/:field/:newValue', async (req, res) => {
+    if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
+    if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
+    if (!req.params.field) return res.status(400).json({ error: 'Field is required' });
+    if (!req.params.newValue) return res.status(400).json({ error: 'newValue is required' });
+
+
+    const dataFilePath = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'data.json');
+    try {
+        const fieldData = await fs.readFile(dataFilePath, 'utf-8');
+        let fieldDataJson = JSON.parse(fieldData);
+
+        const field = req.params.field;
+        const newValue = req.params.newValue;
+        fieldDataJson[field] = newValue;
+        const newFieldData = JSON.stringify(fieldDataJson, null, 2);
+
+        await fs.writeFile(dataFilePath, newFieldData, 'utf-8');
+        res.send();
+    } catch (error) {
+        console.error(`Error updating ${dataFilePath}:`, error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);
 })

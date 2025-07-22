@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import './fields.css';
+import useFieldChange from '../../hooks/useFieldChange';
 
 interface Props {
+	overlay: string;
+	widget: string;
 	name: string;
 	label: string;
 	value?: string;
 }
 
-const TextField = ({ name, label, value = '' }: Props) => {
+const TextField = ({ overlay, widget, name, label, value = '' }: Props) => {
 	const [inputValue, setInputValue] = useState(value);
 	const labelChars = label
 		.replaceAll(' ', '\u00a0')
@@ -26,7 +29,10 @@ const TextField = ({ name, label, value = '' }: Props) => {
 				type="text"
 				value={inputValue}
 				required
-				onChange={(event) => setInputValue(event.target.value)}
+				onChange={(event) => {
+					setInputValue(event.target.value);
+					useFieldChange(overlay, widget, name, event.target.value);
+				}}
 			/>
 			<span className="bar"></span>
 			<label className="label" htmlFor={name}>

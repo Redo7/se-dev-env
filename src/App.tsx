@@ -103,7 +103,6 @@ function App() {
 			return;
 		}
 		setActiveWidget(widget);
-		console.log(widget);
 	};
 
 	return (
