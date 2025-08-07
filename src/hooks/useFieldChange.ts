@@ -3,10 +3,11 @@ const useFieldChange = async (overlay: string, widget: string, field: string, ne
 		const res = await fetch(
 			`/api/update-field-data/${encodeURIComponent(overlay)}/${encodeURIComponent(widget)}/${encodeURIComponent(
 				field
-			)}/${encodeURIComponent(newValue)}`,
+			)}`,
 			{
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ newValue: newValue }),
 			}
 		);
 
