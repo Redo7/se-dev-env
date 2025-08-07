@@ -87,7 +87,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 								let assignedValue;
 
 								if (fieldConfig.options) {
-									assignedValue = fieldConfig.options[currWidgetFieldData[fieldName]];
+									assignedValue = fieldConfig.options[currWidgetFieldData[fieldName].toString()];
 								} else {
 									assignedValue = currWidgetFieldData[fieldName];
 								}
