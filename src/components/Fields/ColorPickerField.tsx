@@ -4,7 +4,6 @@ import TextField from './TextField';
 import { useState } from 'react';
 
 interface Props {
-	fieldKey?: string;
 	name: string;
 	label: string;
 	overlay: string;
@@ -12,7 +11,7 @@ interface Props {
 	onColorPickerToggle: () => void;
 }
 
-const ColorPickerField = ({ fieldKey, name, label, overlay, widget, onColorPickerToggle }: Props) => {
+const ColorPickerField = ({ name, label, overlay, widget, onColorPickerToggle }: Props) => {
 	const [color, setColor] = useColor('#ed1b53');
 	const [isVisible, setIsVisible] = useState(false);
 
@@ -22,7 +21,7 @@ const ColorPickerField = ({ fieldKey, name, label, overlay, widget, onColorPicke
 	};
 
 	return (
-		<div key={fieldKey} className="color-picker-field">
+		<div className="color-picker-field">
 			<span className="color-circle" style={{ background: color.hex }} onClick={() => handleToggle()}></span>
 			<TextField name={name} label={label} value={color.hex} overlay={overlay} widget={widget} />
 			{isVisible && (

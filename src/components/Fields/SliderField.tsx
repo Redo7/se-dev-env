@@ -1,7 +1,6 @@
 import './fields.css';
 
 interface Props {
-	fieldKey?: string;
 	name: string;
 	label: string;
 	value?: number;
@@ -10,9 +9,9 @@ interface Props {
 	step?: number;
 }
 
-const SliderField = ({ fieldKey, name, label, value = 0, min, max, step = 1 }: Props) => {
+const SliderField = ({ name, label, value = 0, min, max, step = 1 }: Props) => {
 	return (
-		<div key={fieldKey} className="slider-field">
+		<div className="slider-field">
 			<label htmlFor={name}>{label}</label>
 			<input type="range" name={name} id={name} min={min} defaultValue={value} max={max} step={step} />
 			<div className="slider-field-range">
