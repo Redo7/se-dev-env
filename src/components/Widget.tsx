@@ -119,7 +119,7 @@ const Widget = ({
 				return;
 			}
 
-			const { type, listener, detail } = event.data;
+			const { type, listener } = event.data;
 
 			switch (type || listener) {
 				case 'iframeInitialized':
