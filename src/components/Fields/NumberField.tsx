@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './fields.css';
 
 interface Props {
+	fieldKey: string;
 	name: string;
 	label: string;
 	value?: number | '';
@@ -10,7 +11,7 @@ interface Props {
 	step?: number;
 }
 
-const NumberField = ({ name, label, value = 0 }: Props) => {
+const NumberField = ({ fieldKey, name, label, value = 0 }: Props) => {
 	const [inputValue, setInputValue] = useState<number | ''>(value);
 	const labelChars = label
 		.replaceAll(' ', '\u00a0')
@@ -22,7 +23,7 @@ const NumberField = ({ name, label, value = 0 }: Props) => {
 		));
 
 	return (
-		<div className="number-field">
+		<div key={fieldKey} className="number-field">
 			<input
 				name={name}
 				id={name}

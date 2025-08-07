@@ -3,6 +3,7 @@ import './fields.css';
 import useFieldChange from '../../hooks/useFieldChange';
 
 interface Props {
+	fieldKey?: string;
 	overlay: string;
 	widget: string;
 	name: string;
@@ -10,7 +11,7 @@ interface Props {
 	value?: string;
 }
 
-const TextField = ({ overlay, widget, name, label, value = '' }: Props) => {
+const TextField = ({ fieldKey, overlay, widget, name, label, value = '' }: Props) => {
 	const [inputValue, setInputValue] = useState(value);
 	const labelChars = label
 		.replaceAll(' ', '\u00a0')
@@ -22,7 +23,7 @@ const TextField = ({ overlay, widget, name, label, value = '' }: Props) => {
 		));
 
 	return (
-		<div className="text-field">
+		<div key={fieldKey} className="text-field">
 			<input
 				name={name}
 				id={name}

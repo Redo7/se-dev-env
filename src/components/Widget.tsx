@@ -37,15 +37,9 @@ interface Props {
 
 type ResizeHandle = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null;
 
-// Fields
-
 interface OnWidgetLoadData {
 	[key: string]: any;
 }
-
-// Fetch ./data/onWidgetLoad.json, then add fieldData to the object and send it to the widget.
-// Also gonna need to spoof obj.detail.channel.id to work for Twitch, YouTube, Kick, Twitter, and Trovo.
-// Probably no other way than to make an account on all of them and use those IDs within the app
 
 const fetchOnWidgetLoad = async (): Promise<OnWidgetLoadData | undefined> => {
 	try {
@@ -55,7 +49,6 @@ const fetchOnWidgetLoad = async (): Promise<OnWidgetLoadData | undefined> => {
 		});
 		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 		const data = await res.json();
-
 		return data;
 	} catch (error) {
 		console.error('[Parent App] Error fetching onWidgetLoad data:', error);
@@ -102,32 +95,22 @@ const Widget = ({
 	const hasIframeInitialized = useRef(false);
 	const [onWidgetLoadData, setOnWidgetLoadData] = useState<OnWidgetLoadData | undefined>(undefined);
 
-	useEffect(() => {
-		// HMR
-		if (import.meta.hot) {
-			import.meta.hot.on('vite:beforeUpdate', (payload) => {
-				// can filter payload.updates for specific files if needed
-				if (iframeRef.current) {
-					iframeRef.current.contentWindow?.location.reload();
-				}
-			});
+	const getOnWidgetLoadData = useCallback(async () => {
+		const [data, fieldData] = await Promise.all([fetchOnWidgetLoad(), useFields(overlay, `${template}-${id}`)]);
+
+		if (data && fieldData) {
+			const combinedData = { ...data, fieldData: { ...fieldData } };
+			setOnWidgetLoadData(combinedData);
 		}
+	}, [overlay, template, id]);
 
-		const getOnWidgetLoadData = async () => {
-			const [data, fieldData] = await Promise.all([fetchOnWidgetLoad(), useFields(overlay, `${template}-${id}`)]);
-
-			if (data && fieldData) {
-				const combinedData = { ...data, fieldData: { ...fieldData } };
-				setOnWidgetLoadData(combinedData);
-			}
-		};
+	useEffect(() => {
 		getOnWidgetLoadData();
-	}, []);
+	}, [getOnWidgetLoadData]);
 
 	useEffect(() => {
 		const handleIncomingMessage = (event: MessageEvent) => {
 			if (event.origin !== 'http://localhost:5173' && event.origin !== 'null') {
-				// Adjust origin in production
 				console.warn('[Parent App] Message from unknown origin:', event.origin);
 				return;
 			}
@@ -138,11 +121,9 @@ const Widget = ({
 
 			const { type, listener, detail } = event.data;
 
-			switch (type) {
+			switch (type || listener) {
 				case 'iframeInitialized':
-					// console.log('[Parent App] Received iframeInitialized message.');
 					if (!hasIframeInitialized.current && onWidgetLoadData) {
-						// Ensure field data is loaded
 						hasIframeInitialized.current = true;
 						if (iframeRef.current && iframeRef.current.contentWindow) {
 							const messageToSend = {
@@ -151,7 +132,6 @@ const Widget = ({
 									...onWidgetLoadData,
 								},
 							};
-							// console.log('[Parent App] Sending onWidgetLoad message with data:', messageToSend);
 							iframeRef.current.contentWindow.postMessage(messageToSend, '*');
 						}
 					} else if (!onWidgetLoadData) {
@@ -159,7 +139,7 @@ const Widget = ({
 					}
 					break;
 				default:
-					console.log('[Parent App] Unknown message type from iframe:', event.data);
+				// console.log('[Parent App] Unknown message type from iframe:', event.data);
 			}
 		};
 
@@ -169,7 +149,33 @@ const Widget = ({
 		};
 	}, [onWidgetLoadData]);
 
-	// Widget positioning
+	useEffect(() => {
+		if (!import.meta.hot) {
+			return;
+		}
+
+		const handleIframeContentUpdate = async (dataPayloadFromPlugin: any) => {
+			if (dataPayloadFromPlugin && dataPayloadFromPlugin.file && dataPayloadFromPlugin.type) {
+				const { widgetId: incomingWidgetId } = dataPayloadFromPlugin;
+
+				if (incomingWidgetId === `${template}-${id}`) {
+					if (iframeRef.current) {
+						hasIframeInitialized.current = false;
+						await getOnWidgetLoadData();
+						iframeRef.current.contentWindow?.location.reload();
+					}
+				}
+			}
+		};
+
+		import.meta.hot.on('iframe-content-update', handleIframeContentUpdate);
+
+		return () => {
+			if (import.meta.hot) {
+				import.meta.hot.off('iframe-content-update', handleIframeContentUpdate);
+			}
+		};
+	}, [id, template, getOnWidgetLoadData]);
 
 	const widgetRef = useRef<HTMLDivElement>(null);
 
@@ -210,8 +216,7 @@ const Widget = ({
 						break;
 				}
 
-				// Ensure minimum dimensions
-				newWidth = Math.max(newWidth, 50); // Minimum widget size
+				newWidth = Math.max(newWidth, 50);
 				newHeight = Math.max(newHeight, 50);
 
 				setDimensions({ width: newWidth, height: newHeight });
@@ -253,23 +258,18 @@ const Widget = ({
 		[isDragging, isResizing, position, dimensions, onDragEnd, onResizeEnd, handleGlobalMouseMove]
 	);
 
-	// --- Effect to manage global event listeners ---
 	useEffect(() => {
 		if (isDragging || isResizing) {
 			document.addEventListener('mousemove', handleGlobalMouseMove);
 			document.addEventListener('mouseup', handleGlobalMouseUp);
 		}
-		// Cleanup function to remove listeners when component unmounts or states change
 		return () => {
 			document.removeEventListener('mousemove', handleGlobalMouseMove);
 			document.removeEventListener('mouseup', handleGlobalMouseUp);
 		};
-	}, [isDragging, isResizing, handleGlobalMouseMove, handleGlobalMouseUp]); // Dependencies for useEffect
+	}, [isDragging, isResizing, handleGlobalMouseMove, handleGlobalMouseUp]);
 
-	// --- Local MouseDown Handlers ---
 	const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-		// Check if the click was on a resize handle OR the delete button.
-		// If so, don't start dragging.
 		if (e.target instanceof HTMLElement) {
 			if (e.target.dataset.resizeHandle || e.target.closest('.widget-remove-button')) {
 				return;
@@ -288,7 +288,7 @@ const Widget = ({
 	};
 
 	const handleResizeMouseDown = (e: React.MouseEvent<HTMLDivElement>, handle: ResizeHandle) => {
-		e.stopPropagation(); // Prevent drag from starting on the parent div
+		e.stopPropagation();
 		if (widgetRef.current && handle) {
 			setIsResizing(handle);
 			resizeStartData.current = {
@@ -303,18 +303,15 @@ const Widget = ({
 		}
 	};
 
-	// Keep internal dimensions in sync if external width/height props change
 	useEffect(() => {
 		setDimensions({ width: initialWidth, height: initialHeight });
 	}, [initialWidth, initialHeight]);
-
-	// Fields
 
 	const combinedStyle: CSSProperties = {
 		position: 'absolute',
 		left: position.x,
 		top: position.y,
-		width: dimensions.width, // Always apply dimensions, as they are managed by state
+		width: dimensions.width,
 		height: dimensions.height,
 		cursor: isDragging ? 'grabbing' : isResizing ? 'grabbing' : 'grab',
 		userSelect: 'none',
@@ -333,7 +330,6 @@ const Widget = ({
 				<SubtleButton width="2rem" height="2rem" onClick={onDelete}>
 					<IconTrash />
 				</SubtleButton>
-				{/* May want to introduce a confirmation modal */}
 			</div>
 			<iframe ref={iframeRef} id={id} src={src}></iframe>
 

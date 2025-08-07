@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import SubtleButton from '../Buttons/SubtleButton';
 interface Props {
+	fieldKey: string;
 	name: string;
 	label: string;
 	value?: string;
 	timestampClassName?: string;
 }
 
-const SoundInputField = ({ name, label, value, timestampClassName }: Props) => {
+const SoundInputField = ({ fieldKey, name, label, value, timestampClassName }: Props) => {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const [isPlaying, setIsPlaying] = useState<boolean>(false);
 	const [currentTime, setCurrentTime] = useState<number>(0);
@@ -71,7 +72,7 @@ const SoundInputField = ({ name, label, value, timestampClassName }: Props) => {
 	}, []);
 
 	return (
-		<div className="audio-input-field">
+		<div key={fieldKey} className="audio-input-field">
 			<audio ref={audioRef} src={value} preload="metadata" />
 
 			<label htmlFor={name}>{label}</label>

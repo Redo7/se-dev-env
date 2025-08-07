@@ -1,15 +1,16 @@
 import { useState } from 'react';
 
 interface Props {
+	key: string;
 	name: string;
 	label: string;
 	value: boolean;
 }
 
-const CheckboxField = ({ name, label, value }: Props) => {
+const CheckboxField = ({ key, name, label, value }: Props) => {
 	const [isChecked, setIsChecked] = useState(value);
 	return (
-		<label className="checkbox-container">
+		<label key={key} className="checkbox-container">
 			<input
 				name={name}
 				id={name}

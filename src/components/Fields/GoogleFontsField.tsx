@@ -3,11 +3,13 @@ import DropdownField from './DropdownField';
 import { type Option } from 'react-dropdown';
 
 interface Props {
+	fieldKey: string;
 	name: string;
 	label: string;
+	value: string;
 }
 
-const GoogleFontsField = ({ name, label }: Props) => {
+const GoogleFontsField = ({ fieldKey, name, label, value }: Props) => {
 	const [fonts, setFonts] = useState<Option[]>([]);
 
 	useEffect(() => {
@@ -29,8 +31,8 @@ const GoogleFontsField = ({ name, label }: Props) => {
 	}, []);
 
 	return (
-		<div className="google-fonts-field">
-			<DropdownField name={name} label={label} options={fonts} />
+		<div key={fieldKey} className="google-fonts-field">
+			<DropdownField name={name} label={label} options={fonts} value={value} />
 		</div>
 	);
 };

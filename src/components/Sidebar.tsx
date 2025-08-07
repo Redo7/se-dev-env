@@ -92,16 +92,15 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 									assignedValue = currWidgetFieldData[fieldName];
 								}
 								return (
-									<div key={fieldName} style={{ marginBottom: '10px' }}>
-										<Component
-											overlay={overlay}
-											widget={`${widget?.template}-${widget?.id}`}
-											name={fieldName}
-											label={label}
-											value={assignedValue}
-											{...restProps}
-										/>
-									</div>
+									<Component
+										key={fieldName}
+										overlay={overlay}
+										widget={`${widget?.template}-${widget?.id}`}
+										name={fieldName}
+										label={label}
+										value={assignedValue}
+										{...restProps}
+									/>
 								);
 							})}
 						</FieldGroup>

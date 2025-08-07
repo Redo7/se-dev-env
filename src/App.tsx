@@ -139,7 +139,7 @@ function App() {
 						<IconPlus />
 					</IconPopupButton>
 				</div>
-				{widgets.map((widget) => (
+				{widgets.map((widget) => (					
 					<Widget
 						key={widget.id}
 						overlay={currOverlay}
