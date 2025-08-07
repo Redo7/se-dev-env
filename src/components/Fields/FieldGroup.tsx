@@ -24,7 +24,6 @@ const FieldGroup = ({ children, name }: Props) => {
 	// Something causes the field group to not open sometimes
 	useEffect(() => {
 		if (!contentRef.current) {
-			console.log('asd');
 			return;
 		}
 

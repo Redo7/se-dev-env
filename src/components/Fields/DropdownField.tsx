@@ -1,7 +1,7 @@
 import ReactDropdown, { type Group, type Option } from 'react-dropdown';
 
 interface Props {
-	fieldKey: string;
+	fieldKey?: string;
 	name: string;
 	label: string;
 	value: string;

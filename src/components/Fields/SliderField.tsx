@@ -1,7 +1,7 @@
 import './fields.css';
 
 interface Props {
-	fieldKey: string;
+	fieldKey?: string;
 	name: string;
 	label: string;
 	value?: number;
