@@ -2,11 +2,9 @@ import { useEffect, useState } from 'react';
 import Overlay from './components/Overlay';
 import Widget from './components/Widget';
 import IconPopupButton from './components/Buttons/IconPopupButton';
-import IconPlusSm from './assets/Icons/IconPlusSm';
-import IconPlus from './assets/Icons/IconPlus';
+import {SidebarExpand, IconPlus, IconPlusSm} from './assets/Icons/';
 import Sidebar from './components/Sidebar';
 import IconButton from './components/Buttons/IconButton';
-import SidebarExpand from './assets/Icons/SidebarExpand';
 
 export interface WidgetInstance {
 	id: string;
