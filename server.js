@@ -46,20 +46,22 @@ app.post("/api/create-widget", async (req, res) => {
         name: `${templateName} widget`,
         src: `/overlays/overlay-1/${templateName}-${instanceId}/iframe.html`,
         width: 500,
-        height: 700,
+        height: 500,
         posX: 0,
         posY: 0,
     };
-    // Swap overlay-1 for id here
+    // Swap overlay-1 for id of the overlay, name for user input
 
-    const templatePath = join(__dirname, "templates", templateName);
-    const destinationPath = join(__dirname, "overlays", "overlay-1", `${templateName}-${instanceId}`,);
+    const iframeTemplate = join(__dirname, "templates", "iframe");
+    const widgetTemplate = join(__dirname, "templates", "user", templateName);
+    const destinationPath = join(__dirname, "overlays", "overlay-1", `${templateName}-${instanceId}`);
+    const widgetFilesPath = join(__dirname, "overlays", "overlay-1", `${templateName}-${instanceId}`, "src");
     // Swap overlay-1 for id here
-
 
     try {
         console.log(`Copying ${templateName} files to ${destinationPath}`);
-        await fs.promises.cp(templatePath, destinationPath, { recursive: true });
+        await fs.promises.cp(iframeTemplate, destinationPath, { recursive: true });
+        await fs.promises.cp(widgetTemplate, widgetFilesPath, { recursive: true });
 
         const currWidgets = await fs.promises.readFile(
             "./widgetInstances.json",
@@ -67,7 +69,7 @@ app.post("/api/create-widget", async (req, res) => {
         );
         const currWidgetsArray = JSON.parse(currWidgets);
         currWidgetsArray.push(widgetData);
-        await fs.promises.writeFile("./widgetInstances.json", JSON.stringify(currWidgetsArray, null, 2), "utf-8",);
+        await fs.promises.writeFile("./widgetInstances.json", JSON.stringify(currWidgetsArray, null, "\t"), "utf-8",);
 
         res.json(widgetData);
     } catch (error) {
@@ -88,7 +90,7 @@ app.delete('/api/delete-widget', async (req, res) => {
 
     try {
         const updatedWidgetsArray = currWidgetsArray.filter(item => item.id != req.body.id);
-        fs.writeFileSync('./widgetInstances.json', JSON.stringify(updatedWidgetsArray), 'utf-8');
+        fs.writeFileSync('./widgetInstances.json', JSON.stringify(updatedWidgetsArray, null, "\t"), 'utf-8');
         fs.rmSync(target, { recursive: true, force: true });
 
         res.send();
@@ -111,7 +113,7 @@ app.put('/api/update-widget-settings', async (req, res) => {
     const currWidgetsArray = JSON.parse(currWidgets);
     try {
         const updatedWidgetsArray = currWidgetsArray.map(widget => widget.id === req.body.id ? { ...widget, ...newSettings } : widget);
-        fs.writeFileSync('./widgetInstances.json', JSON.stringify(updatedWidgetsArray), 'utf-8');
+        fs.writeFileSync('./widgetInstances.json', JSON.stringify(updatedWidgetsArray, null, "\t"), 'utf-8');
         res.send();
     } catch (error) {
         console.error(error);
