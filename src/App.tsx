@@ -140,13 +140,11 @@ function App() {
 				<div
 					className="flex gap-16 absolute OverlayButtonContainer depth-shadow"
 					data-sidebar-visible={isSidebarVisible}>
-					<IconPopupButton
-						popupItems={templates}
-						popupPosition="top">
+					<IconPopupButton popupItems={templates} popupPosition="top">
 						<IconPlus />
 					</IconPopupButton>
 				</div>
-				{widgets.map((widget) => (					
+				{widgets.map((widget) => (
 					<Widget
 						key={widget.id}
 						overlay={currOverlay}
@@ -164,6 +162,22 @@ function App() {
 						}
 					/>
 				))}
+				<svg id="lens-map" style={{display: 'none'}}>
+					<linearGradient id="red">
+					</linearGradient>
+					<linearGradient id="blue">
+					</linearGradient>
+				</svg>
+				<svg style={{display: 'none'}}>
+					<defs>
+						<filter id="glass" x="0%" y="0%" width="100%" height="100%">
+						<feTurbulence type="fractalNoise" baseFrequency="0.004 0.004" numOctaves="1" seed="0" result="noise" />
+						<feGaussianBlur in="noise" stdDeviation="8" result="blurred" />
+						<feComposite operator="arithmetic" k1="0" k2="1" k3="2" k4="0" result="litImage" />
+						<feDisplacementMap in="SourceGraphic" in2="litImage" scale="-30" xChannelSelector="G" yChannelSelector="G" />
+						</filter>
+					</defs>
+				</svg>
 			</Overlay>
 		</>
 	);
