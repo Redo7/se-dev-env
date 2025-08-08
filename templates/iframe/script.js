@@ -1,29 +1,3 @@
-// At the very top of script.js, *after* any 'use strict' or imports
-if (import.meta.hot) {
-    import.meta.hot.on('vite:connected', () => {
-        originalConsole.log('[Iframe HMR] Vite HMR client connected.');
-    });
-
-    // Listen for full-reload events triggered by our custom Vite plugin
-    import.meta.hot.on('full-reload', (payload) => {
-        // The plugin sends 'full-reload' with path: '*'
-        // We'll log it and force a window reload.
-        originalConsole.log('[Iframe HMR] Received full-reload command from Vite. Forcing iframe reload...', payload);
-        window.location.reload();
-    });
-
-    // Keep this listener for debugging if needed, but the 'full-reload' type is now explicit
-    import.meta.hot.on('vite:beforeUpdate', (payload) => {
-        // This will now mostly catch updates that Vite's core system handles
-        // or provides more granular updates for (e.g., JS modules).
-        // Our plugin explicitly sends 'full-reload' for HTML/CSS/JSON.
-        originalConsole.log('[Iframe HMR] Received vite:beforeUpdate payload:', payload);
-        // If you had any specific hot-updates for JS modules that don't need full reload,
-        // you'd handle them here. For general content, 'full-reload' is simpler.
-    });
-}
-
-
 // Preserve original console and wrap it minimally for internal use only
 const originalConsole = window.console;
 
@@ -44,9 +18,7 @@ const myCustomLoggerEvents = {
 };
 
 // Wrap window.console to *only* proxy to the original console
-// and *not* trigger your custom dispatchEvent or interfere with HMR
 window.console = {
-    // Proxy standard console methods directly to originalConsole
     log: function () { originalConsole.log.apply(originalConsole, arguments); },
     debug: function () { originalConsole.debug.apply(originalConsole, arguments); },
     warn: function () { originalConsole.warn.apply(originalConsole, arguments); },
@@ -70,100 +42,152 @@ window.console = {
     trace: function () { originalConsole.trace.apply(originalConsole, arguments); },
 };
 
-
-// --- Your Core Widget Logic Functions ---
+// --- Utility: Replace {{var}} and {var} placeholders ---
 function replaceVariables(text, variables) {
     text = text.replace(/\{\{([^{}]+)\}\}/g, (_, match) =>
-        variables[match] !== undefined ? variables[match] : `{{${match}}}`);
+        variables[match] !== undefined ? variables[match] : `{{${match}}}`
+    );
     return text.replace(/\{([^{}]+)\}/g, (_, match) =>
-        variables[match] !== undefined ? variables[match] : `{${match}}`);
+        variables[match] !== undefined ? variables[match] : `{${match}}`
+    );
 }
 
-async function appendHTML(text) {
-    $('#widget').append(text);
-    originalConsole.log('HTML appended');
-}
+// --- Helper: Inject HTML with scripts in correct order ---
+async function injectHTMLWithScripts(container, htmlString) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, "text/html");
 
-async function formatStyles(data) {
-    originalConsole.log('CSS formatting');
-    const _generateCSS = (text) => replaceVariables(text, data);
-    let css;
-    await fetch('./src/css.css?raw') // Uses ?raw to get unprocessed CSS
-        .then((res) => res.text())
-        .then((text) => css = _generateCSS(text))
-        .then(() => {
-            $('body').prepend($.parseHTML(`<style>${css}</style>`))
+    // Append non-script elements first
+    Array.from(doc.body.childNodes).forEach((node) => {
+        if (node.tagName !== "SCRIPT") {
+            container.appendChild(node.cloneNode(true));
+        }
+    });
+
+    // Then load scripts in order
+    for (const script of doc.querySelectorAll("script")) {
+        await new Promise((resolve, reject) => {
+            const newScript = document.createElement("script");
+
+            if (script.src) {
+                newScript.src = script.src;
+                newScript.onload = resolve;
+                newScript.onerror = (err) => {
+                    originalConsole.error(
+                        `[injectHTMLWithScripts] Failed to load script: ${script.src}`,
+                        err
+                    );
+                    resolve(); // Continue even if one fails
+                };
+            } else {
+                newScript.textContent = script.textContent;
+                resolve(); // Inline executes immediately
+            }
+
+            for (const attr of script.attributes) {
+                newScript.setAttribute(attr.name, attr.value);
+            }
+
+            container.appendChild(newScript);
         });
+    }
 }
 
-async function appendJavascript(evt) {
-    originalConsole.log('JS appending');
-    let js;
-    await fetch('./src/js.js') // Fetches raw JS content
-        .then((res) => res.text())
-        .then((text) => js = text)
-        .then(() => {
-            var s = document.createElement("script");
-            s.type = "text/javascript";
-            s.innerHTML = js; // Injects as inline script
-            $("body").append(s);
-        })
-        .then(() => {
-            // Appends external script for testButtons2.js
-            var s = document.createElement("script");
-            s.type = "text/javascript";
-            s.src = 'https://redo.graphics/testButtons2.js';
-            $("body").append(s);
-        })
-        .then(() => { dispatchEvent(evt) }); // Dispatches custom event (e.g., onWidgetLoad)
+// --- Helper: Load and inject CSS ---
+async function injectCSSFromFile(path, variables) {
+    originalConsole.log("[injectCSSFromFile] Loading CSS:", path);
+    const res = await fetch(path);
+    let css = await res.text();
+    css = replaceVariables(css, variables); // Replace variables before injecting
+    const styleEl = document.createElement("style");
+    styleEl.textContent = css;
+    document.head.prepend(styleEl);
 }
 
+// --- Helper: Load and inject JS ---
+async function injectJSFromFile(path, variables) {
+    originalConsole.log("[injectJSFromFile] Loading JS:", path);
+    const res = await fetch(path);
+    let js = await res.text();
+    js = replaceVariables(js, variables); // Replace variables before executing
+    const scriptEl = document.createElement("script");
+    scriptEl.textContent = js;
+    document.body.appendChild(scriptEl);
+}
+
+// --- Main Loader ---
+async function loadWidgetContent(htmlPath, cssPath, jsPath, variables, onCompleteEvent) {
+    try {
+        // 1. Load HTML as raw text
+        originalConsole.log("[loadWidgetContent] Loading HTML:", htmlPath);
+        const htmlRes = await fetch(htmlPath);
+        let htmlText = await htmlRes.text();
+
+        // 2. Replace variables BEFORE parsing
+        htmlText = replaceVariables(htmlText, variables);
+
+        // 3. Inject HTML into <body> instead of #widget
+        await injectHTMLWithScripts(document.body, htmlText);
+
+        // 4. Inject CSS
+        if (cssPath) {
+            await injectCSSFromFile(cssPath, variables);
+        }
+
+        // 5. Load additional JS file if provided
+        if (jsPath) {
+            await injectJSFromFile(jsPath, variables);
+        }
+
+        // 6. Dispatch custom event
+        if (onCompleteEvent) {
+            dispatchEvent(onCompleteEvent);
+        }
+
+        originalConsole.log("[loadWidgetContent] Widget content loaded successfully");
+    } catch (err) {
+        originalConsole.error("[loadWidgetContent] Error loading widget content:", err);
+    }
+}
 
 // --- SE_API Emulation Global Stores ---
 const __mockStore = {};
 const __mockCounters = {};
-const __mockFieldData = {}; // Initialized from onWidgetLoad, updated by SE_API.setField
+const __mockFieldData = {};
 
-
-// --- Iframe Initialization and Message Handling ---
-
-// Send 'iframeInitialized' message to parent when iframe's DOM is ready
+// --- Iframe Initialization ---
 $(document).ready(function () {
     if (window.parent !== window && window.parent) {
-        window.parent.postMessage({ type: 'iframeInitialized' }, '*');
-        // originalConsole.log('[Iframe Script] Sent iframeInitialized message to parent.');
+        window.parent.postMessage({ type: "iframeInitialized" }, "*");
     }
 });
 
-// Message listener for communication from parent (e.g., 'onWidgetLoad')
-window.addEventListener('message', (obj) => {
-    // originalConsole.log('[Iframe Script] Received message:', obj.data);
+// --- Message Handling ---
+window.addEventListener("message", (obj) => {
     try {
         switch (obj.data.listener) {
-            case 'onEventReceived':
-                const onEventReceived = new CustomEvent('onEventReceived', obj.data);
-                dispatchEvent(onEventReceived);
+            case "onEventReceived":
+                dispatchEvent(new CustomEvent("onEventReceived", obj.data));
                 break;
-            case 'onSessionUpdate':
-                const onSessionUpdate = new CustomEvent('onSessionUpdate', obj.data);
-                dispatchEvent(onSessionUpdate);
-                break;
-            case 'onWidgetLoad':
-                originalConsole.log('[Iframe Script] Detected onWidgetLoad message. Initializing SE_API and variables.', obj.data);
 
-                // Initialize __mockFieldData with data received from onWidgetLoad
+            case "onSessionUpdate":
+                dispatchEvent(new CustomEvent("onSessionUpdate", obj.data));
+                break;
+
+            case "onWidgetLoad":
+                originalConsole.log("[Iframe Script] Detected onWidgetLoad message. Initializing SE_API and variables.", obj.data);
+
                 Object.assign(__mockFieldData, obj.data.detail.fieldData || {});
 
-                // --- StreamElements Global Variables & SE_API Emulation ---
-                // Expose StreamElements static variables from obj.data.detail
+                // --- StreamElements Global Variables ---
                 window.SE_WIDTH = obj.data.detail.width || 0;
                 window.SE_HEIGHT = obj.data.detail.height || 0;
                 window.currency = obj.data.detail.currency || {};
-                window.widgetId = obj.data.detail.widgetId || '';
+                window.widgetId = obj.data.detail.widgetId || "";
                 window.channel = obj.data.detail.channel || {};
-                window.fieldData = __mockFieldData; // Use the mockFieldData for consistent access
+                window.fieldData = __mockFieldData;
 
-                // SE_API Mock Object
+                // --- SE_API Mock ---
                 window.SE_API = {
                     store: {
                         set: (keyName, obj) => {
@@ -173,7 +197,6 @@ window.addEventListener('message', (obj) => {
                                 return;
                             }
                             __mockStore[keyName] = JSON.parse(JSON.stringify(obj));
-                            // Could postMessage to parent for persistence if needed
                         },
                         get: (keyName) => {
                             originalConsole.log(`[SE_API.store] Getting '${keyName}'`);
@@ -193,40 +216,36 @@ window.addEventListener('message', (obj) => {
                     },
                     sanitize: ({ message }) => {
                         originalConsole.log(`[SE_API.sanitize] Sanitizing message: "${message}"`);
-                        const sanitizedMessage = message.replace(/Vulgar/gi, 'Kreygasm');
+                        const sanitizedMessage = message.replace(/Vulgar/gi, "Kreygasm");
                         return Promise.resolve({ result: { message: sanitizedMessage }, skip: false });
                     },
                     cheerFilter: (message) => {
                         originalConsole.log(`[SE_API.cheerFilter] Filtering cheers from message: "${message}"`);
-                        const filteredMessage = message.replace(/\b\d+\s*(cheer|bits)\b/gi, '').trim();
+                        const filteredMessage = message.replace(/\b\d+\s*(cheer|bits)\b/gi, "").trim();
                         return Promise.resolve(filteredMessage);
                     },
                     setField: (key, value) => {
                         originalConsole.log(`[SE_API.setField] Setting fieldData['${key}'] =`, value);
-                        __mockFieldData[key] = value; // Update the mock field data
-                        // Could postMessage to parent for UI update if needed
+                        __mockFieldData[key] = value;
                     },
                     getOverlayStatus: () => {
-                        originalConsole.log('[SE_API.getOverlayStatus] Called');
+                        originalConsole.log("[SE_API.getOverlayStatus] Called");
                         return { isEditorMode: true, muted: false };
                     }
                 };
-                // --- End SE_API Emulation ---
 
-                // Proceed with content injection after setup
-                const onWidgetLoadEvent = new CustomEvent('onWidgetLoad', obj.data);
-                fetch('./src/html.html')
-                    .then((res) => res.text())
-                    .then((text) => {
-                        text = replaceVariables(text, __mockFieldData); // Use updated mock field data
-                        const html = $.parseHTML(text);
-                        appendHTML(html);
-                    })
-                    .then(() => formatStyles(__mockFieldData)) // Use updated mock field data for CSS
-                    .then(() => appendJavascript(onWidgetLoadEvent));
+                // --- Load widget content in correct order ---
+                const onWidgetLoadEvent = new CustomEvent("onWidgetLoad", obj.data);
+                loadWidgetContent(
+                    "./src/html.html",
+                    "./src/css.css?raw",
+                    "./src/js.js",
+                    __mockFieldData,
+                    onWidgetLoadEvent
+                );
                 break;
         }
     } catch (e) {
-        originalConsole.error('[Iframe Script] Error processing message:', e, obj.data);
+        originalConsole.error("[Iframe Script] Error processing message:", e, obj.data);
     }
 });

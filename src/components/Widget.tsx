@@ -331,7 +331,7 @@ const Widget = ({
 					<IconTrash />
 				</SubtleButton>
 			</div>
-			<iframe ref={iframeRef} id={id} src={src}></iframe>
+			<iframe ref={iframeRef} id={id} src={src} sandbox='allow-scripts allow-same-origin'></iframe>
 
 			{resizable && (
 				<>
