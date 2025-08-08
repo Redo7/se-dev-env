@@ -26,7 +26,7 @@ const ColorPickerField = ({ name, label, overlay, widget, onColorPickerToggle }:
 			<TextField name={name} label={label} value={color.hex} overlay={overlay} widget={widget} />
 			{isVisible && (
 				<div className="color-picker-popup">
-					<ColorPicker color={color} onChange={setColor} />
+					<ColorPicker color={color} onChange={setColor}/>
 				</div>
 			)}
 		</div>

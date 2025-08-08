@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import './fields.css';
+import useFieldChange from '../../hooks/useFieldChange';
 
 interface Props {
+	overlay: string;
+	widget: string;
 	name: string;
 	label: string;
 	value?: number | '';
@@ -10,7 +13,7 @@ interface Props {
 	step?: number;
 }
 
-const NumberField = ({ name, label, value = 0 }: Props) => {
+const NumberField = ({ overlay, widget, name, label, step = 1, value = 0 }: Props) => {
 	const [inputValue, setInputValue] = useState<number | ''>(value);
 	const labelChars = label
 		.replaceAll(' ', '\u00a0')
@@ -26,10 +29,14 @@ const NumberField = ({ name, label, value = 0 }: Props) => {
 			<input
 				name={name}
 				id={name}
+				step={step}
 				type="number"
 				value={inputValue}
 				required
-				onChange={(event) => setInputValue(parseInt(event.target.value))}
+				onChange={(event) => {
+					setInputValue(parseInt(event.target.value));
+					useFieldChange(overlay, widget, name, parseInt(event.target.value));
+				}}
 			/>
 			<span className="bar"></span>
 			<label className="label" htmlFor={name}>

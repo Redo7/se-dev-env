@@ -16,7 +16,7 @@ const DropdownField = ({ name, label, value, options }: Props) => {
 	return (
 		<div className="dropdown-field">
 			<label>{label}</label>
-			<ReactDropdown name={name} value={value} options={convertedOptions} placeholder="Choose an option" />
+			<ReactDropdown name={name} value={value} onChange={() => console.log(value)} options={convertedOptions} placeholder="Choose an option" />
 		</div>
 	);
 };
