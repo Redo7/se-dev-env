@@ -35,6 +35,11 @@ app.get('/api/get-widgets', async (req, res) => {
     // This should check for widget files and delete entries from the JSON if not found.
 })
 
+app.get('/api/get-templates', async (req, res) => {
+    const templates = await fs.readdir('./templates/user/');
+    res.json([templates])
+})
+
 app.post("/api/create-widget", async (req, res) => {
     if (!req.body.template) return res.status(400).json({ error: "templateName is required" });
 

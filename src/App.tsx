@@ -20,6 +20,12 @@ export interface WidgetInstance {
 	posY: number;
 }
 
+interface Template{
+	label: string;
+	icon: React.ReactNode | null;
+	action: () => void;
+}
+
 function App() {
 	// const [isDarkMode, setIsDarkMode] = useState(true);
 	const currOverlay = 'overlay-1';
@@ -27,6 +33,7 @@ function App() {
 	document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
 
 	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+	const [templates, setTemplates] = useState<Template[]>([]);
 	const [widgets, setWidgets] = useState<WidgetInstance[]>([]);
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
 
@@ -38,6 +45,19 @@ function App() {
 	};
 
 	useEffect(() => {
+		const getTemplates = async () => {
+			console.log('Retrieving templates');
+			const res = await fetch('/api/get-templates');
+			const data = await res.json();
+			const templateArray: Template[] = data.map((template: string) => ({
+				label: template[0].toUpperCase() + template.slice(1),
+				icon: <IconPlusSm />,
+				action: () => addWidget(template),
+			}));
+			console.log('template array', templateArray);
+			setTemplates(templateArray)
+		};
+		getTemplates();
 		getWidgets();
 	}, []);
 
@@ -123,18 +143,7 @@ function App() {
 					className="flex gap-16 absolute OverlayButtonContainer depth-shadow"
 					data-sidebar-visible={isSidebarVisible}>
 					<IconPopupButton
-						popupItems={[
-							{
-								label: 'Chat',
-								icon: <IconPlusSm />,
-								action: () => addWidget('chat'),
-							},
-							{
-								label: 'Goal',
-								icon: <IconPlusSm />,
-								action: () => addWidget('goal'),
-							},
-						]}
+						popupItems={templates}
 						popupPosition="top">
 						<IconPlus />
 					</IconPopupButton>

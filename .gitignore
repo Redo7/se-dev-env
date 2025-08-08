@@ -24,6 +24,6 @@ dist-ssr
 *.sw?
 
 overlays/*
-templates/*
+templates/user/*
 widgetInstances.json
 .env

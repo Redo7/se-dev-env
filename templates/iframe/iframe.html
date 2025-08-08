@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./main.css">
+    <title>Widget</title>
+    <script type="module" src="http://localhost:5173/@vite/client"></script>
+</head>
+<body>
+    <div id="widget"></div>
+    <script type="module" src="./script.js"></script>
+    <!-- Script to trigger jQuery events on parent's iframe element -->
+    <script type="text/javascript">
+        var iframe = window.frameElement;
+        if (iframe) {
+            iframe.contentDocument = document;
+            var parentWindow = window.parent;
+            if (parentWindow && parentWindow.jQuery) {
+                var parent$ = parentWindow.jQuery;
+                parent$(parentWindow.document).ready(function () {
+                    parent$(iframe).trigger("iframeloading");
+                    $(function () {
+                        parent$(iframe).trigger("iframeready");
+                    });
+                    $(window).on("beforeunload", function () {
+                        parent$(iframe).trigger("iframebeforeunload");
+                    });
+                });
+            } else {
+                console.warn("[Iframe HTML] Parent window or parent.jQuery not found for triggers.");
+            }
+        }
+    </script>
+</body>
+</html>
