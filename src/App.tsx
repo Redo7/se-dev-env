@@ -104,7 +104,7 @@ function App() {
 			if (!response.ok) {
 				throw new Error(`Something went wrong while changing settings for ${id}`);
 			}
-			console.log(`Settings applied successfully.`);
+			// console.log(`Settings applied successfully.`);
 		});
 	};
 
@@ -114,7 +114,7 @@ function App() {
 
 	const handleWidgetClick = (widget: WidgetInstance) => {
 		if (widget.id === activeWidget?.id) {
-			console.log('Active widget clicked');
+			// console.log('Active widget clicked');
 			return;
 		}
 		setActiveWidget(widget);
