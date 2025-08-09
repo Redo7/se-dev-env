@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import DropdownField from './DropdownField';
 
 interface Props {
+	overlay: string;
+	widget: string;
 	name: string;
 	label: string;
 	value: string;
@@ -19,7 +21,7 @@ interface GoogleFont {
     menu: string;
 }
 
-const GoogleFontsField = ({ name, label, value }: Props) => {
+const GoogleFontsField = ({ overlay, widget, name, label, value }: Props) => {
 	const [fonts, setFonts] = useState<Object>({});
 
 	useEffect(() => {
@@ -42,7 +44,7 @@ const GoogleFontsField = ({ name, label, value }: Props) => {
 
 	return (
 		<div className="google-fonts-field">
-			<DropdownField name={name} label={label} options={fonts} value={value} />
+			<DropdownField overlay={overlay} widget={widget} name={name} label={label} options={fonts} value={value} />
 		</div>
 	);
 };
