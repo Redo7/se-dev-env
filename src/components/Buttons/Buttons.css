@@ -77,7 +77,7 @@ button.subtle{
     border-radius: 0.25rem;
     padding: 0.125rem;
 
-    transition: background 300ms ease, opacity 300ms ease;
+    transition: background 300ms ease, opacity 300ms ease, transform 300ms ease, box-shadow 150ms ease;
 }
 
 button.subtle::before{
@@ -106,4 +106,13 @@ button:hover.subtle::before{
     position: absolute;
     top: 0;
     left: 0;
+}
+
+button:active.subtle{
+    transform: scale(0.95);
+    /* box-shadow: inset #ffffff20 0 0 0.5rem, #ffffff20 0 0 0.5rem; */
+}
+
+button:active.subtle::before{
+    opacity: .5;
 }
