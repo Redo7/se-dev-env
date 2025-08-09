@@ -93,60 +93,82 @@ async function injectHTMLWithScripts(container, htmlString) {
     }
 }
 
-// --- Helper: Load and inject CSS ---
-async function injectCSSFromFile(path, variables) {
-    originalConsole.log("[injectCSSFromFile] Loading CSS:", path);
-    const res = await fetch(path);
-    let css = await res.text();
-    css = replaceVariables(css, variables); // Replace variables before injecting
-    const styleEl = document.createElement("style");
-    styleEl.textContent = css;
-    document.head.prepend(styleEl);
-}
-
-// --- Helper: Load and inject JS ---
-async function injectJSFromFile(path, variables) {
-    originalConsole.log("[injectJSFromFile] Loading JS:", path);
-    const res = await fetch(path);
-    let js = await res.text();
-    js = replaceVariables(js, variables); // Replace variables before executing
-    const scriptEl = document.createElement("script");
-    scriptEl.textContent = js;
-    document.body.appendChild(scriptEl);
-}
-
 // --- Main Loader ---
-async function loadWidgetContent(htmlPath, cssPath, jsPath, variables, onCompleteEvent) {
+async function loadWidgetContentAll(htmlPath, cssPath, jsPath, variables, onCompleteEvent) {
     try {
-        // 1. Load HTML as raw text
-        originalConsole.log("[loadWidgetContent] Loading HTML:", htmlPath);
-        const htmlRes = await fetch(htmlPath);
-        let htmlText = await htmlRes.text();
+        if (htmlPath) {
+            originalConsole.log("[loadWidgetContentAll] Loading HTML:", htmlPath);
+            let htmlText = await (await fetch(htmlPath)).text();
+            htmlText = replaceVariables(htmlText, variables);
 
-        // 2. Replace variables BEFORE parsing
-        htmlText = replaceVariables(htmlText, variables);
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, "text/html");
 
-        // 3. Inject HTML into <body> instead of #widget
-        await injectHTMLWithScripts(document.body, htmlText);
+            // --- Append <link> and <style> from parsed head ---
+            Array.from(doc.head.querySelectorAll("link, style")).forEach((node) => {
+                document.head.appendChild(node.cloneNode(true));
+            });
 
-        // 4. Inject CSS
+            // --- Append non-script body elements ---
+            Array.from(doc.body.childNodes).forEach((node) => {
+                if (node.tagName !== "SCRIPT") {
+                    document.body.appendChild(node.cloneNode(true));
+                }
+            });
+
+            // --- Append scripts in order ---
+            for (const script of doc.querySelectorAll("script")) {
+                await new Promise((resolve) => {
+                    const newScript = document.createElement("script");
+
+                    if (script.src) {
+                        newScript.src = script.src;
+                        newScript.onload = resolve;
+                        newScript.onerror = (err) => {
+                            originalConsole.error(
+                                `[loadWidgetContentAll] Failed to load script: ${script.src}`,
+                                err
+                            );
+                            resolve();
+                        };
+                    } else {
+                        newScript.textContent = script.textContent;
+                        resolve();
+                    }
+
+                    for (const attr of script.attributes) {
+                        newScript.setAttribute(attr.name, attr.value);
+                    }
+
+                    document.body.appendChild(newScript);
+                });
+            }
+        }
+
+        // --- Load CSS file (if provided) ---
         if (cssPath) {
-            await injectCSSFromFile(cssPath, variables);
+            let css = await (await fetch(cssPath)).text();
+            css = replaceVariables(css, variables);
+            const styleEl = document.createElement("style");
+            styleEl.textContent = css;
+            document.head.prepend(styleEl);
         }
 
-        // 5. Load additional JS file if provided
+        // --- Load JS file (if provided) ---
         if (jsPath) {
-            await injectJSFromFile(jsPath, variables);
+            let js = await (await fetch(jsPath)).text();
+            js = replaceVariables(js, variables);
+            const scriptEl = document.createElement("script");
+            scriptEl.textContent = js;
+            document.body.appendChild(scriptEl);
         }
 
-        // 6. Dispatch custom event
+        // --- Dispatch event ---
         if (onCompleteEvent) {
             dispatchEvent(onCompleteEvent);
         }
-
-        originalConsole.log("[loadWidgetContent] Widget content loaded successfully");
     } catch (err) {
-        originalConsole.error("[loadWidgetContent] Error loading widget content:", err);
+        originalConsole.error("[loadWidgetContentAll] Error loading widget content:", err);
     }
 }
 
@@ -175,8 +197,6 @@ window.addEventListener("message", (obj) => {
                 break;
 
             case "onWidgetLoad":
-                originalConsole.log("[Iframe Script] Detected onWidgetLoad message. Initializing SE_API and variables.", obj.data);
-
                 Object.assign(__mockFieldData, obj.data.detail.fieldData || {});
 
                 // --- StreamElements Global Variables ---
@@ -227,6 +247,7 @@ window.addEventListener("message", (obj) => {
                     setField: (key, value) => {
                         originalConsole.log(`[SE_API.setField] Setting fieldData['${key}'] =`, value);
                         __mockFieldData[key] = value;
+                        // Todo: This should change the actual data file too
                     },
                     getOverlayStatus: () => {
                         originalConsole.log("[SE_API.getOverlayStatus] Called");
@@ -236,7 +257,7 @@ window.addEventListener("message", (obj) => {
 
                 // --- Load widget content in correct order ---
                 const onWidgetLoadEvent = new CustomEvent("onWidgetLoad", obj.data);
-                loadWidgetContent(
+                loadWidgetContentAll(
                     "./src/html.html",
                     "./src/css.css?raw",
                     "./src/js.js",
