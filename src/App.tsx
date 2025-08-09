@@ -52,7 +52,6 @@ function App() {
 				icon: <IconPlusSm />,
 				action: () => addWidget(template),
 			}));
-			console.log('template array', templateArray);
 			setTemplates(templateArray)
 		};
 		getTemplates();
