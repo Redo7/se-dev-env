@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import DropdownField from './DropdownField';
-import { type Option } from 'react-dropdown';
 
 interface Props {
 	name: string;
