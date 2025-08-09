@@ -36,7 +36,6 @@ function App() {
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
 
 	const getWidgets = async () => {
-		console.log('Retrieving widgets');
 		const res = await fetch('/api/get-widgets');
 		const data: WidgetInstance[] = await res.json();
 		setWidgets(data);
@@ -44,7 +43,6 @@ function App() {
 
 	useEffect(() => {
 		const getTemplates = async () => {
-			console.log('Retrieving templates');
 			const res = await fetch('/api/get-templates');
 			const data = await res.json();
 			const templateArray: Template[] = data.map((template: string) => ({

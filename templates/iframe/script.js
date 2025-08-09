@@ -97,7 +97,6 @@ async function injectHTMLWithScripts(container, htmlString) {
 async function loadWidgetContentAll(htmlPath, cssPath, jsPath, variables, onCompleteEvent) {
     try {
         if (htmlPath) {
-            originalConsole.log("[loadWidgetContentAll] Loading HTML:", htmlPath);
             let htmlText = await (await fetch(htmlPath)).text();
             htmlText = replaceVariables(htmlText, variables);
 
