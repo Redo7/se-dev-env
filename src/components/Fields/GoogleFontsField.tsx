@@ -8,8 +8,20 @@ interface Props {
 	value: string;
 }
 
+interface GoogleFont {
+    family: string;
+    variants: [];
+    subsets: [];
+    version: string;
+    lastModified: string;
+    files: Object;
+    category: string;
+    kind: string;
+    menu: string;
+}
+
 const GoogleFontsField = ({ name, label, value }: Props) => {
-	const [fonts, setFonts] = useState<Option[]>([]);
+	const [fonts, setFonts] = useState<Object>({});
 
 	useEffect(() => {
 		const getFonts = async () => {
@@ -20,10 +32,10 @@ const GoogleFontsField = ({ name, label, value }: Props) => {
 				throw new Error(`HTTP error. Status: ${res.status}`);
 			}
 			const data = await res.json();
-			const formattedFonts: Option[] = data.items.map((font: any) => ({
-				value: font.family,
-				label: font.family,
-			}));
+			const formattedFonts: Object = data.items.reduce((acc: any, currentObject: GoogleFont) => {
+				acc[currentObject.family] = currentObject.family;
+				return acc;
+				}, {});
 			setFonts(formattedFonts);
 		};
 		getFonts();

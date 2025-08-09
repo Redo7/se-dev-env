@@ -4,13 +4,13 @@ interface Props {
 	name: string;
 	label: string;
 	value: string;
-	options: (Group | Option | string)[];
+	options: (Group | Option | string)[] | Object;
 }
 
 const DropdownField = ({ name, label, value, options }: Props) => {
 	const convertedOptions: Option[] = Object.entries(options).map(([objKey, val]) => ({
 		value: objKey,
-		label: val,
+		label: val.toString(),
 	}));
 
 	return (
