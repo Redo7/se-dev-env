@@ -1,7 +1,15 @@
 // Preserve original console and wrap it minimally for internal use only
 const originalConsole = window.console;
+window.console = new Proxy(originalConsole, {
+    get(target, prop) {
+        if (typeof target[prop] === "function") {
+            return target[prop].bind(target);
+        }
+        return target[prop];
+    }
+});
 
-// Create a *separate* object for your custom event handling, not on window.console
+// Create a separate object for your custom event handling, not on window.console
 const myCustomLoggerEvents = {
     __on: {},
     addEventListener: function (name, callback) {
@@ -15,31 +23,6 @@ const myCustomLoggerEvents = {
         }
         return this;
     },
-};
-
-// Wrap window.console to *only* proxy to the original console
-window.console = {
-    log: function () { originalConsole.log.apply(originalConsole, arguments); },
-    debug: function () { originalConsole.debug.apply(originalConsole, arguments); },
-    warn: function () { originalConsole.warn.apply(originalConsole, arguments); },
-    error: function () { originalConsole.error.apply(originalConsole, arguments); },
-    info: function () { originalConsole.info.apply(originalConsole, arguments); },
-    clear: function () { originalConsole.clear.apply(originalConsole, arguments); },
-    table: function () { originalConsole.table.apply(originalConsole, arguments); },
-    assert: function () { originalConsole.assert.apply(originalConsole, arguments); },
-    count: function () { originalConsole.count.apply(originalConsole, arguments); },
-    countReset: function () { originalConsole.countReset.apply(originalConsole, arguments); },
-    dir: function () { originalConsole.dir.apply(originalConsole, arguments); },
-    dirxml: function () { originalConsole.dirxml.apply(originalConsole, arguments); },
-    group: function () { originalConsole.group.apply(originalConsole, arguments); },
-    groupCollapsed: function () { originalConsole.groupCollapsed.apply(originalConsole, arguments); },
-    groupEnd: function () { originalConsole.groupEnd.apply(originalConsole, arguments); },
-    profile: function () { originalConsole.profile.apply(originalConsole, arguments); },
-    profileEnd: function () { originalConsole.profileEnd.apply(originalConsole, arguments); },
-    time: function () { originalConsole.time.apply(originalConsole, arguments); },
-    timeEnd: function () { originalConsole.timeEnd.apply(originalConsole, arguments); },
-    timeStamp: function () { originalConsole.timeStamp.apply(originalConsole, arguments); },
-    trace: function () { originalConsole.trace.apply(originalConsole, arguments); },
 };
 
 // --- Utility: Replace {{var}} and {var} placeholders ---
