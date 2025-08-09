@@ -210,7 +210,7 @@ window.addEventListener("message", (obj) => {
                 window.SE_API = {
                     store: {
                         set: (keyName, obj) => {
-                            originalConsole.log(`[SE_API.store] Setting '${keyName}':`, obj);
+                            // originalConsole.log(`[SE_API.store] Setting '${keyName}':`, obj);
                             if (!/^[a-zA-Z0-9]+$/.test(keyName)) {
                                 originalConsole.warn(`[SE_API.store] Invalid keyName: ${keyName}. Must be alphanumeric.`);
                                 return;
@@ -218,7 +218,7 @@ window.addEventListener("message", (obj) => {
                             __mockStore[keyName] = JSON.parse(JSON.stringify(obj));
                         },
                         get: (keyName) => {
-                            originalConsole.log(`[SE_API.store] Getting '${keyName}'`);
+                            // originalConsole.log(`[SE_API.store] Getting '${keyName}'`);
                             return Promise.resolve(
                                 __mockStore[keyName] ? JSON.parse(JSON.stringify(__mockStore[keyName])) : null
                             );
@@ -226,7 +226,7 @@ window.addEventListener("message", (obj) => {
                     },
                     counters: {
                         get: (counterName) => {
-                            originalConsole.log(`[SE_API.counters] Getting '${counterName}'`);
+                            // originalConsole.log(`[SE_API.counters] Getting '${counterName}'`);
                             if (!__mockCounters[counterName]) {
                                 __mockCounters[counterName] = { counter: counterName, value: 0 };
                             }
@@ -234,22 +234,22 @@ window.addEventListener("message", (obj) => {
                         }
                     },
                     sanitize: ({ message }) => {
-                        originalConsole.log(`[SE_API.sanitize] Sanitizing message: "${message}"`);
+                        // originalConsole.log(`[SE_API.sanitize] Sanitizing message: "${message}"`);
                         const sanitizedMessage = message.replace(/Vulgar/gi, "Kreygasm");
                         return Promise.resolve({ result: { message: sanitizedMessage }, skip: false });
                     },
                     cheerFilter: (message) => {
-                        originalConsole.log(`[SE_API.cheerFilter] Filtering cheers from message: "${message}"`);
+                        // originalConsole.log(`[SE_API.cheerFilter] Filtering cheers from message: "${message}"`);
                         const filteredMessage = message.replace(/\b\d+\s*(cheer|bits)\b/gi, "").trim();
                         return Promise.resolve(filteredMessage);
                     },
                     setField: (key, value) => {
-                        originalConsole.log(`[SE_API.setField] Setting fieldData['${key}'] =`, value);
+                        // originalConsole.log(`[SE_API.setField] Setting fieldData['${key}'] =`, value);
                         __mockFieldData[key] = value;
                         // Todo: This should change the actual data file too
                     },
                     getOverlayStatus: () => {
-                        originalConsole.log("[SE_API.getOverlayStatus] Called");
+                        // originalConsole.log("[SE_API.getOverlayStatus] Called");
                         return { isEditorMode: true, muted: false };
                     }
                 };
