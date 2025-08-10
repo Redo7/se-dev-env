@@ -34,6 +34,7 @@ const NumberField = ({ overlay, widget, name, label, step = 1, value = 0 }: Prop
 				value={inputValue}
 				required
 				onChange={(event) => {
+					if(isNaN(parseInt(event.target.value))) return;
 					setInputValue(parseInt(event.target.value));
 					useFieldChange(overlay, widget, name, parseInt(event.target.value));
 				}}
