@@ -7,21 +7,25 @@ interface Props {
 
 const ButtonField = ({ name, label }: Props) => {
 	const handleButtonClick = () => {
-		
-		const iframe = (document?.querySelector("iframe") as HTMLIFrameElement) 
-		if (iframe?.contentWindow) {
-			iframe.contentWindow.postMessage(
-				{
-					listener: "onEventReceived",
-					detail: { event: { listener: "widget-button", field: name } }
-				},
-				"*"
-			);
-		}
-	}
+		const iframes = document?.querySelectorAll('iframe') as NodeListOf<HTMLIFrameElement>;
+		iframes.forEach((iframe) => {
+			if (iframe?.contentWindow) {
+				const obj = {
+						listener: 'onEventReceived',
+						detail: { listener: 'event:test', event: { listener: 'widget-button', field: name, value: label, }, },
+					};
+				iframe.contentWindow.postMessage( obj, '*' );
+			}
+		});
+	};
 	return (
 		<div className="button-field">
-			<SubtleButton id={name} onClick={handleButtonClick} width="fit-content" padding=".25rem .75rem" height="2rem">
+			<SubtleButton
+				id={name}
+				onClick={handleButtonClick}
+				width="fit-content"
+				padding=".25rem .75rem"
+				height="2rem">
 				{label}
 			</SubtleButton>
 		</div>
