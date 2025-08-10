@@ -229,8 +229,14 @@ label {
 
 .color-picker-field{
     display: flex;
-    gap: 0.375rem;
+    gap: 1rem;
+    flex-direction: column;
+}
+
+.color-picker-input{
+    display: flex;
     align-items: center;
+    gap: 0.375rem;
 }
 
 .color-circle{
