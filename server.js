@@ -28,17 +28,24 @@ app.get('/overlays/overlay-:overlay-id/:template-:id/iframe.html', async (req, r
     }
 });
 
+// Get widgets
+// This should check for widget files and delete entries from the JSON if not found.
+// In the future widgetInstances will also store deletion data in the form of a UNIX timestamp. This should check the current time and delete any references earlier than Date.now()
+
 app.get('/api/get-widgets', async (req, res) => {
     const widgets = await fs.readFile('./widgetInstances.json', 'utf-8');
     res.json(JSON.parse(widgets))
 
-    // This should check for widget files and delete entries from the JSON if not found.
 })
+
+// Get templates
 
 app.get('/api/get-templates', async (req, res) => {
     const templates = await fs.readdir('./templates/user/');
     res.json([templates])
 })
+
+// Create Widget
 
 app.post("/api/create-widget", async (req, res) => {
     if (!req.body.template) return res.status(400).json({ error: "templateName is required" });
@@ -83,6 +90,8 @@ app.post("/api/create-widget", async (req, res) => {
     }
 });
 
+// Delete widget
+
 app.delete('/api/delete-widget', async (req, res) => {
     if (!req.body.id) return res.status(400).json({ error: 'Widget id is required' });
     if (!req.body.template) return res.status(400).json({ error: 'Template name is required' });
@@ -103,6 +112,8 @@ app.delete('/api/delete-widget', async (req, res) => {
         console.error(error);
     }
 })
+
+// Update widgetInstances
 
 app.put('/api/update-widget-settings', async (req, res) => {
     if (!req.body.id) return res.status(400).json({ error: 'Widget id is required' });
@@ -125,7 +136,9 @@ app.put('/api/update-widget-settings', async (req, res) => {
     }
 })
 
-app.get('/api/data/:file', async (req, res) => {
+// Fetch files from /data/
+
+app.get('/api/data/:file', async (req, res) => { 
     if (!req.params.file) return res.status(400).json({ error: 'File is required' });
 
     const dataFile = join(__dirname, "data", `${req.params.file}.json`);
@@ -135,7 +148,21 @@ app.get('/api/data/:file', async (req, res) => {
     res.json(JSON.parse(dataObject))
 })
 
-app.post('/api/field-data/:overlay/:widget', async (req, res) => {
+// Fetch fields.json
+
+app.get('/api/fields/:overlay/:widget', async (req, res) => {
+    if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
+    if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
+
+    const dataFile = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'fields.json');
+    const fieldData = await fs.readFile(dataFile, 'utf-8');
+
+    res.send(fieldData)
+})
+
+// Fetch data.json
+
+app.post('/api/field-data/:overlay/:widget', async (req, res) => { 
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
 
@@ -147,26 +174,35 @@ app.post('/api/field-data/:overlay/:widget', async (req, res) => {
     const dataFilePath = join(widgetSrc, 'data.json');
     const fieldsFilePath = join(widgetSrc, 'fields.json');
 
-    let fieldData;
-
     try {
-        fieldData = await fs.readFile(dataFilePath, 'utf-8');
-        res.send(fieldData)
+        const fieldsFile = fs.readFileSync(fieldsFilePath, 'utf-8');
+        const fields = generateDataFromFields(JSON.parse(fieldsFile));
+        const dataFile = fs.readFileSync(dataFilePath, 'utf-8');
+        const data = JSON.parse(dataFile);
+
+        
+        let regenerate = false;
+        Object.keys(fields).forEach(key => {
+            if(data[key] === undefined) regenerate = true;
+        })
+        
+        const defaultDataContent = JSON.stringify(fields, null, 2);
+        if(regenerate){
+            await fs.writeFile(dataFilePath, defaultDataContent, 'utf-8');
+            console.log(`Fields data for ${dataFilePath} regenerated successfully`);
+        }
+
+        res.type('application/json').send(defaultDataContent);
     } catch (error) {
         if (error.code === 'ENOENT') {
-            console.log(`File not found: ${dataFilePath}. Creating with default content.`);
+            console.log(`Fields file not found. Creating with default content.`);
             try {
-                // 1. Prepare field data
-                const fieldsFile = fs.readFileSync(fieldsFilePath, 'utf-8');
-                fieldData = generateDataFromFields(JSON.parse(fieldsFile));
+                const defaultContent = JSON.stringify({}, null, 2);
 
-                const defaultDataContent = JSON.stringify(fieldData, null, 2);
+                await fs.writeFile(fieldsFilePath, defaultContent, 'utf-8');
+                await fs.writeFile(dataFilePath, defaultContent, 'utf-8');
 
-                // 2. Write the default data to the file
-                await fs.writeFile(dataFilePath, defaultDataContent, 'utf-8');
-
-                // 3. Send the default data back in the response
-                res.type('application/json').send(defaultDataContent);
+                res.type('application/json').send(defaultContent);
                 console.log(`File created successfully: ${dataFilePath}`);
 
             } catch (createError) {
@@ -174,24 +210,15 @@ app.post('/api/field-data/:overlay/:widget', async (req, res) => {
                 res.status(500).json({ error: 'Failed to create default data file.' });
             }
         } else {
-            console.error(`Error reading ${dataFilePath}:`, error);
+            console.error(`Error reading ${fieldsFilePath}:`, error);
             res.status(500).json({ error: 'Internal server error' });
         }
     }
 })
 
-app.get('/api/fields/:overlay/:widget', async (req, res) => {
-    if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
-    if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
+// Update the value of a specific field in data.json
 
-    const dataFile = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'fields.json');
-
-    const fieldData = await fs.readFile(dataFile, 'utf-8');
-
-    res.send(fieldData)
-})
-
-app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
+app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => { 
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
     if (!req.params.field) return res.status(400).json({ error: 'Field is required' });
