@@ -24,6 +24,9 @@ const NumberField = ({ overlay, widget, name, label, step = 1, value = 0 }: Prop
 			</span>
 		));
 
+		console.log(name, step);
+		
+
 	return (
 		<div className="number-field">
 			<input
@@ -34,9 +37,16 @@ const NumberField = ({ overlay, widget, name, label, step = 1, value = 0 }: Prop
 				value={inputValue}
 				required
 				onChange={(event) => {
-					if(isNaN(parseInt(event.target.value))) return;
-					setInputValue(parseInt(event.target.value));
-					useFieldChange(overlay, widget, name, parseInt(event.target.value));
+					const rawValue = event.target.value;
+					if (rawValue === '') {
+						setInputValue(0);
+						useFieldChange(overlay, widget, name, 0); // Or 0, depending on your default
+						return;
+					}
+					const parsedValue = parseFloat(rawValue);
+					if (isNaN(parsedValue)) { return; }
+					setInputValue(parsedValue);
+					useFieldChange(overlay, widget, name, parsedValue);
 				}}
 			/>
 			<span className="bar"></span>
