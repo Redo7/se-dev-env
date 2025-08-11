@@ -1,18 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import SubtleButton from '../Buttons/SubtleButton';
+import useFieldChange from '../../hooks/useFieldChange';
+import TextField from './TextField';
 interface Props {
+	overlay: string;
+	widget: string;
 	name: string;
 	label: string;
 	value?: string;
 	timestampClassName?: string;
 }
 
-const SoundInputField = ({ name, label, value, timestampClassName }: Props) => {
+const SoundInputField = ({ overlay, widget, name, label, value, timestampClassName }: Props) => {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const [isPlaying, setIsPlaying] = useState<boolean>(false);
 	const [currentTime, setCurrentTime] = useState<number>(0);
 	const [duration, setDuration] = useState<number>(0);
 	const [isLoaded, setIsLoaded] = useState<boolean>(false);
+	
+	const [selectedFile, setSelectedFile] = useState(value);
+
+	const handleFileChange = (newValue: string) => {
+        setSelectedFile(newValue);
+		useFieldChange(overlay, widget, name, newValue);
+	};
 
 	// Helper function to format time
 	const formatTime = useCallback((seconds: number): string => {
@@ -49,7 +59,7 @@ const SoundInputField = ({ name, label, value, timestampClassName }: Props) => {
 
 		const handleEnded = () => {
 			setIsPlaying(false);
-			setCurrentTime(0); // Reset current time when audio ends
+			setCurrentTime(0);
 		};
 
 		const handlePlay = () => setIsPlaying(true);
@@ -72,23 +82,29 @@ const SoundInputField = ({ name, label, value, timestampClassName }: Props) => {
 
 	return (
 		<div className="audio-input-field">
-			<audio ref={audioRef} src={value} preload="metadata" />
-
-			<label htmlFor={name}>{label}</label>
-			{value && (
-				<div className="audio-controls">
-					<button onClick={togglePlayPause} disabled={!isLoaded} className="play-pause-button">
-						{isPlaying ? '❚❚' : '▶'}
-					</button>
-					<div className="timestamp-wrapper">
-						<span className={timestampClassName || ''}>{formatTime(currentTime)}</span> /{' '}
-						<span className={timestampClassName || ''}>{isLoaded ? formatTime(duration) : '0:00'}</span>
+			{selectedFile && (
+				<>
+					<label htmlFor={name}>{label}</label>
+					<div className="audio-controls">
+						<audio ref={audioRef} src={selectedFile} preload="metadata" />
+						<button onClick={togglePlayPause} disabled={!isLoaded} className="play-pause-button">
+							{isPlaying ? '❚❚' : '▶'}
+						</button>
+						<div className="timestamp-wrapper">
+							<span className={timestampClassName || ''}>{formatTime(currentTime)}</span> /{' '}
+							<span className={timestampClassName || ''}>{isLoaded ? formatTime(duration) : '0:00'}</span>
+						</div>
 					</div>
-				</div>
+				</>
 			)}
-			<SubtleButton width="100%" height="1.5rem">
-				Select audio
-			</SubtleButton>
+			<TextField
+				name={name}
+				label={`"${label}" link`}
+				value={value}
+				onChange={handleFileChange}
+				overlay={overlay}
+				widget={widget}
+			/>
 		</div>
 	);
 };

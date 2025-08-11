@@ -1,19 +1,39 @@
-import SubtleButton from '../Buttons/SubtleButton';
+import { useState } from 'react';
+import TextField from './TextField';
+import useFieldChange from '../../hooks/useFieldChange';
 interface Props {
+	overlay: string;
+	widget: string;
 	name: string;
 	label: string;
-	value?: string;
+	value?: string | undefined;
 }
 
-const ImageInputField = ({ name, label, value }: Props) => {
+const ImageInputField = ({ overlay, widget, name, label, value = undefined }: Props) => {
+	const [selectedFile, setSelectedFile] = useState(value);
+
+	const handleFileChange = (newValue: string) => {
+        setSelectedFile(newValue);
+		useFieldChange(overlay, widget, name, newValue);
+	};
+
 	return (
 		<div className="image-input-field">
-			<label htmlFor={name}>{label}</label>
-			{value && <img className="field-asset-preview" src={value} alt={label} id={name} />}
-			<SubtleButton width="100%" height="1.5rem">
-				Select an Image
-			</SubtleButton>
-		</div>
+			{selectedFile && 
+				<>
+					<label htmlFor={name}>{label}</label>
+					<img className="field-asset-preview" src={selectedFile} alt={label} id={name} />
+				</>
+			}
+			<TextField
+					name={name}
+					label={`"${label}" link`}
+					value={value}
+					onChange={handleFileChange}
+					overlay={overlay}
+					widget={widget}
+				/>
+			</div>
 	);
 };
 
