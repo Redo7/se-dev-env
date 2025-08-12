@@ -13,7 +13,8 @@ const PORT = 3001;
 
 app.use(cors())
 app.use(express.json());
-// app.use(express.static(join(__dirname, 'public')));
+
+// Helper functions
 
 function generateDataFromFields(fields) {
     let fieldData = {};
@@ -39,17 +40,7 @@ async function fetchOverlayData(overlayID){
     return currOverlayData;
 }
 
-app.get('/overlays/:overlayID/:template-:id/iframe.html', async (req, res) => {
-    const { overlayID, template, id } = req.params;
-    const filePath = join(__dirname, 'overlays', overlayID, `${template}-${id}`, 'iframe.html');
-
-    try {
-        await fs.access(filePath, fs.constants.F_OK);
-        res.sendFile(filePath);
-    } catch (error) {
-        res.status(404).send('File not found');
-    }
-});
+// API
 
 // Get widgets
 // This should check for widget files and delete entries from the JSON if not found.
@@ -146,6 +137,20 @@ app.delete('/api/delete-widget/', async (req, res) => {
         console.error(error);
     }
 })
+
+// Load iframe
+
+app.get('/overlays/:overlayID/:template-:id/iframe.html', async (req, res) => {
+    const { overlayID, template, id } = req.params;
+    const filePath = join(__dirname, 'overlays', overlayID, `${template}-${id}`, 'iframe.html');
+
+    try {
+        await fs.access(filePath, fs.constants.F_OK);
+        res.sendFile(filePath);
+    } catch (error) {
+        res.status(404).send('File not found');
+    }
+});
 
 // Update widget settings
 
