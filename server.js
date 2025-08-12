@@ -64,6 +64,16 @@ app.get('/api/get-widgets/:overlayID', async (req, res) => {
     res.json(currWidgetsArray)
 })
 
+// Get overlays
+
+app.get('/api/get-overlays', async (req, res) => {
+    const overlays = await fs.readdir('./overlays/');
+    const overlaysArray = await Promise.all(overlays.map(async (overlay) => {
+        return await fetchOverlayData(overlay);
+    }))
+    res.json(overlaysArray)
+})
+
 // Get templates
 
 app.get('/api/get-templates', async (req, res) => {

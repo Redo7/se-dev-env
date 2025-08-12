@@ -11,7 +11,7 @@ const App = () => {
 		<Router>
 		  <Routes>
 			<Route path="/" element={<HomeScreen />} />
-			<Route path="/overlay/:id" element={<Overlay />} />
+			<Route path="/:id" element={<Overlay />} />
 		  </Routes>
 		</Router>
 	  );
