@@ -2,17 +2,19 @@ import { useRef, useState, type CSSProperties, useEffect, useCallback } from 're
 import SubtleButton from './Buttons/SubtleButton';
 import IconTrash from '../assets/Icons/IconTrash';
 import useFields from '../hooks/useFieldData';
+import type { WidgetInstance } from '../types/widget';
 
 interface Props {
 	overlay: string;
 	template: string;
 	id: string;
+	name: string;
 	src: string;
 	width: number;
 	height: number;
 	onClick: () => void;
 	onDelete: () => void;
-	onSettingsChange: (id: string, width: number, height: number, posX: number, posY: number) => void;
+	onSettingsChange: (overlay: string, widget: WidgetInstance) => void;
 
 	onDragStart?: (event: React.MouseEvent<HTMLDivElement>) => void;
 	onDragEnd?: (event: React.MouseEvent<HTMLDivElement>, newPosition: { x: number; y: number }) => void;
@@ -59,6 +61,7 @@ const fetchOnWidgetLoad = async (): Promise<OnWidgetLoadData | undefined> => {
 const Widget = ({
 	overlay,
 	template,
+	name,
 	id,
 	src,
 	width: initialWidth,
@@ -246,11 +249,18 @@ const Widget = ({
 				onResizeEnd?.(e as unknown as React.MouseEvent<HTMLDivElement>, currentDims, position);
 			}
 			onSettingsChange(
-				id,
-				Math.max(dimensions.width, 50),
-				Math.max(dimensions.height, 50),
-				position.x,
-				position.y
+				overlay,
+				{	
+					id: id,
+					name: name,
+					template: template,
+					src: src,
+				
+					width: Math.max(dimensions.width, 50),
+					height: Math.max(dimensions.height, 50),
+					posX: position.x,
+					posY: position.y
+				}
 			);
 			document.removeEventListener('mousemove', handleGlobalMouseMove);
 			document.removeEventListener('mouseup', handleGlobalMouseUp);

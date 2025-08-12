@@ -24,8 +24,8 @@ const Overlay = () => {
 
 	const getWidgets = async () => {
 		const res = await fetch(`/api/get-widgets/${encodeURIComponent(id)}`);
-		const data: WidgetInstance[] = await res.json();
-		setWidgets(data);
+		const data = await res.json();
+		setWidgets(data.widgets);
 	};
 
 	useEffect(() => {
@@ -84,11 +84,11 @@ const Overlay = () => {
 		}
 	};
 
-	const updateWidgetSettings = async (id: string, width: number, height: number, posX: number, posY: number) => {
+	const updateWidgetSettings = async (overlayID: string, id: string, width: number, height: number, posX: number, posY: number) => {
 		await fetch('/api/update-widget-settings', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ id, width, height, posX, posY }),
+			body: JSON.stringify({ "overlayID": overlayID, id, width, height, posX, posY }),
 		}).then((response) => {
 			if (!response.ok) {
 				throw new Error(`Something went wrong while changing settings for ${id}`);
@@ -134,6 +134,7 @@ const Overlay = () => {
 					key={widget.id}
 					overlay={id}
 					template={widget.template}
+					name={widget.name}
 					id={widget.id}
 					src={widget.src}
 					width={widget.width}
@@ -142,8 +143,10 @@ const Overlay = () => {
 					resizable={true}
 					onClick={() => handleWidgetClick(widget)}
 					onDelete={() => removeWidget(widget.template, widget.id)}
-					onSettingsChange={(id, width, height, posX, posY) =>
-						updateWidgetSettings(id, width, height, posX, posY)
+					onSettingsChange={(id, widget) =>
+					{
+						updateWidgetSettings(id, widget.id, widget.width, widget.height, widget.posX, widget.posY)
+					}
 					}
 				/>
 			))}

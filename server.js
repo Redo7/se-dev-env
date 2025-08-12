@@ -15,6 +15,30 @@ app.use(cors())
 app.use(express.json());
 // app.use(express.static(join(__dirname, 'public')));
 
+function generateDataFromFields(fields) {
+    let fieldData = {};
+    for (const [key, value] of Object.entries(fields)) {
+        if (Object.keys(fields[key]).includes("value") === false && fields[key]["type"] === "number") {
+            fieldData[key] = 0;
+        } else if (Object.keys(fields[key]).includes("value") === false && fields[key]["type"] === "checkbox") {
+            fieldData[key] = false;
+        } else if (Object.keys(fields[key]).includes("value") === false) {
+            fieldData[key] = "";
+        } else {
+            fieldData[key] = value["value"];
+        }
+    }
+    return fieldData;
+}
+
+async function fetchOverlayData(overlayID){
+    const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
+    const data = await fs.readFile(instancePath, 'utf-8');
+    const currOverlayData = JSON.parse(data);
+
+    return currOverlayData;
+}
+
 app.get('/overlays/:overlayID/:template-:id/iframe.html', async (req, res) => {
     const { overlayID, template, id } = req.params;
     const filePath = join(__dirname, 'overlays', overlayID, `${template}-${id}`, 'iframe.html');
@@ -29,16 +53,15 @@ app.get('/overlays/:overlayID/:template-:id/iframe.html', async (req, res) => {
 
 // Get widgets
 // This should check for widget files and delete entries from the JSON if not found.
-// In the future widgetInstances will also store deletion data in the form of a UNIX timestamp. This should check the current time and delete any references earlier than Date.now()
+// In the future overlay-data will also store deletion data in the form of a UNIX timestamp. This should check the current time and delete any references earlier than Date.now()
 
 app.get('/api/get-widgets/:overlayID', async (req, res) => {
     if (!req.params.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
 
     const { overlayID } = req.params;
-    const instancePath = join(__dirname, "overlays", overlayID, "widgetInstances.json");
-    const widgets = await fs.readFile(instancePath, 'utf-8');
-    res.json(JSON.parse(widgets))
-
+    let currWidgetsArray = await fetchOverlayData(overlayID);
+    
+    res.json(currWidgetsArray)
 })
 
 // Get templates
@@ -50,41 +73,38 @@ app.get('/api/get-templates', async (req, res) => {
 
 // Create Widget
 
-app.post("/api/create-widget", async (req, res) => {
+app.post("/api/create-widget/", async (req, res) => {
+    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
     if (!req.body.template) return res.status(400).json({ error: "templateName is required" });
 
-    const { template: templateName } = req.body;
+    const { template,  overlayID} = req.body;
     const instanceId = uuidv4();
     const widgetData = {
-        template: templateName,
+        template: template,
         id: instanceId,
-        name: `${templateName} widget`,
-        src: `/overlays/overlay-1/${templateName}-${instanceId}/iframe.html`,
+        name: `${template} widget`,
+        src: `/overlays/${overlayID}/${template}-${instanceId}/iframe.html`,
         width: 500,
         height: 500,
         posX: 0,
         posY: 0,
     };
-    // Swap overlay-1 for id of the overlay, name for user input
 
     const iframeTemplate = join(__dirname, "templates", "iframe");
-    const widgetTemplate = join(__dirname, "templates", "user", templateName);
-    const destinationPath = join(__dirname, "overlays", "overlay-1", `${templateName}-${instanceId}`);
-    const widgetFilesPath = join(__dirname, "overlays", "overlay-1", `${templateName}-${instanceId}`, "src");
-    // Swap overlay-1 for id here
+    const widgetTemplate = join(__dirname, "templates", "user", template);
+    const destinationPath = join(__dirname, "overlays", overlayID, `${template}-${instanceId}`);
+    const widgetFilesPath = join(__dirname, "overlays", overlayID, `${template}-${instanceId}`, "src");
+    const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
+
 
     try {
-        console.log(`Copying ${templateName} files to ${destinationPath}`);
+        console.log(`Copying ${template} files to ${destinationPath}`);
         await fs.promises.cp(iframeTemplate, destinationPath, { recursive: true });
         await fs.promises.cp(widgetTemplate, widgetFilesPath, { recursive: true });
 
-        const currWidgets = await fs.promises.readFile(
-            "./widgetInstances.json",
-            "utf-8",
-        );
-        const currWidgetsArray = JSON.parse(currWidgets);
-        currWidgetsArray.push(widgetData);
-        await fs.promises.writeFile("./widgetInstances.json", JSON.stringify(currWidgetsArray, null, "\t"), "utf-8",);
+        let currWidgetsArray = await fetchOverlayData(overlayID);
+        currWidgetsArray.widgets.push(widgetData);
+        await fs.promises.writeFile(instancePath, JSON.stringify(currWidgetsArray, null, "\t"), "utf-8",);
 
         res.json(widgetData);
     } catch (error) {
@@ -95,19 +115,20 @@ app.post("/api/create-widget", async (req, res) => {
 
 // Delete widget
 
-app.delete('/api/delete-widget', async (req, res) => {
+app.delete('/api/delete-widget/', async (req, res) => {
+    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
     if (!req.body.id) return res.status(400).json({ error: 'Widget id is required' });
     if (!req.body.template) return res.status(400).json({ error: 'Template name is required' });
 
+    const { template, id, overlayID } = req.body;
 
-    const currWidgets = await fs.readFile('./widgetInstances.json', 'utf-8');
-    const currWidgetsArray = JSON.parse(currWidgets);
-    const target = join(__dirname, 'overlays', 'overlay-1', `${req.body.template}-${req.body.id}`);
-    // Swap overlay-1 for id here
+    const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
+    let currWidgetsArray = await fetchOverlayData(overlayID);
+    const target = join(__dirname, 'overlays', overlayID, `${template}-${id}`);
 
     try {
-        const updatedWidgetsArray = currWidgetsArray.filter(item => item.id != req.body.id);
-        fs.writeFileSync('./widgetInstances.json', JSON.stringify(updatedWidgetsArray, null, "\t"), 'utf-8');
+        const updatedWidgetsArray = currWidgetsArray.widgets.filter(item => item.id != id);
+        fs.writeFileSync(instancePath, JSON.stringify(updatedWidgetsArray, null, "\t"), 'utf-8');
         fs.rmSync(target, { recursive: true, force: true });
 
         res.send();
@@ -116,23 +137,28 @@ app.delete('/api/delete-widget', async (req, res) => {
     }
 })
 
-// Update widgetInstances
+// Update widget settings
 
 app.put('/api/update-widget-settings', async (req, res) => {
+    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
     if (!req.body.id) return res.status(400).json({ error: 'Widget id is required' });
 
+    const { overlayID, id, width, height, posX, posY } = req.body;
+
     const newSettings = {
-        width: req.body.width,
-        height: req.body.height,
-        posX: req.body.posX,
-        posY: req.body.posY,
+        width: width,
+        height: height,
+        posX: posX,
+        posY: posY,
     }
 
-    const currWidgets = await fs.readFile('./widgetInstances.json', 'utf-8');
-    const currWidgetsArray = JSON.parse(currWidgets);
+    const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
+    let currWidgetsArray = await fetchOverlayData(overlayID);
+    
     try {
-        const updatedWidgetsArray = currWidgetsArray.map(widget => widget.id === req.body.id ? { ...widget, ...newSettings } : widget);
-        fs.writeFileSync('./widgetInstances.json', JSON.stringify(updatedWidgetsArray, null, "\t"), 'utf-8');
+        const updatedWidgetsArray = currWidgetsArray.widgets.map(widget => widget.id === id ? { ...widget, ...newSettings } : widget);
+        currWidgetsArray.widgets = updatedWidgetsArray;
+        fs.writeFileSync(instancePath, JSON.stringify(currWidgetsArray, null, "\t"), 'utf-8');
         res.send();
     } catch (error) {
         console.error(error);
@@ -251,19 +277,3 @@ app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);
 })
-
-function generateDataFromFields(fields) {
-    let fieldData = {};
-    for (const [key, value] of Object.entries(fields)) {
-        if (Object.keys(fields[key]).includes("value") === false && fields[key]["type"] === "number") {
-            fieldData[key] = 0;
-        } else if (Object.keys(fields[key]).includes("value") === false && fields[key]["type"] === "checkbox") {
-            fieldData[key] = false;
-        } else if (Object.keys(fields[key]).includes("value") === false) {
-            fieldData[key] = "";
-        } else {
-            fieldData[key] = value["value"];
-        }
-    }
-    return fieldData;
-}
