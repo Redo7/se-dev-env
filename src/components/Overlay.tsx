@@ -33,11 +33,13 @@ const Overlay = ({ id  }: Props) => {
 		const getTemplates = async () => {
 			const res = await fetch('/api/get-templates');
 			const data = await res.json();
-			const templateArray: Template[] = data.map((template: string) => ({
+			
+			const templateArray: Template[] = data[0].map((template: string) => ({
 				label: template[0].toUpperCase() + template.slice(1),
 				icon: <IconPlusSm />,
 				action: () => addWidget(template),
 			}));
+			
 			setTemplates(templateArray)
 		};
 		getTemplates();
