@@ -6,6 +6,7 @@ const HomeScreen = () => {
     <>
         <div>HomeScreen</div>
         <Link to={`/overlay/overlay-1`}>Overlay 1</Link>
+        <Link to={`/overlay/overlay-2`}>Overlay 2</Link>
     </>
   )
 }

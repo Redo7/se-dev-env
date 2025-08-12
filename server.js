@@ -15,10 +15,9 @@ app.use(cors())
 app.use(express.json());
 // app.use(express.static(join(__dirname, 'public')));
 
-app.get('/overlays/overlay-:overlay-id/:template-:id/iframe.html', async (req, res) => {
-    const { template, id } = req.params;
-    const filePath = join(__dirname, 'overlays', 'overlay-1', `${template}-${id}`, 'iframe.html');
-    // Swap overlay-1 for id here
+app.get('/overlays/:overlayID/:template-:id/iframe.html', async (req, res) => {
+    const { overlayID, template, id } = req.params;
+    const filePath = join(__dirname, 'overlays', overlayID, `${template}-${id}`, 'iframe.html');
 
     try {
         await fs.access(filePath, fs.constants.F_OK);
@@ -32,8 +31,12 @@ app.get('/overlays/overlay-:overlay-id/:template-:id/iframe.html', async (req, r
 // This should check for widget files and delete entries from the JSON if not found.
 // In the future widgetInstances will also store deletion data in the form of a UNIX timestamp. This should check the current time and delete any references earlier than Date.now()
 
-app.get('/api/get-widgets', async (req, res) => {
-    const widgets = await fs.readFile('./widgetInstances.json', 'utf-8');
+app.get('/api/get-widgets/:overlayID', async (req, res) => {
+    if (!req.params.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
+
+    const { overlayID } = req.params;
+    const instancePath = join(__dirname, "overlays", overlayID, "widgetInstances.json");
+    const widgets = await fs.readFile(instancePath, 'utf-8');
     res.json(JSON.parse(widgets))
 
 })

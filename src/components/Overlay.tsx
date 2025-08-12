@@ -6,6 +6,7 @@ import {SidebarExpand, IconPlus, IconPlusSm} from '../assets/Icons/';
 import Sidebar from './Sidebar';
 import IconButton from './Buttons/IconButton';
 import { type WidgetInstance } from '../types/widget';
+import { useParams } from 'react-router-dom';
 
 interface Template{
 	label: string;
@@ -13,18 +14,16 @@ interface Template{
 	action: () => void;
 }
 
-interface Props {
-	id: string;
-}
-
-const Overlay = ({ id  }: Props) => {
+const Overlay = () => {
+	const { id } = useParams<{ id: string }>();
+	if (!id) return (<>Incorrect Overlay ID: {id}</>);
 	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 	const [templates, setTemplates] = useState<Template[]>([]);
 	const [widgets, setWidgets] = useState<WidgetInstance[]>([]);
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
 
 	const getWidgets = async () => {
-		const res = await fetch('/api/get-widgets');
+		const res = await fetch(`/api/get-widgets/${encodeURIComponent(id)}`);
 		const data: WidgetInstance[] = await res.json();
 		setWidgets(data);
 	};
