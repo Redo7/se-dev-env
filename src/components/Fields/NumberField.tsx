@@ -24,9 +24,6 @@ const NumberField = ({ overlay, widget, name, label, step = 1, value = 0 }: Prop
 			</span>
 		));
 
-		console.log(name, step);
-		
-
 	return (
 		<div className="number-field">
 			<input

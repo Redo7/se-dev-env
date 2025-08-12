@@ -3,7 +3,7 @@ import SubtleButton from './Buttons/SubtleButton';
 import SidebarCollapse from '../assets/Icons/SidebarCollapse';
 import { useEffect, useMemo, useState } from 'react';
 import FieldGroup from './Fields/FieldGroup';
-import type { WidgetInstance } from '../App';
+import type { WidgetInstance } from '../types/widget';
 import useFields from '../hooks/useFields';
 import componentMap from '../utils/componentMap';
 import useFieldData from '../hooks/useFieldData';
