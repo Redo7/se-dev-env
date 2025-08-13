@@ -30,8 +30,6 @@ const DropdownField = ({ overlay, widget, name, label, value, options }: Props) 
 		useFieldChange(overlay, widget, name, value);
 	};
 
-	console.log(convertedOptions);
-
 	return (
 		<div className="dropdown-field">
 			<Label>{label}</Label>
@@ -59,7 +57,6 @@ const DropdownField = ({ overlay, widget, name, label, value, options }: Props) 
 										onSelect={(currentValue) => {
 											setOpen(false);
 											handleChange(currentValue);
-											console.log(currentValue);
 										}}>
 										{option.label}
 										<Check
