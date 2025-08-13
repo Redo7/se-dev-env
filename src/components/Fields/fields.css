@@ -435,6 +435,11 @@ audio.field-asset-preview{
     border-radius: 1rem;
 }
 
+.play-pause-button{
+    padding: .5rem;
+    vertical-align: middle;
+}
+
 /* Hidden */
 
 .hidden-field label{
