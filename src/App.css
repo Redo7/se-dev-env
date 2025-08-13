@@ -2,6 +2,11 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+
+html{
+    background-color: #000;
+}
+
 /* Utility */
 
 :root{
@@ -38,50 +43,18 @@
     --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
     --sidebar-border: oklch(0.92 0.004 286.32);
     --sidebar-ring: oklch(0.705 0.015 286.067);
-}
 
-.flex {
-    display: flex;
-}
-
-.gap-1 {
-    gap: 0.0625rem;
-}
-
-.gap-2 {
-    gap: 0.125rem;
-}
-
-.gap-4 {
-    gap: 0.25rem;
-}
-
-.gap-6 {
-    gap: 0.375rem;
-}
-
-.gap-8 {
-    gap: 0.5rem;
-}
-
-.gap-10 {
-    gap: 0.625rem;
-}
-
-.gap-12 {
-    gap: 0.75rem;
-}
-
-.gap-16 {
-    gap: 1rem;
-}
-
-.relative {
-    position: relative;
-}
-
-.absolute {
-    position: absolute;
+    --color-redo-50: hsl(270 9.1% 99.7%);
+    --color-redo-100: hsl(240 5.3% 92.5%);
+    --color-redo-200: hsl(252 6.5% 84.9%);
+    --color-redo-300: hsl(247.5 6% 73.7%);
+    --color-redo-400: hsl(250 6.3% 62.7%);
+    --color-redo-500: hsl(251.2 6.7% 52.9%);
+    --color-redo-600: hsl(253.3 8.3% 42.4%);
+    --color-redo-700: hsl(256 9.3% 31.6%);
+    --color-redo-800: hsl(250.9 10.1% 21.4%);
+    --color-redo-900: hsl(248.6 10.8% 12.7%);
+    --color-redo-950: hsl(252 13.5% 7.3%);
 }
 
 .center{
@@ -92,6 +65,10 @@
 
 /* Home Screen */
 
+.home-screen{
+    height: 100vh;
+}
+
 .home-screen-heading h1{
     font-size: 2em;
     font-weight: 700;
@@ -99,15 +76,20 @@
 
 /* Overlay */
 
-body{
-    background: var(--background);
+body {
+    background-color: var(--chart-1);
     color: var(--foreground);
-}
+    transition: background-color 0.3s ease, color 0.3s ease;
+    background: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23D9D9D933'/%3E%3C/svg%3E%0A"), radial-gradient(31.64% 56.25% at 100% 0%, #ffffff 0%, transparent 100%), radial-gradient(32.21% 57.27% at 42% 100%, #ffffff 0%, transparent 100%), var(--color-redo-100);
+  }
+  
+  .dark body {
+    background: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23D9D9D933'/%3E%3C/svg%3E%0A"), radial-gradient(31.64% 56.25% at 100% 0%, var(--background) 0%, transparent 100%), radial-gradient(32.21% 57.27% at 42% 100%, var(--secondary) 0%, transparent 100%), var(--background);
+  }
 
 .overlay {
     display: block;
     height: 100vh;
-    background: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23D9D9D933'/%3E%3C/svg%3E%0A"), radial-gradient(31.64% 56.25% at 100% 0%, var(--background) 0%, transparent 100%), radial-gradient(32.21% 57.27% at 42% 100%, var(--secondary) 0%, transparent 100%), var(--background);
     color: var(--foreground);
     padding: 3.125rem;
     box-sizing: border-box;
@@ -220,6 +202,7 @@ iframe {
 /* Sidebar */
 
 .sidebar {
+    color: var(--foreground);
     box-sizing: border-box;
 
     display: flex;
@@ -231,7 +214,7 @@ iframe {
     width: 14.75rem;
     height: 100%;
 
-    background: linear-gradient(180deg, #000000 0%, #191919 100%);
+    background: linear-gradient(180deg, var(--background) 0%, var(--secondary) 100%);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     transition: margin-left 750ms var(--redo-easing);

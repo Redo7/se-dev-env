@@ -42,18 +42,33 @@ async function fetchOverlayData(overlayID){
 
 // API
 
-// Get widgets
-// This should check for widget files and delete entries from the JSON if not found.
-// In the future overlay-data will also store deletion data in the form of a UNIX timestamp. This should check the current time and delete any references earlier than Date.now()
+// Create overlay
 
-app.get('/api/get-widgets/:overlayID', async (req, res) => {
-    if (!req.params.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
+app.post("/api/create-overlay/", async (req, res) => {
+    if (!req.body.name) return res.status(400).json({ error: 'Overlay name is required' });
 
-    const { overlayID } = req.params;
-    let currWidgetsArray = await fetchOverlayData(overlayID);
+    const { name } = req.body;
+    const instanceId = uuidv4();
+    const id = name.toLowerCase().replaceAll(' ', '-') + '-' + instanceId;
+    const defaults = {
+        name: name,
+        id: id,
+        widgets: []
+    };
+
+    const destinationPath = join(__dirname, "overlays", id);
+    const overlayDataPath = join(__dirname, "overlays", id, 'overlay-data.json');
     
-    res.json(currWidgetsArray)
-})
+    try {
+        console.log(`Creating overlay: ${name}, in ${destinationPath}`);
+        fs.mkdirSync(destinationPath, { recursive: true });
+        await fs.promises.writeFile(overlayDataPath, JSON.stringify(defaults, null, "\t"), "utf-8",);
+        res.status(200).json(defaults);
+    } catch (error) {
+        console.error("Error creating overlay:", error);
+        res.status(500).json({ error: "Failed to create overlay" });
+    }
+});
 
 // Get overlays
 
@@ -70,6 +85,19 @@ app.get('/api/get-overlays', async (req, res) => {
 app.get('/api/get-templates', async (req, res) => {
     const templates = await fs.readdir('./templates/user/');
     res.json([templates])
+})
+
+// Get widgets
+// This should check for widget files and delete entries from the JSON if not found.
+// In the future overlay-data will also store deletion data in the form of a UNIX timestamp. This should check the current time and delete any references earlier than Date.now()
+
+app.get('/api/get-widgets/:overlayID', async (req, res) => {
+    if (!req.params.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
+
+    const { overlayID } = req.params;
+    let currWidgetsArray = await fetchOverlayData(overlayID);
+    
+    res.json(currWidgetsArray)
 })
 
 // Create Widget
