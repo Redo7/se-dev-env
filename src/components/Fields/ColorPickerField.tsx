@@ -1,7 +1,7 @@
 import { ColorPicker, useColor, type IColor } from 'react-color-palette';
 import 'react-color-palette/css';
 import TextField from './TextField';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import useFieldChange from '../../hooks/useFieldChange';
 
 interface Props {
@@ -10,12 +10,13 @@ interface Props {
 	name: string;
 	label: string;
 	value: string;
-	onColorPickerToggle: () => void;
+	onColorPickerToggle?: () => void;
 }
 
 const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onColorPickerToggle }: Props) => {
 	const [color, setColor] = useColor(value);
 	const [isVisible, setIsVisible] = useState(false);
+	const containerRef = useRef<HTMLDivElement>(null);
 
 	const handleColorChange = (val: IColor) => {
 		setColor(val);
@@ -44,14 +45,12 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 		}
 
 		// RGB
-
 		const num = parseInt(hex, 16);
 		const r = (num >> 16) & 255;
 		const g = (num >> 8) & 255;
 		const b = num & 255;
 
 		//HSV
-
 		const rNorm = r / 255;
 		const gNorm = g / 255;
 		const bNorm = b / 255;
@@ -82,6 +81,38 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 		};
 	}
 
+	// Trigger parent height recalculation
+	const triggerParentRecalc = useCallback(() => {
+		// Try multiple methods to trigger parent recalculation
+		
+		// Method 1: Call the callback if provided
+		if (onColorPickerToggle) {
+			onColorPickerToggle();
+		}
+		
+		// Method 2: Find parent FieldGroup and call its recalcHeight method
+		let parent = containerRef.current?.parentElement;
+		while (parent) {
+			if (parent.classList.contains('field-group-accordion')) {
+				const recalcMethod = (parent as any).recalcHeight;
+				if (typeof recalcMethod === 'function') {
+					recalcMethod();
+				}
+				break;
+			}
+			parent = parent.parentElement;
+		}
+		
+		// Method 3: Dispatch a custom event that parent can listen to
+		if (containerRef.current) {
+			const event = new CustomEvent('fieldHeightChange', {
+				bubbles: true,
+				detail: { component: 'ColorPickerField', expanded: isVisible }
+			});
+			containerRef.current.dispatchEvent(event);
+		}
+	}, [onColorPickerToggle, isVisible]);
+
 	useEffect(() => {
 		if (color.hex === value) return;
 		const handler = setTimeout(() => {
@@ -92,17 +123,34 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 		return () => {
 			clearTimeout(handler);
 		};
-	}, [color]);
+	}, [color, overlay, widget, name, value]);
 
-	const handleToggle = () => {
-		setIsVisible(!isVisible);
-		// requestAnimationFrame(() => onColorPickerToggle()); // This is supposed to trigger the height recalc within the FieldGroup component, but is currently not being applied due to the json -> component mapping function
-	};
+	const handleToggle = useCallback(() => {
+		setIsVisible(prev => {
+			const newVisible = !prev;
+			
+			// Trigger parent recalculation after state update
+			requestAnimationFrame(() => {
+				triggerParentRecalc();
+			});
+			
+			return newVisible;
+		});
+	}, [triggerParentRecalc]);
+
+	// Also trigger recalc when visibility changes (backup)
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			triggerParentRecalc();
+		}, 50); // Small delay to ensure DOM has updated
+
+		return () => clearTimeout(timer);
+	}, [isVisible, triggerParentRecalc]);
 
 	return (
-		<div className="color-picker-field">
+		<div className="color-picker-field" ref={containerRef}>
 			<div className="color-picker-input">
-				<span className="color-circle" style={{ background: color.hex }} onClick={() => handleToggle()}></span>
+				<span className="color-circle" style={{ background: color.hex }} onClick={handleToggle}></span>
 				<TextField
 					name={name}
 					label={label}

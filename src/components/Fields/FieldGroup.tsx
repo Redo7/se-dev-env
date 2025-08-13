@@ -8,50 +8,85 @@ interface Props {
 
 const FieldGroup = ({ children, name }: Props) => {
 	const [isAccordionExpanded, setIsAccordionExpanded] = useState(false);
-	const [contentHeight, setContentHeight] = useState(0);
-	const [contentVersion, setContentVersion] = useState(0);
+	const [maxHeight, setMaxHeight] = useState<string>('0px');
 	const contentRef = useRef<HTMLDivElement>(null);
+	const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
-	const toggleAccordion = () => {
-		setIsAccordionExpanded((prev) => {
-			if (!prev) {
-				requestAnimationFrame(() => setContentVersion((v) => v + 1));
-			}
-			return !prev;
-		});
-	};
-
-	// Something causes the field group to not open sometimes
-	useEffect(() => {
-		if (!contentRef.current) {
-			return;
-		}
-
+	const updateMaxHeight = useCallback(() => {
+		if (!contentRef.current) return;
+		
 		if (isAccordionExpanded) {
-			const prevHeight = contentRef.current.offsetHeight;
-			contentRef.current.style.height = 'auto';
-
-			requestAnimationFrame(() => {
-				if (contentRef.current) {
-					const newScrollHeight = contentRef.current.scrollHeight;
-					contentRef.current.style.height = `${prevHeight}px`;
-
-					requestAnimationFrame(() => {
-						setContentHeight(newScrollHeight);
-					});
-				}
-			});
+			// Measure the content height
+			const scrollHeight = contentRef.current.scrollHeight;
+			setMaxHeight(`${scrollHeight}px`);
 		} else {
-			setContentHeight(contentRef.current.scrollHeight);
-			requestAnimationFrame(() => {
-				setContentHeight(0);
-			});
+			setMaxHeight('0px');
 		}
-	}, [isAccordionExpanded, contentVersion]);
+	}, [isAccordionExpanded]);
 
-	const recalcHeight = useCallback(() => {
-		setContentVersion((prev) => prev + 1);
+	const toggleAccordion = useCallback(() => {
+		setIsAccordionExpanded(prev => !prev);
 	}, []);
+
+	// Update max-height when expansion state changes
+	useEffect(() => {
+		// Small delay to ensure DOM is ready
+		const timer = setTimeout(() => {
+			updateMaxHeight();
+		}, 10);
+
+		return () => clearTimeout(timer);
+	}, [isAccordionExpanded, updateMaxHeight]);
+
+	// Set up ResizeObserver to watch for content changes
+	useEffect(() => {
+		if (!contentRef.current) return;
+
+		resizeObserverRef.current = new ResizeObserver(() => {
+			if (isAccordionExpanded) {
+				updateMaxHeight();
+			}
+		});
+
+		const observer = resizeObserverRef.current;
+		const element = contentRef.current;
+		
+		observer.observe(element);
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [isAccordionExpanded, updateMaxHeight]);
+
+	// Public method to trigger height recalculation
+	const recalcHeight = useCallback(() => {
+		updateMaxHeight();
+	}, [updateMaxHeight]);
+
+	// Listen for custom height change events from children
+	useEffect(() => {
+		if (!contentRef.current) return;
+
+		const handleFieldHeightChange = () => {
+			setTimeout(() => {
+				updateMaxHeight();
+			}, 10);
+		};
+
+		const element = contentRef.current;
+		element.addEventListener('fieldHeightChange', handleFieldHeightChange);
+
+		return () => {
+			element.removeEventListener('fieldHeightChange', handleFieldHeightChange);
+		};
+	}, [updateMaxHeight]);
+
+	// Expose recalcHeight to children via ref
+	useEffect(() => {
+		if (contentRef.current) {
+			(contentRef.current as any).recalcHeight = recalcHeight;
+		}
+	}, [recalcHeight]);
 
 	return (
 		<div className="field-group">
@@ -61,7 +96,11 @@ const FieldGroup = ({ children, name }: Props) => {
 			<div
 				ref={contentRef}
 				className="field-group-accordion"
-				style={{ height: contentHeight }}
+				style={{ 
+					maxHeight: maxHeight,
+					overflow: 'hidden',
+					transition: 'max-height 0.3s ease-in-out'
+				}}
 				data-is-expanded={isAccordionExpanded}>
 				{children}
 			</div>
