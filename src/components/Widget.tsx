@@ -97,52 +97,114 @@ const Widget = ({
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const hasIframeInitialized = useRef(false);
 	const [onWidgetLoadData, setOnWidgetLoadData] = useState<OnWidgetLoadData | undefined>(undefined);
+	const widgetIdRef = useRef(`${template}-${id}`);
+	const pendingDataRef = useRef<OnWidgetLoadData | undefined>(undefined);
+	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	const getOnWidgetLoadData = useCallback(async () => {
-		const [data, fieldData] = await Promise.all([fetchOnWidgetLoad(), useFields(overlay, `${template}-${id}`)]);
+		try {
+			const [data, fieldData] = await Promise.all([
+				fetchOnWidgetLoad(), 
+				useFields(overlay, widgetIdRef.current)
+			]);
 
-		if (data && fieldData) {
-			const combinedData = { ...data, fieldData: { ...fieldData } };
-			setOnWidgetLoadData(combinedData);
+			if (data && fieldData) {
+				const combinedData = { 
+					...data, 
+					fieldData: { ...fieldData },
+					widgetId: widgetIdRef.current
+				};
+				setOnWidgetLoadData(combinedData);
+				return combinedData;
+			}
+		} catch (error) {
+			console.error('[Parent App] Error getting widget load data:', error);
 		}
-	}, [overlay, template, id]);
+		return undefined;
+	}, [overlay]);
+
+	// Send data to iframe with retry mechanism
+	const sendDataToIframe = useCallback((data: OnWidgetLoadData, retryCount = 0) => {
+		if (!iframeRef.current?.contentWindow) {
+			if (retryCount < 3) {
+				console.warn(`[Parent App] Iframe not ready, retrying... (${retryCount + 1}/3)`);
+				retryTimeoutRef.current = setTimeout(() => {
+					sendDataToIframe(data, retryCount + 1);
+				}, 100);
+			} else {
+				console.error('[Parent App] Failed to send data to iframe after 3 retries');
+			}
+			return;
+		}
+
+		try {
+			const messageToSend = {
+				listener: 'onWidgetLoad',
+				detail: data,
+			};
+			iframeRef.current.contentWindow.postMessage(messageToSend, '*');
+			console.log(`[Parent App] Data sent to iframe ${widgetIdRef.current}`);
+		} catch (error) {
+			console.error('[Parent App] Error sending message to iframe:', error);
+		}
+	}, []);
 
 	useEffect(() => {
 		getOnWidgetLoadData();
+		
+		return () => {
+			if (retryTimeoutRef.current) {
+				clearTimeout(retryTimeoutRef.current);
+			}
+		};
 	}, [getOnWidgetLoadData]);
 
 	useEffect(() => {
 		const handleIncomingMessage = (event: MessageEvent) => {
-			if (event.origin !== 'http://localhost:5173' && event.origin !== 'null') {
+			// More permissive origin check for development
+			const allowedOrigins = ['http://localhost:5173', 'null', window.location.origin];
+			if (!allowedOrigins.includes(event.origin)) {
 				console.warn('[Parent App] Message from unknown origin:', event.origin);
 				return;
 			}
 
-			if (typeof event.data !== 'object' || event.data === null || (!event.data.type && !event.data.listener)) {
+			if (typeof event.data !== 'object' || event.data === null) {
 				return;
 			}
 
-			const { type, listener } = event.data;
+			const { type, listener, widgetId: messageWidgetId, iframeId } = event.data;
+
+			// Match by iframe element ID instead of widget ID
+			if (iframeId && iframeId !== id) {
+				return;
+			}
 
 			switch (type || listener) {
 				case 'iframeInitialized':
-					if (!hasIframeInitialized.current && onWidgetLoadData) {
-						hasIframeInitialized.current = true;
-						if (iframeRef.current && iframeRef.current.contentWindow) {
-							const messageToSend = {
-								listener: 'onWidgetLoad',
-								detail: {
-									...onWidgetLoadData,
-								},
-							};
-							iframeRef.current.contentWindow.postMessage(messageToSend, '*');
-						}
-					} else if (!onWidgetLoadData) {
-						console.warn('[Parent App] iframeInitialized received, but onWidgetLoad data not yet loaded.');
+					console.log(`[Parent App] Iframe initialized for ${widgetIdRef.current}`);
+					hasIframeInitialized.current = true;
+					
+					// Send data immediately if available
+					if (onWidgetLoadData) {
+						sendDataToIframe(onWidgetLoadData);
+					} else if (pendingDataRef.current) {
+						sendDataToIframe(pendingDataRef.current);
+					} else {
+						console.warn('[Parent App] No data available to send to initialized iframe');
 					}
 					break;
+					
+				case 'widgetLoadComplete':
+					console.log(`[Parent App] Widget load complete for ${widgetIdRef.current}`);
+					break;
+					
+				case 'widgetLoadError':
+					console.error(`[Parent App] Widget load error for ${widgetIdRef.current}:`, event.data.error);
+					break;
+					
 				default:
-				// console.log('[Parent App] Unknown message type from iframe:', event.data);
+					// Uncomment for debugging
+					// console.log('[Parent App] Unknown message type from iframe:', event.data);
 			}
 		};
 
@@ -150,7 +212,18 @@ const Widget = ({
 		return () => {
 			window.removeEventListener('message', handleIncomingMessage);
 		};
-	}, [onWidgetLoadData]);
+	}, [onWidgetLoadData, sendDataToIframe, id]);
+
+	// Handle data updates
+	useEffect(() => {
+		if (onWidgetLoadData) {
+			pendingDataRef.current = onWidgetLoadData;
+			
+			if (hasIframeInitialized.current) {
+				sendDataToIframe(onWidgetLoadData);
+			}
+		}
+	}, [onWidgetLoadData, sendDataToIframe]);
 
 	useEffect(() => {
 		if (!import.meta.hot) {
@@ -158,14 +231,24 @@ const Widget = ({
 		}
 
 		const handleIframeContentUpdate = async (dataPayloadFromPlugin: any) => {
-			if (dataPayloadFromPlugin && dataPayloadFromPlugin.file && dataPayloadFromPlugin.type) {
+			if (dataPayloadFromPlugin?.file && dataPayloadFromPlugin?.type) {
 				const { widgetId: incomingWidgetId } = dataPayloadFromPlugin;
 
-				if (incomingWidgetId === `${template}-${id}`) {
+				if (incomingWidgetId === widgetIdRef.current) {
+					console.log(`[Parent App] Hot reload triggered for ${widgetIdRef.current}`);
+					
 					if (iframeRef.current) {
 						hasIframeInitialized.current = false;
-						await getOnWidgetLoadData();
-						iframeRef.current.contentWindow?.location.reload();
+						
+						try {
+							const newData = await getOnWidgetLoadData();
+							if (newData) {
+								pendingDataRef.current = newData;
+							}
+							iframeRef.current.contentWindow?.location.reload();
+						} catch (error) {
+							console.error('[Parent App] Error during hot reload:', error);
+						}
 					}
 				}
 			}
@@ -178,7 +261,7 @@ const Widget = ({
 				import.meta.hot.off('iframe-content-update', handleIframeContentUpdate);
 			}
 		};
-	}, [id, template, getOnWidgetLoadData]);
+	}, [getOnWidgetLoadData]);
 
 	const widgetRef = useRef<HTMLDivElement>(null);
 
@@ -265,7 +348,7 @@ const Widget = ({
 			document.removeEventListener('mousemove', handleGlobalMouseMove);
 			document.removeEventListener('mouseup', handleGlobalMouseUp);
 		},
-		[isDragging, isResizing, position, dimensions, onDragEnd, onResizeEnd, handleGlobalMouseMove]
+		[isDragging, isResizing, position, dimensions, onDragEnd, onResizeEnd, handleGlobalMouseMove, overlay, id, name, template, src, onSettingsChange]
 	);
 
 	useEffect(() => {
@@ -341,7 +424,13 @@ const Widget = ({
 					<IconTrash />
 				</SubtleButton>
 			</div>
-			<iframe ref={iframeRef} id={id} src={src} sandbox='allow-scripts allow-same-origin'></iframe>
+			<iframe 
+				ref={iframeRef} 
+				id={id} 
+				src={src} 
+				sandbox='allow-scripts allow-same-origin'
+				style={{ width: '100%', height: '100%', border: 'none' }}
+			/>
 
 			{resizable && (
 				<>

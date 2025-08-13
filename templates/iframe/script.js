@@ -25,6 +25,9 @@ const myCustomLoggerEvents = {
     },
 };
 
+// Get the iframe ID from the iframe element itself
+let IFRAME_ID = null;
+
 // --- Utility: Replace {{var}} and {var} placeholders ---
 function replaceVariables(text, variables) {
     text = text.replace(/\{\{([^{}]+)\}\}/g, (_, match) =>
@@ -79,6 +82,8 @@ async function injectHTMLWithScripts(container, htmlString) {
 // --- Main Loader ---
 async function loadWidgetContentAll(htmlPath, cssPath, jsPath, variables, onCompleteEvent) {
     try {
+        originalConsole.log(`[${IFRAME_ID}] Starting widget content load...`);
+
         if (htmlPath) {
             let htmlText = await (await fetch(htmlPath)).text();
             htmlText = replaceVariables(htmlText, variables);
@@ -149,8 +154,27 @@ async function loadWidgetContentAll(htmlPath, cssPath, jsPath, variables, onComp
         if (onCompleteEvent) {
             dispatchEvent(onCompleteEvent);
         }
+
+        // Notify parent that loading is complete
+        if (window.parent !== window) {
+            window.parent.postMessage({ 
+                type: "widgetLoadComplete", 
+                iframeId: IFRAME_ID 
+            }, "*");
+        }
+
+        originalConsole.log(`[${IFRAME_ID}] Widget content load completed successfully`);
     } catch (err) {
-        originalConsole.error("[loadWidgetContentAll] Error loading widget content:", err);
+        originalConsole.error(`[${IFRAME_ID}] Error loading widget content:`, err);
+        
+        // Notify parent of error
+        if (window.parent !== window) {
+            window.parent.postMessage({ 
+                type: "widgetLoadError", 
+                iframeId: IFRAME_ID,
+                error: err.message 
+            }, "*");
+        }
     }
 }
 
@@ -161,15 +185,27 @@ const __mockFieldData = {};
 
 // --- Iframe Initialization ---
 $(document).ready(function () {
+    // Get the iframe ID from the iframe element itself
+    if (window.frameElement && window.frameElement.id) {
+        IFRAME_ID = window.frameElement.id;
+    }
+    
+    originalConsole.log(`[${IFRAME_ID}] Document ready, initializing iframe...`);
+    
     if (window.parent !== window && window.parent) {
-        window.parent.postMessage({ type: "iframeInitialized" }, "*");
+        window.parent.postMessage({ 
+            type: "iframeInitialized", 
+            iframeId: IFRAME_ID 
+        }, "*");
     }
 });
 
 // --- Message Handling ---
-window.addEventListener("message", (obj) => {
+window.addEventListener("message", async (obj) => {
     try {
-        switch (obj.data.listener) {
+        const { listener, detail } = obj.data;
+
+        switch (listener) {
             case "onEventReceived":
                 dispatchEvent(new CustomEvent("onEventReceived", obj.data));
                 break;
@@ -179,21 +215,27 @@ window.addEventListener("message", (obj) => {
                 break;
 
             case "onWidgetLoad":
-                Object.assign(__mockFieldData, obj.data.detail.fieldData || {});
+                originalConsole.log(`[${IFRAME_ID}] Received onWidgetLoad data:`, detail);
+                
+                if (!detail) {
+                    originalConsole.error(`[${IFRAME_ID}] No detail data in onWidgetLoad message`);
+                    return;
+                }
+
+                Object.assign(__mockFieldData, detail.fieldData || {});
 
                 // --- StreamElements Global Variables ---
-                window.SE_WIDTH = obj.data.detail.width || 0;
-                window.SE_HEIGHT = obj.data.detail.height || 0;
-                window.currency = obj.data.detail.currency || {};
-                window.widgetId = obj.data.detail.widgetId || "";
-                window.channel = obj.data.detail.channel || {};
+                window.SE_WIDTH = detail.width || 0;
+                window.SE_HEIGHT = detail.height || 0;
+                window.currency = detail.currency || {};
+                window.widgetId = detail.widgetId || IFRAME_ID;
+                window.channel = detail.channel || {};
                 window.fieldData = __mockFieldData;
 
                 // --- SE_API Mock ---
                 window.SE_API = {
                     store: {
                         set: (keyName, obj) => {
-                            // originalConsole.log(`[SE_API.store] Setting '${keyName}':`, obj);
                             if (!/^[a-zA-Z0-9]+$/.test(keyName)) {
                                 originalConsole.warn(`[SE_API.store] Invalid keyName: ${keyName}. Must be alphanumeric.`);
                                 return;
@@ -201,7 +243,6 @@ window.addEventListener("message", (obj) => {
                             __mockStore[keyName] = JSON.parse(JSON.stringify(obj));
                         },
                         get: (keyName) => {
-                            // originalConsole.log(`[SE_API.store] Getting '${keyName}'`);
                             return Promise.resolve(
                                 __mockStore[keyName] ? JSON.parse(JSON.stringify(__mockStore[keyName])) : null
                             );
@@ -209,7 +250,6 @@ window.addEventListener("message", (obj) => {
                     },
                     counters: {
                         get: (counterName) => {
-                            // originalConsole.log(`[SE_API.counters] Getting '${counterName}'`);
                             if (!__mockCounters[counterName]) {
                                 __mockCounters[counterName] = { counter: counterName, value: 0 };
                             }
@@ -217,29 +257,24 @@ window.addEventListener("message", (obj) => {
                         }
                     },
                     sanitize: ({ message }) => {
-                        // originalConsole.log(`[SE_API.sanitize] Sanitizing message: "${message}"`);
                         const sanitizedMessage = message.replace(/Vulgar/gi, "Kreygasm");
                         return Promise.resolve({ result: { message: sanitizedMessage }, skip: false });
                     },
                     cheerFilter: (message) => {
-                        // originalConsole.log(`[SE_API.cheerFilter] Filtering cheers from message: "${message}"`);
                         const filteredMessage = message.replace(/\b\d+\s*(cheer|bits)\b/gi, "").trim();
                         return Promise.resolve(filteredMessage);
                     },
                     setField: (key, value) => {
-                        // originalConsole.log(`[SE_API.setField] Setting fieldData['${key}'] =`, value);
                         __mockFieldData[key] = value;
-                        // Todo: This should change the actual data file too
                     },
                     getOverlayStatus: () => {
-                        // originalConsole.log("[SE_API.getOverlayStatus] Called");
                         return { isEditorMode: true, muted: false };
                     }
                 };
 
                 // --- Load widget content in correct order ---
                 const onWidgetLoadEvent = new CustomEvent("onWidgetLoad", obj.data);
-                loadWidgetContentAll(
+                await loadWidgetContentAll(
                     "./src/html.html",
                     "./src/css.css?raw",
                     "./src/js.js",
@@ -249,6 +284,15 @@ window.addEventListener("message", (obj) => {
                 break;
         }
     } catch (e) {
-        originalConsole.error("[Iframe Script] Error processing message:", e, obj.data);
+        originalConsole.error(`[${IFRAME_ID}] Error processing message:`, e, obj.data);
+        
+        // Notify parent of error
+        if (window.parent !== window) {
+            window.parent.postMessage({ 
+                type: "widgetLoadError", 
+                iframeId: IFRAME_ID,
+                error: e.message 
+            }, "*");
+        }
     }
 });
