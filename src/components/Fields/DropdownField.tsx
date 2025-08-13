@@ -25,49 +25,57 @@ const DropdownField = ({ overlay, widget, name, label, value, options }: Props) 
 		label: val.toString(),
 	}));
 
-	const handleChange = ( value: string ) => {
+	const handleChange = (value: string) => {
 		setInputValue(value);
 		useFieldChange(overlay, widget, name, value);
 	};
 
+	console.log(convertedOptions);
+
 	return (
-		<>
-		<Label>{label}</Label>
-		<Popover open={open} onOpenChange={setOpen}>
-			<PopoverTrigger asChild>
-				<Button variant="outline" role="combobox" aria-expanded={open} className="w-[200px] justify-between">
-					{inputValue
-						? convertedOptions.find((option) => option.value === inputValue)?.label
-						: 'Select framework...'}
-					<ChevronsUpDown className="opacity-50" />
-				</Button>
-			</PopoverTrigger>
-			<PopoverContent className="w-[200px] p-0">
-				<Command>
-					<CommandInput placeholder="Search options..." className="h-9" />
-					<CommandList>
-						<CommandEmpty>No option found.</CommandEmpty>
-						<CommandGroup>
-							{convertedOptions.map((option) => (
-								<CommandItem
-									key={option.value}
-									value={option.value}
-									onSelect={(currentValue) => {
-										setOpen(false);
-										handleChange(currentValue)
-									}}>
-									{option.label}
-									<Check
-										className={cn('ml-auto', inputValue === option.value ? 'opacity-100' : 'opacity-0')}
-									/>
-								</CommandItem>
-							))}
-						</CommandGroup>
-					</CommandList>
-				</Command>
-			</PopoverContent>
-		</Popover>
-		</>
+		<div className="dropdown-field">
+			<Label>{label}</Label>
+			<Popover open={open} onOpenChange={setOpen}>
+				<PopoverTrigger asChild>
+					<Button
+						variant="outline"
+						role="combobox"
+						aria-expanded={open}
+						className="w-[200px] justify-between">
+						{inputValue ? convertedOptions.find((option) => option.label === inputValue)?.label : 'Select options...'}
+						<ChevronsUpDown className="opacity-50" />
+					</Button>
+				</PopoverTrigger>
+				<PopoverContent className="w-[200px] p-0">
+					<Command>
+						<CommandInput placeholder="Search options..." className="h-9" />
+						<CommandList>
+							<CommandEmpty>No option found.</CommandEmpty>
+							<CommandGroup>
+								{convertedOptions.map((option) => (
+									<CommandItem
+										key={option.value}
+										value={option.value}
+										onSelect={(currentValue) => {
+											setOpen(false);
+											handleChange(currentValue);
+											console.log(currentValue);
+										}}>
+										{option.label}
+										<Check
+											className={cn(
+												'ml-auto',
+												inputValue === option.value ? 'opacity-100' : 'opacity-0'
+											)}
+										/>
+									</CommandItem>
+								))}
+							</CommandGroup>
+						</CommandList>
+					</Command>
+				</PopoverContent>
+			</Popover>
+		</div>
 	);
 };
 
