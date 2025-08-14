@@ -82,7 +82,7 @@ async function injectHTMLWithScripts(container, htmlString) {
 // --- Main Loader ---
 async function loadWidgetContentAll(htmlPath, cssPath, jsPath, variables, onCompleteEvent) {
     try {
-        originalConsole.log(`[${IFRAME_ID}] Starting widget content load...`);
+        // originalConsole.log(`[${IFRAME_ID}] Starting widget content load...`);
 
         if (htmlPath) {
             let htmlText = await (await fetch(htmlPath)).text();
@@ -157,22 +157,22 @@ async function loadWidgetContentAll(htmlPath, cssPath, jsPath, variables, onComp
 
         // Notify parent that loading is complete
         if (window.parent !== window) {
-            window.parent.postMessage({ 
-                type: "widgetLoadComplete", 
-                iframeId: IFRAME_ID 
+            window.parent.postMessage({
+                type: "widgetLoadComplete",
+                iframeId: IFRAME_ID
             }, "*");
         }
 
-        originalConsole.log(`[${IFRAME_ID}] Widget content load completed successfully`);
+        // originalConsole.log(`[${IFRAME_ID}] Widget content load completed successfully`);
     } catch (err) {
         originalConsole.error(`[${IFRAME_ID}] Error loading widget content:`, err);
-        
+
         // Notify parent of error
         if (window.parent !== window) {
-            window.parent.postMessage({ 
-                type: "widgetLoadError", 
+            window.parent.postMessage({
+                type: "widgetLoadError",
                 iframeId: IFRAME_ID,
-                error: err.message 
+                error: err.message
             }, "*");
         }
     }
@@ -189,13 +189,13 @@ $(document).ready(function () {
     if (window.frameElement && window.frameElement.id) {
         IFRAME_ID = window.frameElement.id;
     }
-    
-    originalConsole.log(`[${IFRAME_ID}] Document ready, initializing iframe...`);
-    
+
+    // originalConsole.log(`[${IFRAME_ID}] Document ready, initializing iframe...`);
+
     if (window.parent !== window && window.parent) {
-        window.parent.postMessage({ 
-            type: "iframeInitialized", 
-            iframeId: IFRAME_ID 
+        window.parent.postMessage({
+            type: "iframeInitialized",
+            iframeId: IFRAME_ID
         }, "*");
     }
 });
@@ -215,8 +215,8 @@ window.addEventListener("message", async (obj) => {
                 break;
 
             case "onWidgetLoad":
-                originalConsole.log(`[${IFRAME_ID}] Received onWidgetLoad data:`, detail);
-                
+                // originalConsole.log(`[${IFRAME_ID}] Received onWidgetLoad data:`, detail);
+
                 if (!detail) {
                     originalConsole.error(`[${IFRAME_ID}] No detail data in onWidgetLoad message`);
                     return;
@@ -274,25 +274,15 @@ window.addEventListener("message", async (obj) => {
 
                 // --- Load widget content in correct order ---
                 const onWidgetLoadEvent = new CustomEvent("onWidgetLoad", obj.data);
-                await loadWidgetContentAll(
-                    "./src/html.html",
-                    "./src/css.css?raw",
-                    "./src/js.js",
-                    __mockFieldData,
-                    onWidgetLoadEvent
-                );
+                await loadWidgetContentAll( "./src/html.html", "./src/css.css?raw", "./src/js.js", __mockFieldData, onWidgetLoadEvent );
                 break;
         }
     } catch (e) {
         originalConsole.error(`[${IFRAME_ID}] Error processing message:`, e, obj.data);
-        
+
         // Notify parent of error
         if (window.parent !== window) {
-            window.parent.postMessage({ 
-                type: "widgetLoadError", 
-                iframeId: IFRAME_ID,
-                error: e.message 
-            }, "*");
+            window.parent.postMessage({ type: "widgetLoadError", iframeId: IFRAME_ID, error: e.message }, "*");
         }
     }
 });

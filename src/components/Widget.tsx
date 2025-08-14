@@ -143,7 +143,7 @@ const Widget = ({
 				detail: data,
 			};
 			iframeRef.current.contentWindow.postMessage(messageToSend, '*');
-			console.log(`[Parent App] Data sent to iframe ${widgetIdRef.current}`);
+			// console.log(`[Parent App] Data sent to iframe ${widgetIdRef.current}`);
 		} catch (error) {
 			console.error('[Parent App] Error sending message to iframe:', error);
 		}
@@ -181,7 +181,7 @@ const Widget = ({
 
 			switch (type || listener) {
 				case 'iframeInitialized':
-					console.log(`[Parent App] Iframe initialized for ${widgetIdRef.current}`);
+					// console.log(`[Parent App] Iframe initialized for ${widgetIdRef.current}`);
 					hasIframeInitialized.current = true;
 					
 					// Send data immediately if available
@@ -195,7 +195,7 @@ const Widget = ({
 					break;
 					
 				case 'widgetLoadComplete':
-					console.log(`[Parent App] Widget load complete for ${widgetIdRef.current}`);
+					// console.log(`[Parent App] Widget load complete for ${widgetIdRef.current}`);
 					break;
 					
 				case 'widgetLoadError':
@@ -235,7 +235,7 @@ const Widget = ({
 				const { widgetId: incomingWidgetId } = dataPayloadFromPlugin;
 
 				if (incomingWidgetId === widgetIdRef.current) {
-					console.log(`[Parent App] Hot reload triggered for ${widgetIdRef.current}`);
+					// console.log(`[Parent App] Hot reload triggered for ${widgetIdRef.current}`);
 					
 					if (iframeRef.current) {
 						hasIframeInitialized.current = false;
