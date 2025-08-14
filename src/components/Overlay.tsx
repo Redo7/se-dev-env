@@ -14,18 +14,24 @@ interface Template{
 	action: () => void;
 }
 
+export interface Overlay{
+	name: string,
+	id: string,
+	widgets: WidgetInstance[]
+}
+
 const Overlay = () => {
 	const { id } = useParams<{ id: string }>();
 	if (!id) return (<>Incorrect Overlay ID: {id}</>);
 	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 	const [templates, setTemplates] = useState<Template[]>([]);
-	const [widgets, setWidgets] = useState<WidgetInstance[]>([]);
+	const [overlayData, setOverlayData] = useState<Overlay>({name: 'Overlay Name', id: 'overlay-id', widgets: []});
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
 
-	const getWidgets = async () => {
-		const res = await fetch(`/api/get-widgets/${encodeURIComponent(id)}`);
+	const getOverlayData = async () => {
+		const res = await fetch(`/api/get-overlay-data/${encodeURIComponent(id)}`);
 		const data = await res.json();
-		setWidgets(data.widgets);
+		setOverlayData(data);
 	};
 
 	useEffect(() => {
@@ -42,7 +48,7 @@ const Overlay = () => {
 			setTemplates(templateArray)
 		};
 		getTemplates();
-		getWidgets();
+		getOverlayData();
 	}, []);
 
 	const addWidget = async (template: string) => {
@@ -56,7 +62,12 @@ const Overlay = () => {
 			if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
 			const data = await res.json();
-			setWidgets((prevWidgets) => [...prevWidgets, data]);
+			setOverlayData((prevOverlay) => {
+				return {
+				  ...prevOverlay,
+				  widgets: [...prevOverlay.widgets, data],
+				};
+			  });
 			console.log('Created ' + data.name);
 		} catch (error) {
 			console.error(error);
@@ -77,7 +88,7 @@ const Overlay = () => {
 					throw new Error(`Something went wrong while deleting ${template}-${id}`);
 				}
 				console.log(`${template}-${id} deleted successfully.`);
-				getWidgets();
+				getOverlayData();
 			});
 		} catch (error) {
 			console.error(`Error removing ${template}-${id}`, error);
@@ -118,7 +129,7 @@ const Overlay = () => {
 			</div>
 			<Sidebar
 				isVisible={isSidebarVisible}
-				overlay={id}
+				overlay={overlayData}
 				widget={activeWidget}
 				onToggle={() => handleSidebarToggle()}
 			/>
@@ -129,10 +140,10 @@ const Overlay = () => {
 					<IconPlus />
 				</IconPopupButton>
 			</div>
-			{widgets.map((widget) => (
+			{overlayData?.widgets.map((widget) => (
 				<Widget
 					key={widget.id}
-					overlay={id}
+					overlay={overlayData}
 					template={widget.template}
 					name={widget.name}
 					id={widget.id}

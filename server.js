@@ -91,7 +91,7 @@ app.get('/api/get-templates', async (req, res) => {
 // This should check for widget files and delete entries from the JSON if not found.
 // In the future overlay-data will also store deletion data in the form of a UNIX timestamp. This should check the current time and delete any references earlier than Date.now()
 
-app.get('/api/get-widgets/:overlayID', async (req, res) => {
+app.get('/api/get-overlay-data/:overlayID', async (req, res) => {
     if (!req.params.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
 
     const { overlayID } = req.params;

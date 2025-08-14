@@ -4,6 +4,7 @@ import SidebarCollapse from '../assets/Icons/SidebarCollapse';
 import { useEffect, useMemo, useState } from 'react';
 import FieldGroup from './Fields/FieldGroup';
 import type { WidgetInstance } from '../types/widget';
+import type { Overlay } from './Overlay';
 import useFields from '../hooks/useFields';
 import componentMap from '../utils/componentMap';
 import useFieldData from '../hooks/useFieldData';
@@ -27,7 +28,7 @@ interface GroupedFields {
 }
 interface Props {
 	isVisible: boolean;
-	overlay: string;
+	overlay: Overlay;
 	widget: WidgetInstance | undefined;
 	onToggle: () => void;
 }
@@ -38,9 +39,9 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	useEffect(() => {
 		if (!widget) return;
 		const fetchFields = async () => {
-			const fields = await useFields(overlay, `${widget.template}-${widget.id}`);
+			const fields = await useFields(overlay.id, `${widget.template}-${widget.id}`);
 			setCurrWidgetFields(fields);
-			const fieldData = await useFieldData(overlay, `${widget.template}-${widget.id}`);
+			const fieldData = await useFieldData(overlay.id, `${widget.template}-${widget.id}`);
 			setCurrWidgetFieldData(fieldData);
 		};
 		fetchFields();
@@ -48,7 +49,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 
 	const groupedFields = useMemo(() => {
 		const groups: GroupedFields = {};
-		const DEFAULT_GROUP_NAME = 'Fields'; // Name for the default group
+		const DEFAULT_GROUP_NAME = 'Fields';
 
 		if (currWidgetFields) {
 			Object.entries(currWidgetFields).forEach(([fieldName, fieldConfig]) => {
@@ -66,7 +67,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	return (
 		<div className="sidebar depth-shadow" data-sidebar-visible={isVisible}>
 			<div className="sidebar-heading flex">
-				<p className="sidebar-overlay-name">Overlay Name</p>
+				<p className="sidebar-overlay-name">{widget ? widget.name : overlay.name}</p>
 				<SubtleButton onClick={onToggle} cssClass="subtle flex center" width={24} height={24}>
 					<SidebarCollapse />
 				</SubtleButton>

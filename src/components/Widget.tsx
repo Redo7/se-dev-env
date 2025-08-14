@@ -3,9 +3,10 @@ import SubtleButton from './Buttons/SubtleButton';
 import IconTrash from '../assets/Icons/IconTrash';
 import useFields from '../hooks/useFieldData';
 import type { WidgetInstance } from '../types/widget';
+import type { Overlay } from './Overlay';
 
 interface Props {
-	overlay: string;
+	overlay: Overlay;
 	template: string;
 	id: string;
 	name: string;
@@ -105,7 +106,7 @@ const Widget = ({
 		try {
 			const [data, fieldData] = await Promise.all([
 				fetchOnWidgetLoad(), 
-				useFields(overlay, widgetIdRef.current)
+				useFields(overlay.id, widgetIdRef.current)
 			]);
 
 			if (data && fieldData) {
@@ -332,7 +333,7 @@ const Widget = ({
 				onResizeEnd?.(e as unknown as React.MouseEvent<HTMLDivElement>, currentDims, position);
 			}
 			onSettingsChange(
-				overlay,
+				overlay.id,
 				{	
 					id: id,
 					name: name,
