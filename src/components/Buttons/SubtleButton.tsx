@@ -5,7 +5,7 @@ interface Props {
 	padding?: string;
 	cssClass?: string;
 	id?: string;
-	onClick?: () => void;
+	onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const SubtleButton = ({
@@ -23,7 +23,7 @@ const SubtleButton = ({
 		padding: padding,
 	};
 	return (
-		<button className={cssClass} id={id} style={buttonStyle} onClick={onClick}>
+		<button type="button" className={cssClass} id={id} style={buttonStyle} onClick={onClick}>
 			{children}
 		</button>
 	);

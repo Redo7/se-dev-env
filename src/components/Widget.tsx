@@ -9,6 +9,7 @@ interface Props {
 	overlay: Overlay;
 	template: string;
 	id: string;
+	internalName: string;
 	name: string;
 	src: string;
 	width: number;
@@ -62,6 +63,7 @@ const fetchOnWidgetLoad = async (): Promise<OnWidgetLoadData | undefined> => {
 const Widget = ({
 	overlay,
 	template,
+	internalName,
 	name,
 	id,
 	src,
@@ -98,7 +100,7 @@ const Widget = ({
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const hasIframeInitialized = useRef(false);
 	const [onWidgetLoadData, setOnWidgetLoadData] = useState<OnWidgetLoadData | undefined>(undefined);
-	const widgetIdRef = useRef(`${template}-${id}`);
+	const widgetIdRef = useRef(`${internalName}-${id}`);
 	const pendingDataRef = useRef<OnWidgetLoadData | undefined>(undefined);
 	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -336,6 +338,7 @@ const Widget = ({
 				overlay.id,
 				{	
 					id: id,
+					internalName: internalName,
 					name: name,
 					template: template,
 					src: src,

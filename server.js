@@ -49,7 +49,7 @@ app.post("/api/create-overlay/", async (req, res) => {
 
     const { name } = req.body;
     const instanceId = uuidv4();
-    const id = name.toLowerCase().replaceAll(' ', '-') + '-' + instanceId;
+    const id = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-') + '-' + instanceId;
     const defaults = {
         name: name,
         id: id,
@@ -104,15 +104,17 @@ app.get('/api/get-overlay-data/:overlayID', async (req, res) => {
 
 app.post("/api/create-widget/", async (req, res) => {
     if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
-    if (!req.body.template) return res.status(400).json({ error: "templateName is required" });
+    if (!req.body.template) return res.status(400).json({ error: "Template name is required" });
+    if (!req.body.name) return res.status(400).json({ error: "Widget name is required" });
 
-    const { template,  overlayID} = req.body;
+    const { name, template, overlayID } = req.body;
+    const normalizedName = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-');
     const instanceId = uuidv4();
     const widgetData = {
         template: template,
         id: instanceId,
-        name: `${template} widget`,
-        src: `/overlays/${overlayID}/${template}-${instanceId}/iframe.html`,
+        name: name,
+        src: `/overlays/${overlayID}/${normalizedName}-${instanceId}/iframe.html`,
         width: 500,
         height: 500,
         posX: 0,
@@ -121,8 +123,8 @@ app.post("/api/create-widget/", async (req, res) => {
 
     const iframeTemplate = join(__dirname, "templates", "iframe");
     const widgetTemplate = join(__dirname, "templates", "user", template);
-    const destinationPath = join(__dirname, "overlays", overlayID, `${template}-${instanceId}`);
-    const widgetFilesPath = join(__dirname, "overlays", overlayID, `${template}-${instanceId}`, "src");
+    const destinationPath = join(__dirname, "overlays", overlayID, `${normalizedName}-${instanceId}`);
+    const widgetFilesPath = join(__dirname, "overlays", overlayID, `${normalizedName}-${instanceId}`, "src");
     const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
 
 
@@ -225,7 +227,8 @@ app.get('/api/data/:file', async (req, res) => {
 app.get('/api/fields/:overlay/:widget', async (req, res) => {
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
-
+    console.log('--- Widget ---', req.params.widget);
+    
     const dataFile = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'fields.json');
     const fieldData = await fs.readFile(dataFile, 'utf-8');
 
@@ -237,6 +240,7 @@ app.get('/api/fields/:overlay/:widget', async (req, res) => {
 app.post('/api/field-data/:overlay/:widget', async (req, res) => { 
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
+    console.log('--- Widget ---', req.params.widget);
 
     const overlayName = req.params.overlay;
     const widgetName = req.params.widget;

@@ -29,6 +29,10 @@ const Overlay = () => {
 	};
 
 	useEffect(() => {
+		getOverlayData();
+	}, []);
+
+	useEffect(() => {
 		const getTemplates = async () => {
 			const res = await fetch('/api/get-templates');
 			const data = await res.json();
@@ -36,21 +40,20 @@ const Overlay = () => {
 			const templateArray: Template[] = data[0].map((template: string) => ({
 				label: template[0].toUpperCase() + template.slice(1),
 				icon: <IconPlusSm />,
-				action: () => addWidget(template),
+				source: overlayData.id,
+				action: (name: string) => addWidget(name, template, overlayData.id),
 			}));
-			
 			setTemplates(templateArray)
 		};
 		getTemplates();
-		getOverlayData();
-	}, []);
+	}, [overlayData]);
 
-	const addWidget = async (template: string) => {
+	const addWidget = async (name: string, template: string, overlayID: string) => {
 		try {
 			const res = await fetch('/api/create-widget', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ template }),
+				body: JSON.stringify({ name, template, overlayID }),
 			});
 
 			if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -76,7 +79,7 @@ const Overlay = () => {
 			await fetch('/api/delete-widget', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ template, id }),
+				body: JSON.stringify({ template, id }), // Should take overlayID and widgetID
 			}).then((response) => {
 				if (!response.ok) {
 					throw new Error(`Something went wrong while deleting ${template}-${id}`);
@@ -139,6 +142,7 @@ const Overlay = () => {
 					key={widget.id}
 					overlay={overlayData}
 					template={widget.template}
+					internalName={widget.internalName}
 					name={widget.name}
 					id={widget.id}
 					src={widget.src}

@@ -6,6 +6,7 @@ export interface Overlay{
 
 export interface WidgetInstance {
 	id: string;
+	internalName: string;
 	name: string;
 	template: string;
 	src: string;
