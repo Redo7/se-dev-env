@@ -1,21 +1,15 @@
 import { Link } from 'react-router-dom';
 import '../App.css';
 import { useEffect, useRef, useState } from 'react';
-import type { WidgetInstance } from '../types/widget';
 import SubtleButton from './Buttons/SubtleButton';
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import { ThemeToggle } from './ThemeToggle';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-
-interface overlay {
-	name: string;
-	id: string;
-	widgets: WidgetInstance[];
-}
+import type { Overlay } from '../types/'
 
 const HomeScreen = () => {
-	const [overlays, setOverlays] = useState<overlay[]>([]);
+	const [overlays, setOverlays] = useState<Overlay[]>([]);
 	const nameRef = useRef<HTMLInputElement>(null);
 
 	const createOverlay = async (name: string) => {
@@ -61,7 +55,7 @@ const HomeScreen = () => {
 				<ThemeToggle />
 			</div>
 			<div className="overlay-container flex flex-col gap-2">
-				{overlays.map((overlay: overlay) => {
+				{overlays.map((overlay: Overlay) => {
 					return (
 						<Link className="px-6 py-4 rounded-md bg-zinc-100 dark:bg-zinc-900 w-100" key={overlay.id} to={`/${overlay.id}`}>
 							{overlay.name}

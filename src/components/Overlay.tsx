@@ -5,19 +5,13 @@ import IconPopupButton from './Buttons/IconPopupButton';
 import {SidebarExpand, IconPlus, IconPlusSm} from '../assets/Icons/';
 import Sidebar from './Sidebar';
 import IconButton from './Buttons/IconButton';
-import { type WidgetInstance } from '../types/widget';
+import type { Overlay, WidgetInstance } from '../types/';
 import { useParams } from 'react-router-dom';
 
 interface Template{
 	label: string;
 	icon: React.ReactNode | null;
 	action: () => void;
-}
-
-export interface Overlay{
-	name: string,
-	id: string,
-	widgets: WidgetInstance[]
 }
 
 const Overlay = () => {
