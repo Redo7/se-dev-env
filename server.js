@@ -239,7 +239,6 @@ app.get('/api/fields/:overlay/:widget', async (req, res) => {
 app.post('/api/field-data/:overlay/:widget', async (req, res) => { 
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
-    console.log('--- Widget ---', req.params.widget);
 
     const overlayName = req.params.overlay;
     const widgetName = req.params.widget;
