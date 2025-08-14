@@ -175,7 +175,7 @@ const Widget = ({
 				return;
 			}
 
-			const { type, listener, widgetId: messageWidgetId, iframeId } = event.data;
+			const { type, listener, iframeId } = event.data; // widgetId: messageWidgetId,
 
 			// Match by iframe element ID instead of widget ID
 			if (iframeId && iframeId !== id) {
