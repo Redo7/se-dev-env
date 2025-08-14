@@ -227,7 +227,6 @@ app.get('/api/data/:file', async (req, res) => {
 app.get('/api/fields/:overlay/:widget', async (req, res) => {
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
-    console.log('--- Widget ---', req.params.widget);
     
     const dataFile = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'fields.json');
     const fieldData = await fs.readFile(dataFile, 'utf-8');
