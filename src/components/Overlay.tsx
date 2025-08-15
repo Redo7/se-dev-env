@@ -25,7 +25,8 @@ const Overlay = () => {
 	const getOverlayData = async () => {
 		const res = await fetch(`/api/get-overlay-data/${encodeURIComponent(id)}`);
 		const data = await res.json();
-		setOverlayData(data);
+		const filteredData = {...data, widgets: data.widgets.filter((widget: WidgetInstance) => !widget.deleteAfter)}
+		setOverlayData(filteredData);
 	};
 
 	useEffect(() => {
@@ -71,24 +72,20 @@ const Overlay = () => {
 		}
 	};
 
-	const removeWidget = async (template: string, id: string) => {
-		console.log('Deleting is disabled');
-		return;
-
+	const softRemoveWidget = async (overlayID: string, widgetID: string) => {
 		try {
-			await fetch('/api/delete-widget', {
-				method: 'DELETE',
+			await fetch('/api/soft-delete-widget', {
+				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ template, id }), // Should take overlayID and widgetID
+				body: JSON.stringify({ overlayID, widgetID }), 
 			}).then((response) => {
 				if (!response.ok) {
-					throw new Error(`Something went wrong while deleting ${template}-${id}`);
+					throw new Error(`Something went wrong while soft deleting ${widgetID}`);
 				}
-				console.log(`${template}-${id} deleted successfully.`);
 				getOverlayData();
 			});
 		} catch (error) {
-			console.error(`Error removing ${template}-${id}`, error);
+			console.error(`Error removing ${widgetID}`, error);
 		}
 	};
 
@@ -137,12 +134,11 @@ const Overlay = () => {
 					<IconPlus />
 				</IconPopupButton>
 			</div>
-			{overlayData?.widgets.map((widget) => (
+			{overlayData.widgets.map((widget) => (
 				<Widget
 					key={widget.id}
 					overlay={overlayData}
 					template={widget.template}
-					internalName={widget.internalName}
 					name={widget.name}
 					id={widget.id}
 					src={widget.src}
@@ -151,7 +147,7 @@ const Overlay = () => {
 					initialPosition={{ x: widget.posX, y: widget.posY }}
 					resizable={true}
 					onClick={() => handleWidgetClick(widget)}
-					onDelete={() => removeWidget(widget.template, widget.id)}
+					onDelete={() => softRemoveWidget(overlayData.id, widget.id)}
 					onSettingsChange={(id, widget) =>
 					{
 						updateWidgetSettings(id, widget.id, widget.width, widget.height, widget.posX, widget.posY)

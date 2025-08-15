@@ -38,9 +38,9 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	useEffect(() => {
 		if (!widget) return;
 		const fetchFields = async () => {
-			const fields = await useFields(overlay.id, `${widget.internalName}-${widget.id}`);
+			const fields = await useFields(overlay.id, widget.id);
 			setCurrWidgetFields(fields);
-			const fieldData = await useFieldData(overlay.id, `${widget.internalName}-${widget.id}`);
+			const fieldData = await useFieldData(overlay.id, widget.id);
 			setCurrWidgetFieldData(fieldData);
 		};
 		fetchFields();

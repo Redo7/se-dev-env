@@ -5,11 +5,11 @@ export interface Overlay{
 }
 
 export interface WidgetInstance {
-	id: string;
-	internalName: string;
 	name: string;
-	template: string;
+	id: string;
 	src: string;
+	template: string;
+	deleteAfter?: number;
 
 	width: number;
 	height: number;

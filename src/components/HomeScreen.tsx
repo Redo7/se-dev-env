@@ -28,9 +28,58 @@ const HomeScreen = () => {
 		setOverlays(data);
 	};
 
+	const deletionExpiryCheck = async () => {
+		// Change the shape of the objects to:
+		// {
+		// 	'overlayID': [
+		// 		{
+		// 			name: 'some name',
+		// 			internalName: 'some-name-29832752837529',
+		// 			deleteAfter: 1234567890
+		// 		}
+		// 	]
+		// }
+		// Future proofing for the bin display
+		const res = await fetch(`/api/data/deletion-data`);
+		type DeletionData = Record<string, Record<string, number>>;
+		const data: DeletionData = await res.json();
+		const now = Date.now();
+		const widgetsToDelete: { overlay: string; widget: string }[] = [];
+
+		for (const [overlayID, widgets] of Object.entries(data)) {
+			for (const [widgetID, timestamp] of Object.entries(widgets)) {
+			if (timestamp < now) {
+				widgetsToDelete.push({ overlay: overlayID, widget: widgetID });
+			}
+			}
+		}
+		widgetsToDelete.forEach(entry => {
+			removeWidget(entry.overlay, entry.widget);
+		})
+	};
+
 	useEffect(() => {
+		deletionExpiryCheck();
 		getOverlays();
 	}, []);
+
+	const removeWidget = async (overlayID: string, widgetID: string) => {
+		console.log('deleting', overlayID, widgetID);
+		try {
+			await fetch('/api/delete-widget', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ overlayID, widgetID }), 
+			}).then((response) => {
+				if (!response.ok) {
+					throw new Error(`Something went wrong while deleting ${widgetID}`);
+				}
+				getOverlays();
+			});
+		} catch (error) {
+			console.error(`Error removing ${widgetID}`, error);
+		}
+	};
 
 	return (
 		<div className="home-screen flex flex-col p-50 gap-4">
