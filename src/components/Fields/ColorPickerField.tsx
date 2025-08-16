@@ -18,15 +18,31 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 	const [isVisible, setIsVisible] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 
+	// Debounce state for text input
+	const [pendingHex, setPendingHex] = useState<string | null>(null);
+	const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
 	const handleColorChange = (val: IColor) => {
 		setColor(val);
 	};
 
 	const handleTextFieldColorChange = (newHex: string) => {
-		try {
-			const newColor = toColor(newHex, color.rgb.a, color.hsv.a);
-			setColor(newColor);
-		} catch { }
+		setPendingHex(newHex);
+
+		if (debounceTimer.current) {
+			clearTimeout(debounceTimer.current);
+		}
+
+		// Debounce conversion
+		debounceTimer.current = setTimeout(() => {
+			try {
+				const newColor = toColor(newHex, color.rgb.a, color.hsv.a);
+				setColor(newColor);
+				setPendingHex(null);
+			} catch {
+				// Ignore invalid hex until it's valid
+			}
+		}, 400); 
 	};
 
 	function toColor(hex: string, rgbAlpha = 1, hsvAlpha = 100): IColor {
@@ -36,7 +52,7 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 			throw new Error('Invalid hex color');
 		}
 
-		// Normalize #fff to #ffffff
+		// Normalize #fff → #ffffff
 		if (hex.length === 3) {
 			hex = hex
 				.split('')
@@ -50,7 +66,7 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 		const g = (num >> 8) & 255;
 		const b = num & 255;
 
-		//HSV
+		// HSV
 		const rNorm = r / 255;
 		const gNorm = g / 255;
 		const bNorm = b / 255;
@@ -75,22 +91,18 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 		const v = max;
 
 		return {
-			hex: `#${hex}`, // Always 6-digit hex
-			rgb: { r, g, b, a: rgbAlpha }, // Preserve alpha
-			hsv: { h, s: s * 100, v: v * 100, a: hsvAlpha }, // Preserve alpha
+			hex: `#${hex}`,
+			rgb: { r, g, b, a: rgbAlpha }, 
+			hsv: { h, s: s * 100, v: v * 100, a: hsvAlpha }, 
 		};
 	}
 
 	// Trigger parent height recalculation
 	const triggerParentRecalc = useCallback(() => {
-		// Try multiple methods to trigger parent recalculation
-		
-		// Method 1: Call the callback if provided
 		if (onColorPickerToggle) {
 			onColorPickerToggle();
 		}
-		
-		// Method 2: Find parent FieldGroup and call its recalcHeight method
+
 		let parent = containerRef.current?.parentElement;
 		while (parent) {
 			if (parent.classList.contains('field-group-accordion')) {
@@ -102,22 +114,21 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 			}
 			parent = parent.parentElement;
 		}
-		
-		// Method 3: Dispatch a custom event that parent can listen to
+
 		if (containerRef.current) {
 			const event = new CustomEvent('fieldHeightChange', {
 				bubbles: true,
-				detail: { component: 'ColorPickerField', expanded: isVisible }
+				detail: { component: 'ColorPickerField', expanded: isVisible },
 			});
 			containerRef.current.dispatchEvent(event);
 		}
 	}, [onColorPickerToggle, isVisible]);
 
+	// Debounced save to external state
 	useEffect(() => {
 		if (color.hex === value) return;
 		const handler = setTimeout(() => {
 			useFieldChange(overlay, widget, name, color.hex);
-			console.log('writing data', color.hex);
 		}, 500);
 
 		return () => {
@@ -126,24 +137,19 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 	}, [color, overlay, widget, name, value]);
 
 	const handleToggle = useCallback(() => {
-		setIsVisible(prev => {
+		setIsVisible((prev) => {
 			const newVisible = !prev;
-			
-			// Trigger parent recalculation after state update
 			requestAnimationFrame(() => {
 				triggerParentRecalc();
 			});
-			
 			return newVisible;
 		});
 	}, [triggerParentRecalc]);
 
-	// Also trigger recalc when visibility changes (backup)
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			triggerParentRecalc();
-		}, 50); // Small delay to ensure DOM has updated
-
+		}, 50);
 		return () => clearTimeout(timer);
 	}, [isVisible, triggerParentRecalc]);
 
@@ -154,7 +160,7 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 				<TextField
 					name={name}
 					label={label}
-					value={color.hex}
+					value={pendingHex ?? color.hex}
 					onChange={handleTextFieldColorChange}
 					overlay={overlay}
 					widget={widget}
