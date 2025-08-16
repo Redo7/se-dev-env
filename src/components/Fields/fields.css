@@ -43,11 +43,11 @@ label {
 }
 
 .field-group-accordion> :first-child {
-    margin-top: .5rem;
+    margin-top: 1rem;
 }
 
 .field-group-accordion> :last-child {
-    margin-bottom: .5rem;
+    margin-bottom: 1rem;
 }
 
 .field-group-accordion>p {
