@@ -1,4 +1,4 @@
-export interface Overlay{
+export interface OverlayInstance{
 	name: string,
 	id: string,
 	widgets: WidgetInstance[]
