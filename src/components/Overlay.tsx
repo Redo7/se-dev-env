@@ -7,6 +7,7 @@ import Sidebar from './Sidebar';
 import IconButton from './Buttons/IconButton';
 import type { OverlayInstance, WidgetInstance } from '../types/';
 import { useParams } from 'react-router-dom';
+import useSoftDelete from '@/hooks/useSoftDelete';
 
 interface Template{
 	label: string;
@@ -74,16 +75,9 @@ const Overlay = () => {
 		}
 	};
 
-	const softRemoveWidget = async (overlayName: string, overlayID: string, widgetName: string, widgetID: string) => {
+	const softRemoveWidget = async (overlayName: string, overlayID: string, widgetName: string, widgetID: string | undefined) => {
 		try {
-			const response = await fetch('/api/soft-delete-widget', {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ overlayName, overlayID, widgetName, widgetID }),
-			});
-			if (!response.ok) {
-				throw new Error(`Something went wrong while soft deleting ${widgetID}`);
-			}
+			useSoftDelete(overlayName, overlayID, widgetName, widgetID)
 			getOverlayData();
 		} catch (error) {
 			console.error(`Error removing ${widgetID}`, error);

@@ -162,19 +162,19 @@ app.put('/api/soft-delete-widget/', async (req, res) => {
             id: overlayID,
             widgets: []
         };
+        let overlayData = await fetchOverlayData(overlayID);
         const deletionDate = Date.now() + 2592000000;
         if(widgetName && widgetID){
             deletionData[overlayID]['widgets'].push({name: widgetName, id: widgetID, deleteAfter: deletionDate});
+            overlayData.widgets = overlayData.widgets.map(widget => widget.id === widgetID ? {...widget, deleteAfter: deletionDate} : widget)
         } else if(!widgetName && !widgetID) {
             deletionData[overlayID].name = overlayName;
             deletionData[overlayID].deleteAfter = deletionDate;
+            overlayData.deleteAfter = deletionDate;
         }
-        fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, "\t"), 'utf-8');
-
-        let overlayData = await fetchOverlayData(overlayID);
         
-        overlayData.widgets = overlayData.widgets.map(widget => widget.id === widgetID ? {...widget, deleteAfter: deletionDate} : widget)
         fs.writeFileSync(overlayDataPath, JSON.stringify(overlayData, null, "\t"), 'utf-8');
+        fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, "\t"), 'utf-8');
         
         res.status(200).send();
     } catch (error) {
@@ -212,9 +212,10 @@ app.delete('/api/delete-widget/', async (req, res) => {
         }
         fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, "\t"), 'utf-8');
 
-        res.status(200);
+        res.status(200).send();
     } catch (error) {
         console.error(error);
+        res.status(500).send();
     }
 })
 

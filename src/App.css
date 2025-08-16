@@ -301,7 +301,7 @@ body[clean-bg="true"]{
 
 .home-screen-overlay:hover .overlay-action-buttons{
     opacity: 1;
-    pointer-events: unset;
+    pointer-events: all;
     cursor: pointer;
     transition-delay: 200ms;
 }
