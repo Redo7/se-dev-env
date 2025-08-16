@@ -78,6 +78,7 @@ const Widget = ({ overlay, template, name, id, src, width: initialWidth, height:
 	const hasIframeInitialized = useRef(false);
 	const [onWidgetLoadData, setOnWidgetLoadData] = useState<OnWidgetLoadData | undefined>(undefined);
 	const widgetIdRef = useRef(id);
+	
 	const pendingDataRef = useRef<OnWidgetLoadData | undefined>(undefined);
 	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 

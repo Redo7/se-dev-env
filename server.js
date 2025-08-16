@@ -108,13 +108,12 @@ app.post("/api/create-widget/", async (req, res) => {
     if (!req.body.name) return res.status(400).json({ error: "Widget name is required" });
 
     const { name, template, overlayID } = req.body;
-    const normalizedName = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-');
-    const instanceId = uuidv4();
+    const normalizedName = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-') + '-' + uuidv4();
     const widgetData = {
-        template: template,
-        id: instanceId,
         name: name,
-        src: `/overlays/${overlayID}/${normalizedName}-${instanceId}/iframe.html`,
+        id: normalizedName,
+        src: `/overlays/${overlayID}/${normalizedName}/iframe.html`,
+        template: template,
         width: 500,
         height: 500,
         posX: 0,
@@ -123,8 +122,8 @@ app.post("/api/create-widget/", async (req, res) => {
 
     const iframeTemplate = join(__dirname, "templates", "iframe");
     const widgetTemplate = join(__dirname, "templates", "user", template);
-    const destinationPath = join(__dirname, "overlays", overlayID, `${normalizedName}-${instanceId}`);
-    const widgetFilesPath = join(__dirname, "overlays", overlayID, `${normalizedName}-${instanceId}`, "src");
+    const destinationPath = join(__dirname, "overlays", overlayID, normalizedName);
+    const widgetFilesPath = join(__dirname, "overlays", overlayID, normalizedName, "src");
     const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
 
 
@@ -147,28 +146,40 @@ app.post("/api/create-widget/", async (req, res) => {
 // Soft delete widget
 
 app.put('/api/soft-delete-widget/', async (req, res) => {
+    if (!req.body.overlayName) return res.status(400).json({ error: 'Overlay Name is required' });
     if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
-    if (!req.body.widgetID) return res.status(400).json({ error: 'Widget ID is required' });
 
-    const { overlayID, widgetID } = req.body;
+    const { overlayName, overlayID, widgetName, widgetID } = req.body;
 
     const deletionDataPath = join(__dirname, "data", "deletion-data.json");
     const overlayDataPath = join(__dirname, "overlays", overlayID, "overlay-data.json");
 
     try {
         let deletionData = JSON.parse(fs.readFileSync(deletionDataPath));
-        if(!deletionData[overlayID]) deletionData[overlayID] = {};
+        if(!deletionData) deletionData = {}; 
+        if(!deletionData[overlayID]) deletionData[overlayID] = {
+            name: overlayName,
+            id: overlayID,
+            widgets: []
+        };
         const deletionDate = Date.now() + 2592000000;
-        deletionData[overlayID][widgetID] = deletionDate;
+        if(widgetName && widgetID){
+            deletionData[overlayID]['widgets'].push({name: widgetName, id: widgetID, deleteAfter: deletionDate});
+        } else if(!widgetName && !widgetID) {
+            deletionData[overlayID].name = overlayName;
+            deletionData[overlayID].deleteAfter = deletionDate;
+        }
         fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, "\t"), 'utf-8');
 
         let overlayData = await fetchOverlayData(overlayID);
+        
         overlayData.widgets = overlayData.widgets.map(widget => widget.id === widgetID ? {...widget, deleteAfter: deletionDate} : widget)
         fs.writeFileSync(overlayDataPath, JSON.stringify(overlayData, null, "\t"), 'utf-8');
         
-        res.status(200);
+        res.status(200).send();
     } catch (error) {
         console.error(error);
+        res.status(500)
     }
 })
 
@@ -176,22 +187,25 @@ app.put('/api/soft-delete-widget/', async (req, res) => {
 
 app.delete('/api/delete-widget/', async (req, res) => {
     if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
-    if (!req.body.widgetID) return res.status(400).json({ error: 'Widget ID is required' });
 
     const { overlayID, widgetID } = req.body;
 
     const deletionDataPath = join(__dirname, "data", "deletion-data.json");
     const overlayDataPath = join(__dirname, "overlays", overlayID, "overlay-data.json");
     let currWidgetsArray = await fetchOverlayData(overlayID);
-    const target = join(__dirname, 'overlays', overlayID, widgetID);
-
+    let target;
     try {
-        const updatedWidgetsArray = {...currWidgetsArray, widgets: currWidgetsArray.widgets.filter(widget => widget.id != widgetID)}
-        fs.writeFileSync(overlayDataPath, JSON.stringify(updatedWidgetsArray, null, "\t"), 'utf-8');
+        if(widgetID){
+            target = join(__dirname, 'overlays', overlayID, widgetID);
+            const updatedWidgetsArray = {...currWidgetsArray, widgets: currWidgetsArray.widgets.filter(widget => widget.id != widgetID)}
+            fs.writeFileSync(overlayDataPath, JSON.stringify(updatedWidgetsArray, null, "\t"), 'utf-8');
+        } else {
+            target = join(__dirname, 'overlays', overlayID);
+        }
         fs.rmSync(target, { recursive: true, force: true });
 
         let deletionData = JSON.parse(fs.readFileSync(deletionDataPath));
-        if(Object.keys(deletionData[overlayID]).length === 1){
+        if(Object.keys(deletionData[overlayID].widgets).length <= 1){
             delete deletionData[overlayID];
         } else {
             delete deletionData[overlayID][widgetID];

@@ -3,7 +3,7 @@ import SubtleButton from './Buttons/SubtleButton';
 import SidebarCollapse from '../assets/Icons/SidebarCollapse';
 import { useEffect, useMemo, useState } from 'react';
 import FieldGroup from './Fields/FieldGroup';
-import type { Overlay, WidgetInstance } from '../types/';
+import type { OverlayInstance, WidgetInstance } from '../types/';
 import useFields from '../hooks/useFields';
 import componentMap from '../utils/componentMap';
 import useFieldData from '../hooks/useFieldData';
@@ -27,7 +27,7 @@ interface GroupedFields {
 }
 interface Props {
 	isVisible: boolean;
-	overlay: Overlay;
+	overlay: OverlayInstance;
 	widget: WidgetInstance | undefined;
 	onToggle: () => void;
 }

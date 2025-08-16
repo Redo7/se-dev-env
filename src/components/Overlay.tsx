@@ -5,7 +5,7 @@ import IconPopupButton from './Buttons/IconPopupButton';
 import {SidebarExpand, IconPlus, IconPlusSm} from '../assets/Icons/';
 import Sidebar from './Sidebar';
 import IconButton from './Buttons/IconButton';
-import type { Overlay, WidgetInstance } from '../types/';
+import type { OverlayInstance, WidgetInstance } from '../types/';
 import { useParams } from 'react-router-dom';
 
 interface Template{
@@ -19,8 +19,10 @@ const Overlay = () => {
 	if (!id) return (<>Incorrect Overlay ID: {id}</>);
 	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 	const [templates, setTemplates] = useState<Template[]>([]);
-	const [overlayData, setOverlayData] = useState<Overlay>({name: 'Overlay Name', id: 'overlay-id', widgets: []});
+	const [overlayData, setOverlayData] = useState<OverlayInstance>({name: 'Overlay Name', id: 'overlay-id', widgets: []});
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
+
+	document.body.setAttribute('clean-bg', 'false');
 
 	const getOverlayData = async () => {
 		const res = await fetch(`/api/get-overlay-data/${encodeURIComponent(id)}`);
@@ -72,18 +74,17 @@ const Overlay = () => {
 		}
 	};
 
-	const softRemoveWidget = async (overlayID: string, widgetID: string) => {
+	const softRemoveWidget = async (overlayName: string, overlayID: string, widgetName: string, widgetID: string) => {
 		try {
-			await fetch('/api/soft-delete-widget', {
+			const response = await fetch('/api/soft-delete-widget', {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ overlayID, widgetID }), 
-			}).then((response) => {
-				if (!response.ok) {
-					throw new Error(`Something went wrong while soft deleting ${widgetID}`);
-				}
-				getOverlayData();
+				body: JSON.stringify({ overlayName, overlayID, widgetName, widgetID }),
 			});
+			if (!response.ok) {
+				throw new Error(`Something went wrong while soft deleting ${widgetID}`);
+			}
+			getOverlayData();
 		} catch (error) {
 			console.error(`Error removing ${widgetID}`, error);
 		}
@@ -147,7 +148,7 @@ const Overlay = () => {
 					initialPosition={{ x: widget.posX, y: widget.posY }}
 					resizable={true}
 					onClick={() => handleWidgetClick(widget)}
-					onDelete={() => softRemoveWidget(overlayData.id, widget.id)}
+					onDelete={() => softRemoveWidget(overlayData.name, overlayData.id, widget.name, widget.id)}
 					onSettingsChange={(id, widget) =>
 					{
 						updateWidgetSettings(id, widget.id, widget.width, widget.height, widget.posX, widget.posY)

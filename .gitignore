@@ -23,8 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
+.env
+
 overlays/*
 templates/user/*
-widgetInstances.json
-/data/deletion-data.json
-.env
+data/deletion-data.json
