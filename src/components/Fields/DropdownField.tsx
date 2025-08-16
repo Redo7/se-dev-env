@@ -18,12 +18,16 @@ interface Props {
 }
 
 const DropdownField = ({ overlay, widget, name, label, value, options }: Props) => {
-	const [inputValue, setInputValue] = useState(value);
 	const [open, setOpen] = useState(false);
 	const convertedOptions = Object.entries(options).map(([objKey, val]) => ({
 		value: objKey,
 		label: val.toString(),
 	}));
+
+	const initialKey =
+	convertedOptions.find((option) => option.label === value)?.value || value;
+
+	const [inputValue, setInputValue] = useState(initialKey);
 
 	const handleChange = (value: string) => {
 		setInputValue(value);
@@ -40,7 +44,7 @@ const DropdownField = ({ overlay, widget, name, label, value, options }: Props) 
 						role="combobox"
 						aria-expanded={open}
 						className="w-[200px] justify-between">
-						{inputValue ? convertedOptions.find((option) => option.label === inputValue)?.label : 'Select options...'}
+						{inputValue ? convertedOptions.find((option) => option.value === inputValue)?.label : "Select options..."}
 						<ChevronsUpDown className="opacity-50" />
 					</Button>
 				</PopoverTrigger>
