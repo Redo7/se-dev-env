@@ -22,7 +22,7 @@ const App = () => {
 				widgetsToDelete.push({ overlay: overlayKey, widget: undefined });
 				continue;
 			}
-			for (const [widgetKey, widgetValue] of Object.entries(overlayData.widgets)) {
+			for (const widgetValue of Object.values(overlayData.widgets)) {
 				if (widgetValue.deleteAfter < now) {
 					widgetsToDelete.push({ overlay: overlayKey, widget: widgetValue.id });
 				}

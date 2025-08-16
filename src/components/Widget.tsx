@@ -2,10 +2,10 @@ import { useRef, useState, type CSSProperties, useEffect, useCallback } from 're
 import SubtleButton from './Buttons/SubtleButton';
 import IconTrash from '../assets/Icons/IconTrash';
 import useFields from '../hooks/useFieldData';
-import type { Overlay, WidgetInstance } from '../types/';
+import type { OverlayInstance, WidgetInstance } from '../types/';
 
 interface Props {
-	overlay: Overlay;
+	overlay: OverlayInstance;
 	template: string;
 	id: string;
 	name: string;

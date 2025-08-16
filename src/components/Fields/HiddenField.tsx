@@ -4,7 +4,7 @@ interface Props {
 	value?: string | number | boolean;
 }
 
-const HiddenField = ({ name, label, value = '' }: Props) => {
+const HiddenField = ({ name, label }: Props) => {
 	// Implement max length that matches SE then truncate
 	if (label.length >= 34) {
 		label = label.substring(0, 33) + '...';

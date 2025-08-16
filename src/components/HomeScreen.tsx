@@ -3,12 +3,10 @@ import '../App.css';
 import { useEffect, useRef, useState } from 'react';
 import SubtleButton from './Buttons/SubtleButton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ThemeToggle } from './ThemeToggle';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import type { OverlayInstance, WidgetInstance } from '../types/';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { Button } from './ui/button';
 import useSoftDelete from '@/hooks/useSoftDelete';
 import HomeScreenSidebar from './HomeScreenSidebar';
 
