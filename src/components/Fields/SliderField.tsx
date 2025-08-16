@@ -15,6 +15,7 @@ interface Props {
 
 const SliderField = ({ overlay, widget, name, label, value = 0, min, max, step = 1 }: Props) => {
 	const [inputValue, setInputValue] = useState<number | ''>(value);
+	const [currentValueVisible, setCurrentValueVisible] = useState<Boolean>(false)
 	return (
 		<div className="slider-field">
 			<label htmlFor={name}>{label}</label>
@@ -26,6 +27,8 @@ const SliderField = ({ overlay, widget, name, label, value = 0, min, max, step =
 				max={max}
 				step={step}
 				defaultValue={inputValue}
+				onPointerDown={() => setCurrentValueVisible(true)}
+				onPointerUp={() => setCurrentValueVisible(false)}
 				onChange={(event) => {
 					const value = event.target.value.includes('.') ? parseFloat(event.target.value) : parseInt(event.target.value)
 					setInputValue(value);
@@ -34,7 +37,9 @@ const SliderField = ({ overlay, widget, name, label, value = 0, min, max, step =
 			/>
 			<div className="slider-field-range">
 				<p>{min}</p>
+				{/* <p>{inputValue}</p> */}
 				<p>{max}</p>
+				<p className='slider-field-current absolute' style={{"--slider-value": inputValue, "--max": max} as React.CSSProperties} data-value={inputValue} data-visible={currentValueVisible}>{inputValue}</p>
 			</div>
 		</div>
 	);
