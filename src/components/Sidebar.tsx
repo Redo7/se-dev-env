@@ -7,6 +7,8 @@ import type { OverlayInstance, WidgetInstance } from '../types/';
 import useFields from '../hooks/useFields';
 import componentMap from '../utils/componentMap';
 import useFieldData from '../hooks/useFieldData';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 interface StreamElementsField {
 	type: string;
@@ -66,7 +68,10 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	return (
 		<div className="sidebar depth-shadow" data-sidebar-visible={isVisible}>
 			<div className="sidebar-heading flex">
+				<div className="flex gap-2 items-center">
+					<Link to="/" className='sidebar-back opacity-50 hover:opacity-100'><ArrowLeft size={16} strokeWidth={1.5} /></Link>
 				<p className="sidebar-overlay-name">{widget ? widget.name : overlay.name}</p>
+				</div>
 				<SubtleButton onClick={onToggle} cssClass="subtle flex center" width={24} height={24}>
 					<SidebarCollapse />
 				</SubtleButton>

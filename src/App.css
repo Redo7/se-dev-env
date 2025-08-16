@@ -475,6 +475,10 @@ iframe {
     box-sizing: border-box;
 }
 
+.sidebar-back{
+    transition: opacity 300ms var(--redo-easing)
+}
+
 .sidebar-overlay-name {
     margin: 0;
     line-height: 1.5rem;
