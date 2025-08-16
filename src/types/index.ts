@@ -2,6 +2,7 @@ export interface OverlayInstance{
 	name: string,
 	id: string,
 	widgets: WidgetInstance[]
+	deleteAfter?: number;
 }
 
 export interface WidgetInstance {

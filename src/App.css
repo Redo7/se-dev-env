@@ -299,7 +299,7 @@ body[clean-bg="true"]{
     transition-delay: 0ms;
 }
 
-.home-screen-overlay:hover .overlay-action-buttons{
+.home-screen-overlay:hover .overlay-action-buttons, .trash-overlay:hover .overlay-action-buttons,  .trash-widget:hover .overlay-action-buttons{
     opacity: 1;
     pointer-events: all;
     cursor: pointer;
@@ -506,4 +506,26 @@ iframe {
     /* padding-top: .5rem; */
     width: 100%;
     box-sizing: border-box;
+}
+/* Trash */
+
+.trash-overlay, .trash-widget{
+    transition: background 300ms var(--redo-easing);
+    border: transparent 0.0625rem solid;
+    letter-spacing: 0.03em;
+}
+
+.trash-overlay:hover, .trash-widget:hover{
+    border: var(--tr-100) 0.0625rem solid;
+}
+
+.trash-widget{
+    margin-left: 3rem;
+}
+
+.trash-widget .tx{
+    transition: transform 300ms var(--redo-easing);
+}
+.trash-widget:hover .tx{
+    transform: translateX(1.25rem);
 }

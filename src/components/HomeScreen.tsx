@@ -7,7 +7,6 @@ import { ThemeToggle } from './ThemeToggle';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import type { OverlayInstance, WidgetInstance } from '../types/';
-import { SquarePen, Trash2 } from 'lucide-react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Button } from './ui/button';
 import useSoftDelete from '@/hooks/useSoftDelete';

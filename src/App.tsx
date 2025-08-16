@@ -4,6 +4,7 @@ import Overlay from "./components/Overlay";
 import HomeScreen from "./components/HomeScreen";
 import { ThemeProvider } from './components/ThemeProvider';
 import { useEffect } from 'react';
+import Trash from './components/Trash';
 
 const App = () => {
 	// const [isDarkMode, setIsDarkMode] = useState(true);
@@ -39,7 +40,7 @@ const App = () => {
 	const removeWidget = async (overlayID: string, widgetID: string | undefined) => {
 		console.log('deleting', overlayID, widgetID);
 		try {
-			await fetch('/api/delete-widget', {
+			await fetch('/api/delete', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ overlayID, widgetID }), 
@@ -60,6 +61,7 @@ const App = () => {
 			<Routes>
 				<Route path="/" element={<HomeScreen />} />
 				<Route path="/:id" element={<Overlay />} />
+				<Route path="/trash" element={<Trash />} />
 			</Routes>
 			</Router>
 		</ThemeProvider>

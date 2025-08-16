@@ -143,9 +143,9 @@ app.post("/api/create-widget/", async (req, res) => {
     }
 });
 
-// Soft delete widget
+// Soft delete overlay / widget
 
-app.put('/api/soft-delete-widget/', async (req, res) => {
+app.put('/api/soft-delete/', async (req, res) => {
     if (!req.body.overlayName) return res.status(400).json({ error: 'Overlay Name is required' });
     if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
 
@@ -183,9 +183,9 @@ app.put('/api/soft-delete-widget/', async (req, res) => {
     }
 })
 
-// Delete widget
+// Delete overlay / widget
 
-app.delete('/api/delete-widget/', async (req, res) => {
+app.delete('/api/delete/', async (req, res) => {
     if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
 
     const { overlayID, widgetID } = req.body;
@@ -206,6 +206,44 @@ app.delete('/api/delete-widget/', async (req, res) => {
 
         let deletionData = JSON.parse(fs.readFileSync(deletionDataPath));
         if(Object.keys(deletionData[overlayID].widgets).length <= 1){
+            delete deletionData[overlayID];
+        } else {
+            delete deletionData[overlayID][widgetID];
+        }
+        fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, "\t"), 'utf-8');
+
+        res.status(200).send();
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    }
+})
+// Restore overlay / widget
+
+app.put('/api/restore/', async (req, res) => {
+    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
+
+    const { overlayID, widgetID } = req.body;
+
+    const deletionDataPath = join(__dirname, "data", "deletion-data.json");
+    const overlayDataPath = join(__dirname, "overlays", overlayID, "overlay-data.json");
+    let overlayData = await fetchOverlayData(overlayID);
+    try {
+        if (widgetID) {
+            overlayData.widgets = overlayData.widgets.map((widget) => {
+                if (widgetID === widget.id) {
+                    const { deleteAfter, ...rest } = widget;
+                    return rest;
+                }
+                return widget;
+            });
+        } else {
+            delete overlayData.deleteAfter;
+        }
+        fs.writeFileSync(overlayDataPath, JSON.stringify(overlayData, null, "\t"), 'utf-8');
+
+        let deletionData = JSON.parse(fs.readFileSync(deletionDataPath));
+        if (Object.keys(deletionData[overlayID].widgets).length <= 1) {
             delete deletionData[overlayID];
         } else {
             delete deletionData[overlayID][widgetID];
