@@ -30,6 +30,18 @@ const Trash = () => {
 		getDeleted();
 	}
 
+	if(overlays.length === 0){
+		return (
+			<div className="h-screen flex">
+			<HomeScreenSidebar />
+				<div className="w-full flex center">
+					<h1 className='text-5xl opacity-25 font-extrabold'>Nothing to display</h1>
+					<h1 className=' absolute text-9xl opacity-5 blur-xs font-extrabold'>Nothing to display</h1>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="flex">
 			<HomeScreenSidebar />
