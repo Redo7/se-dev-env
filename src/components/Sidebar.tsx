@@ -94,8 +94,8 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 								return (
 									<Component
 										key={fieldName}
-										overlay={overlay}
-										widget={`${widget?.template}-${widget?.id}`}
+										overlay={overlay.id}
+										widget={widget?.id}
 										name={fieldName}
 										label={label}
 										value={assignedValue}
