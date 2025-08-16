@@ -77,7 +77,7 @@ const Overlay = () => {
 
 	const softRemoveWidget = async (overlayName: string, overlayID: string, widgetName: string, widgetID: string | undefined) => {
 		try {
-			useSoftDelete(overlayName, overlayID, widgetName, widgetID)
+			await useSoftDelete(overlayName, overlayID, widgetName, widgetID);
 			getOverlayData();
 		} catch (error) {
 			console.error(`Error removing ${widgetID}`, error);
