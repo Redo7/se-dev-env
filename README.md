@@ -16,13 +16,16 @@ This app aims to bridge the gap between efficient development and StreamElements
 # Installation
 
 ```bash
-git clone https://github.com/redo7/se-dev-env
+git clone https://github.com/Redo7/se-dev-env
 cd se-dev-env
 npm run dev
 ```
 
 # Configuration
-You can add your own widget templates and create them on any overlay by simply putting your `html.html`, `css.css`, `js.js`, `fields.json`, and `data.json` inside of `/templates/user/{your template name}`. The app is going to scan that directory, and will automatically add them to the `+` button on the overlay.
+1. You can add your own widget templates and create them on any overlay by simply putting your `html.html`, `css.css`, `js.js`, `fields.json`, and `data.json` inside of `/templates/user/{your template name}`. The app is going to scan that directory, and will automatically add them to the `+` button on the overlay.
+
+2. Create a `.env` file in the root directory with these values:
+  - `VITE_GOOGLE_FONTS_API_KEY = your-api-key-here`
 
 # 1.0 Release Roadmap
 
