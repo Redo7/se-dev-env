@@ -14,12 +14,15 @@ This app aims to bridge the gap between efficient development and StreamElements
 
 
 # Installation
-
+1. Run this command in the terminal
 ```bash
 git clone https://github.com/Redo7/se-dev-env
 cd se-dev-env
+npm install
 npm run dev
 ```
+2. Open [http://localhost:5173/](http://localhost:5173/)
+3. Then just run `npm run dev` in the app's directory whenever you want to start the server
 
 # Configuration
 1. You can add your own widget templates and create them on any overlay by simply putting your `html.html`, `css.css`, `js.js`, `fields.json`, and `data.json` inside of `/templates/user/{your template name}`. The app is going to scan that directory, and will automatically add them to the `+` button on the overlay.
