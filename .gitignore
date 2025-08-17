@@ -25,7 +25,6 @@ dist-ssr
 
 .env
 
-overlays/*
 templates/user/*
 !templates/user/blank
 data/deletion-data.json

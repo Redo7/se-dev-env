@@ -7,9 +7,11 @@ This app aims to bridge the gap between efficient development and StreamElements
 
 ---
 
-![](https://gist.github.com/user-attachments/assets/bdfc1fb9-6722-4aa7-b4b0-efcae6422043)
-![](https://gist.github.com/user-attachments/assets/fe5da4b0-132f-49a7-90e3-2f608bd6aeb1)
+<img width="3840" height="2486" alt="image" src="https://github.com/user-attachments/assets/899513b6-2cbc-4ac8-9d59-fe400cb0af94" />
+<img width="3840" height="2486" alt="image" src="https://github.com/user-attachments/assets/c020b829-6771-44bb-bcb6-d19e56747254" />
+
 ---
+
 
 # Installation
 
@@ -20,7 +22,10 @@ npm run dev
 ```
 
 # Configuration
-You can add your own widget templates and create them on any overlay by simply putting your `html.html`, `css.css`, `js.js`, `fields.json`, and `data.json` inside of `/templates/user/{your template name}`. The app is going to scan that directory, and will automatically add them to the `+` button on the overlay.
+1. You can add your own widget templates and create them on any overlay by simply putting your `html.html`, `css.css`, `js.js`, `fields.json`, and `data.json` inside of `/templates/user/{your template name}`. The app is going to scan that directory, and will automatically add them to the `+` button on the overlay.
+
+2. Create a `.env` file in the root directory with these values:
+  - `VITE_GOOGLE_FONTS_API_KEY = your-api-key-here`
 
 # 1.0 Release Roadmap
 
