@@ -73,7 +73,7 @@ app.post("/api/create-overlay/", async (req, res) => {
 // Get overlays
 
 app.get('/api/get-overlays', async (req, res) => {
-    const overlays = await fs.readdir('./overlays/');
+    const overlays = (await fs.readdir('./overlays/')).filter(overlay => overlay !== '.gitignore');
     const overlaysArray = await Promise.all(overlays.map(async (overlay) => {
         return await fetchOverlayData(overlay);
     }))
