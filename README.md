@@ -7,9 +7,11 @@ This app aims to bridge the gap between efficient development and StreamElements
 
 ---
 
-![](https://gist.github.com/user-attachments/assets/bdfc1fb9-6722-4aa7-b4b0-efcae6422043)
-![](https://gist.github.com/user-attachments/assets/fe5da4b0-132f-49a7-90e3-2f608bd6aeb1)
+<img width="3840" height="2486" alt="image" src="https://github.com/user-attachments/assets/899513b6-2cbc-4ac8-9d59-fe400cb0af94" />
+<img width="3840" height="2486" alt="image" src="https://github.com/user-attachments/assets/c020b829-6771-44bb-bcb6-d19e56747254" />
+
 ---
+
 
 # Installation
 
