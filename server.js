@@ -14,6 +14,8 @@ const PORT = 3001;
 app.use(cors())
 app.use(express.json());
 
+const SCRIPT_VER = 1.0; // Latest version of the iframe. Used to track whether any changes were made to the templates/iframe/ files, which would require widgets to have those files copied into their dir in order to work again.
+
 // Helper functions
 
 function generateDataFromFields(fields) {
@@ -72,13 +74,26 @@ app.post("/api/create-overlay/", async (req, res) => {
 
 // Get overlays
 
-app.get('/api/get-overlays', async (req, res) => {
-    const overlays = (await fs.readdir('./overlays/')).filter(overlay => overlay !== '.gitignore');
-    const overlaysArray = await Promise.all(overlays.map(async (overlay) => {
-        return await fetchOverlayData(overlay);
-    }))
-    res.json(overlaysArray)
-})
+app.get("/api/get-overlays", async (req, res) => {
+    try {
+      const dirents = await fs.readdir("./overlays/", { withFileTypes: true });
+  
+      const overlays = dirents
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name);
+  
+      const overlaysArray = await Promise.all(
+        overlays.map(async (overlay) => {
+          return await fetchOverlayData(overlay);
+        })
+      );
+  
+      res.json(overlaysArray);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: `Failed to load overlays: ${err}` });
+    }
+  });
 
 // Get templates
 
@@ -114,6 +129,7 @@ app.post("/api/create-widget/", async (req, res) => {
         id: normalizedName,
         src: `/overlays/${overlayID}/${normalizedName}/iframe.html`,
         template: template,
+        scriptVersion: SCRIPT_VER,
         width: 500,
         height: 500,
         posX: 0,
