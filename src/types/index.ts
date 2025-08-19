@@ -10,6 +10,7 @@ export interface WidgetInstance {
 	id: string;
 	src: string;
 	template: string;
+	scriptVersion: number;
 	deleteAfter?: number;
 
 	width: number;

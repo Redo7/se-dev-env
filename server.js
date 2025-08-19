@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs-extra';
 import { v4 as uuidv4 } from 'uuid';
+import util from 'util'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -15,6 +16,7 @@ app.use(cors())
 app.use(express.json());
 
 const SCRIPT_VER = 1.0; // Latest version of the iframe. Used to track whether any changes were made to the templates/iframe/ files, which would require widgets to have those files copied into their dir in order to work again.
+const copyFilePromise = util.promisify(fs.copyFile);
 
 // Helper functions
 
@@ -40,6 +42,12 @@ async function fetchOverlayData(overlayID){
     const currOverlayData = JSON.parse(data);
 
     return currOverlayData;
+}
+
+function copyFiles(srcDir, destDir, files) {
+    return Promise.all(files.map(f => {
+       return copyFilePromise(join(srcDir, f), join(destDir, f));
+    }));
 }
 
 // API
@@ -293,9 +301,10 @@ app.put('/api/update-widget-settings', async (req, res) => {
     if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
     if (!req.body.id) return res.status(400).json({ error: 'Widget id is required' });
 
-    const { overlayID, id, width, height, posX, posY } = req.body;
+    const { overlayID, id, scriptVersion, width, height, posX, posY } = req.body;
 
     const newSettings = {
+        scriptVersion: scriptVersion,
         width: width,
         height: height,
         posX: posX,
@@ -422,6 +431,22 @@ app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
         console.error(`Error updating ${dataFilePath}:`, error);
         res.status(500).json({ error: 'Internal server error' });
     }
+})
+
+app.put('/api/update-iframe-files/', async (req, res) => {
+    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay is required' });
+    if (!req.body.widgetID) return res.status(400).json({ error: 'Widget is required' });
+
+    const { overlayID, widgetID } = req.body;
+    const iframeTemplate = join(__dirname, "templates", "iframe");
+    const widgetPath = join(__dirname, "overlays", overlayID, widgetID);
+
+    copyFiles(iframeTemplate, widgetPath, ['iframe.html', 'main.css', 'script.js']).then(async () => {
+        res.status(200).json({scriptVersion: SCRIPT_VER});
+    }).catch(err => {
+        console.error(`Error updating ${widget} iframe:`, err);
+        res.status(500).json({ error: 'Internal server error' });
+    });
 })
 
 app.listen(PORT, () => {

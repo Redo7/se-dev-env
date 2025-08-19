@@ -353,41 +353,17 @@ p.overlay-last-opened{
 .widget-container {
     width: fit-content;
     height: fit-content;
-}
 
-.widget-container button {
-    opacity: 0;
-    transition: opacity 300ms ease;
-}
-
-.widget-container:hover button {
-    opacity: 0.2;
-}
-
-.widget-container:hover iframe {
-    border-color: #ffffff20;
-}
-
-.widget-container:hover button:hover {
-    opacity: 1;
-}
-
-.widget-remove-button {
-    top: 1rem;
-    right: 1rem;
-    z-index: 1;
-}
-
-iframe {
-    width: 100%;
-    height: 100%;
     border-radius: .5rem;
     border: #ffffff10 0.125rem solid;
     background-color: #ffffff05;
     transition: border 300ms ease;
-    pointer-events: none;
     box-sizing: border-box;
-    position: relative;
+    overflow: hidden;
+}
+
+.widget-container:hover {
+    border-color: #ffffff20;
 }
 
 .widget-container::before {
@@ -404,6 +380,32 @@ iframe {
 
     inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
+}
+
+.widget-container > .widget-remove-button > button {
+    opacity: 0;
+    transition: opacity 300ms ease;
+}
+
+.widget-container:hover > .widget-remove-button > button {
+    opacity: 0.2;
+}
+
+.widget-container:hover > .widget-remove-button > button:hover {
+    opacity: 1;
+}
+
+.widget-remove-button {
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    position: relative;
 }
 
 .resize-handle {
@@ -435,6 +437,18 @@ iframe {
     bottom: -6px;
     right: -6px;
     cursor: nwse-resize;
+}
+
+.widget-container .script-notice{
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    border-bottom-right-radius: 1rem;
+}
+
+.script-notice button{
+    opacity: 1;
 }
 
 /* Sidebar */

@@ -84,11 +84,11 @@ const Overlay = () => {
 		}
 	};
 
-	const updateWidgetSettings = async (overlayID: string, id: string, width: number, height: number, posX: number, posY: number) => {
+	const updateWidgetSettings = async (overlayID: string, widget: WidgetInstance) => {
 		await fetch('/api/update-widget-settings', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ "overlayID": overlayID, id, width, height, posX, posY }),
+			body: JSON.stringify({ overlayID: overlayID, id: widget.id, scriptVersion: widget.scriptVersion, width: widget.width, height: widget.height, posX: widget.posX, posY: widget.posY }),
 		}).then((response) => {
 			if (!response.ok) {
 				throw new Error(`Something went wrong while changing settings for ${id}`);
@@ -133,10 +133,11 @@ const Overlay = () => {
 				<Widget
 					key={widget.id}
 					overlay={overlayData}
-					template={widget.template}
 					name={widget.name}
 					id={widget.id}
 					src={widget.src}
+					scriptVersion={widget.scriptVersion}
+					template={widget.template}
 					width={widget.width}
 					height={widget.height}
 					initialPosition={{ x: widget.posX, y: widget.posY }}
@@ -145,7 +146,7 @@ const Overlay = () => {
 					onDelete={() => softRemoveWidget(overlayData.name, overlayData.id, widget.name, widget.id)}
 					onSettingsChange={(id, widget) =>
 					{
-						updateWidgetSettings(id, widget.id, widget.width, widget.height, widget.posX, widget.posY)
+						updateWidgetSettings(id, widget)
 					}
 					}
 				/>
