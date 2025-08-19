@@ -15,7 +15,7 @@ const PORT = 3001;
 app.use(cors())
 app.use(express.json());
 
-const SCRIPT_VER = 1.0; // Latest version of the iframe. Used to track whether any changes were made to the templates/iframe/ files, which would require widgets to have those files copied into their dir in order to work again.
+const SCRIPT_VER = 1.2; // Latest version of the iframe. Used to track whether any changes were made to the templates/iframe/ files, which would require widgets to have those files copied into their dir in order to work again.
 const copyFilePromise = util.promisify(fs.copyFile);
 
 // Helper functions
@@ -34,6 +34,12 @@ function generateDataFromFields(fields) {
         }
     }
     return fieldData;
+}
+
+async function fetchDataFile(file) {
+    const dataFile = join(__dirname, "data", file);
+    const dataObject = await fs.readFile(dataFile, 'utf-8');
+    return file.includes('.json') ? JSON.parse(dataObject) : dataObject;
 }
 
 async function fetchOverlayData(overlayID){
@@ -328,12 +334,8 @@ app.put('/api/update-widget-settings', async (req, res) => {
 
 app.get('/api/data/:file', async (req, res) => { 
     if (!req.params.file) return res.status(400).json({ error: 'File is required' });
-
-    const dataFile = join(__dirname, "data", `${req.params.file}.json`);
-
-    const dataObject = await fs.readFile(dataFile, 'utf-8');
-
-    res.json(JSON.parse(dataObject))
+    const dataObject = await fetchDataFile(`${req.params.file}.json`); // this returns [object Object] I think?
+    res.json(dataObject)
 })
 
 // Fetch fields.json
@@ -447,6 +449,30 @@ app.put('/api/update-iframe-files/', async (req, res) => {
         console.error(`Error updating ${widget} iframe:`, err);
         res.status(500).json({ error: 'Internal server error' });
     });
+})
+
+app.put('/api/SE_API/set', async (req, res) => {
+    const { key, value } = req.body
+    let data = await fetchDataFile('SE_API.json');
+    if (Array.isArray(value)) {
+        data[key] = [...value];
+    } else {
+        data[key] = value;
+    }
+    
+    const dataFilePath = join(__dirname, "data", 'SE_API.json');
+    await fs.writeFile(dataFilePath, JSON.stringify(data, null, "\t"), 'utf-8');
+    res.status(200);
+})
+
+app.get('/api/SE_API/get/:key', async (req, res) => {
+    const key = req.params.key;
+    const data = await fetchDataFile('SE_API.json');
+    if(data[key]){
+        res.json(data[key]);
+    } else {
+        res.json(null);
+    }
 })
 
 app.listen(PORT, () => {

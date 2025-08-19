@@ -1,3 +1,5 @@
+// Script version: 1.2
+
 const originalConsole = window.console;
 window.console = new Proxy(originalConsole, { get(target, prop) { return typeof target[prop] === "function" ? target[prop].bind(target) : target[prop]; } });
 
@@ -104,7 +106,23 @@ window.addEventListener("message", async (obj) => {
                 Object.assign(__mockFieldData, detail.fieldData || {});
                 Object.assign(window, { SE_WIDTH: detail.width || 0, SE_HEIGHT: detail.height || 0, currency: detail.currency || {}, widgetId: detail.widgetId || IFRAME_ID, channel: detail.channel || {}, fieldData: __mockFieldData });
                 window.SE_API = {
-                    store: { set: (k, o) => { if (!/^[a-zA-Z0-9]+$/.test(k)) return; __mockStore[k] = JSON.parse(JSON.stringify(o)); }, get: (k) => Promise.resolve(__mockStore[k] ? JSON.parse(JSON.stringify(__mockStore[k])) : null) },
+                    store: { 
+                        set: async (k, o) => {
+                            await fetch('http://localhost:3001/api/SE_API/set', {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ key: k, value: o }),
+                            })
+                            return;
+                        }, 
+                        get: async (k) => {
+                            const res = await fetch(`http://localhost:3001/api/SE_API/get/${k}`, {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' }
+                            })
+                            return res.json();
+                        }
+                    },
                     counters: { get: (c) => { if (!__mockCounters[c]) __mockCounters[c] = { counter: c, value: 0 }; return Promise.resolve(JSON.parse(JSON.stringify(__mockCounters[c]))); } },
                     sanitize: ({ message }) => Promise.resolve({ result: { message: message.replace(/Vulgar/gi, "Kreygasm") }, skip: false }),
                     cheerFilter: (m) => Promise.resolve(m.replace(/\b\d+\s*(cheer|bits)\b/gi, "").trim()),

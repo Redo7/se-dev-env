@@ -14,6 +14,9 @@ export default defineConfig({
 	  },
 	server: {
 		port: 5173,
+		watch: {
+			ignored: ["**/data/SE_API.json"],
+		  },
 		proxy: {
 			'/widgets': {
 				target: 'http://localhost:3001', // Your Node.js server

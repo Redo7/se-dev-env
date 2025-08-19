@@ -440,7 +440,7 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 					<IconTrash />
 				</SubtleButton>
 			</div>
-			{currentScriptVersion == 1.0 ? (
+			{currentScriptVersion == 1.2 ? (
 				<iframe ref={iframeRef} id={id} src={src} sandbox="allow-scripts allow-same-origin" />
 			) : (
 				<div className="script-notice flex gap-4 p-4 py-3 bg-zinc-50 dark:bg-zinc-900">
