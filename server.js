@@ -95,6 +95,7 @@ app.get("/api/get-overlays", async (req, res) => {
       const overlays = dirents
         .filter((dirent) => dirent.isDirectory())
         .map((dirent) => dirent.name);
+        
   
       const overlaysArray = await Promise.all(
         overlays.map(async (overlay) => {
@@ -112,7 +113,10 @@ app.get("/api/get-overlays", async (req, res) => {
 // Get templates
 
 app.get('/api/get-templates', async (req, res) => {
-    const templates = await fs.readdir('./templates/user/');
+    const dirents = await fs.readdir('./templates/user/', { withFileTypes: true });
+    const templates = dirents
+        .filter((dirent) => dirent.isDirectory() && dirent.name !== '.git')
+        .map((dirent) => dirent.name);
     res.json([templates])
 })
 
