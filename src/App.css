@@ -398,7 +398,7 @@ p.overlay-last-opened{
 .widget-remove-button {
     top: 1rem;
     right: 1rem;
-    z-index: 1;
+    z-index: 0;
 }
 
 iframe {
