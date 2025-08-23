@@ -68,10 +68,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	return (
 		<div className="sidebar depth-shadow" data-sidebar-visible={isVisible}>
 			<div className="sidebar-heading flex">
-				<div className="flex gap-2 items-center">
-					<Link to="/" className='sidebar-back opacity-50 hover:opacity-100'><ArrowLeft size={16} strokeWidth={1.5} /></Link>
-				<p className="sidebar-overlay-name">{widget ? widget.name : overlay.name}</p>
-				</div>
+				<p className="sidebar-overlay-name">{widget ? widget.name : 'No widget selected'}</p>
 				<SubtleButton onClick={onToggle} cssClass="subtle flex center" width={24} height={24}>
 					<SidebarCollapse />
 				</SubtleButton>

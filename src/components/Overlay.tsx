@@ -6,8 +6,12 @@ import {SidebarExpand, IconPlus, IconPlusSm} from '../assets/Icons/';
 import Sidebar from './Sidebar';
 import IconButton from './Buttons/IconButton';
 import type { OverlayInstance, WidgetInstance } from '../types/';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import useSoftDelete from '@/hooks/useSoftDelete';
+import { ArrowLeft, CircleDollarSign, ClipboardClock, Cog, Diamond, FlagTriangleRight, Heart, Shuffle, Star } from 'lucide-react';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import useAlert from '@/hooks/useAlert';
 
 interface Template{
 	label: string;
@@ -115,6 +119,27 @@ const Overlay = () => {
 				<IconButton onClick={() => handleSidebarToggle()}>
 					<SidebarExpand />
 				</IconButton>
+			</div>
+			<div className="overlay-navbar-container">
+				<div className="overlay-navbar">
+					<div className="flex items-center">
+						<Link to="/" className='sidebar-back opacity-50 hover:opacity-100'><ArrowLeft size={20} strokeWidth={1.5} /></Link>
+						<p className='text-sm tracking-wide ml-[1rem] mr-2'>{overlayData.name}</p>
+						<Badge variant="outline" className='opacity-50'>{overlayData.id}</Badge>
+					</div>
+					<div className="flex">
+						<Button variant="ghost" size="sm"> <ClipboardClock size={16}/> </Button>
+						<Button variant="ghost" size="sm"> <Shuffle size={16}/> </Button>
+						<div className="test-alert-container px-2 mx-2 flex items-center">
+							<Button variant="ghost" size="sm" onClick={() => useAlert('follower-latest')}> <Heart size={16}/> </Button>
+							<Button variant="ghost" size="sm" onClick={() => useAlert('subscriber-latest')}> <Star size={16}/> </Button>
+							<Button variant="ghost" size="sm" onClick={() => useAlert('tip-latest')}> <CircleDollarSign size={16}/> </Button>
+							<Button variant="ghost" size="sm" onClick={() => useAlert('cheer-latest')}> <Diamond size={16}/> </Button>
+							<Button variant="ghost" size="sm" onClick={() => useAlert('raid-latest')}> <FlagTriangleRight size={16}/> </Button>
+						</div>
+						<Button variant="ghost" size="sm"> <Cog size={16}/> </Button>
+					</div>
+				</div>
 			</div>
 			<Sidebar
 				isVisible={isSidebarVisible}
