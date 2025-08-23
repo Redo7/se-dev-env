@@ -331,6 +331,13 @@ p.overlay-last-opened{
     color: var(--foreground);
     padding: 3.125rem;
     box-sizing: border-box;
+    transition: padding-top 300ms var(--redo-easing);
+    transition-delay: 2000ms;
+}
+
+.overlay:has(.overlay-navbar-container:hover), .overlay:has(.overlay-navbar[data-popover-visible="true"]){
+    padding-top: 6.25rem;
+    transition-delay: 0ms;
 }
 
 .OverlayButtonContainer {
@@ -563,12 +570,15 @@ iframe {
 .overlay-navbar-container:hover .overlay-navbar{
     transition-delay: 0ms;
     opacity: .5;
+    transform: translateY(0px);
 }
 
 .overlay-navbar{
     opacity: 0;
+    transform: translateY(-3.125rem);
+
     width: 100%;
-    height: 50px;
+    height: 3.125rem;
     display: flex;
     gap: 1rem;
     align-items: center;
@@ -580,7 +590,7 @@ iframe {
     border: var(--tr-100) 1px solid;
     border-left: unset;
     border-radius: 0 0 1rem 1rem;
-    transition: background 300ms ease, opacity 300ms var(--redo-easing);
+    transition: background 300ms ease, opacity 300ms var(--redo-easing), transform 300ms var(--redo-easing);
     background: linear-gradient(90deg, var(--background) 0%, #e1e1e1 100%);
     transition-delay: 2000ms;
 }
@@ -592,6 +602,7 @@ iframe {
 
 .overlay-navbar-container:hover .overlay-navbar:hover, .overlay-navbar[data-popover-visible="true"]{
     opacity: 1;
+    transform: translateY(0px);
     transition-delay: 0ms;
 }
 
