@@ -43,6 +43,7 @@ npm run dev
     - [ ] Field Creator
     - [ ] Field Group redesign
 - [ ] Events emulation
+    - [x] Basic implementation
     - [ ] Custom events
     - [ ] Update `data/onSessionUpdate` and `data/onWidgetLoad` when related events happen
 - [ ] Chat emulation

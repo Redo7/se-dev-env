@@ -590,7 +590,7 @@ iframe {
     background: linear-gradient(90deg, var(--background) 0%, #191919 100%);
 }
 
-.overlay-navbar-container:hover .overlay-navbar:hover{
+.overlay-navbar-container:hover .overlay-navbar:hover, .overlay-navbar[data-popover-visible="true"]{
     opacity: 1;
     transition-delay: 0ms;
 }

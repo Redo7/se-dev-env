@@ -7,8 +7,6 @@ import type { OverlayInstance, WidgetInstance } from '../types/';
 import useFields from '../hooks/useFields';
 import componentMap from '../utils/componentMap';
 import useFieldData from '../hooks/useFieldData';
-import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
 
 interface StreamElementsField {
 	type: string;
