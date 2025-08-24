@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -16,6 +16,8 @@ interface Props{
 }
 
 const AlertPopover = ({ listener, icon, onPopoverToggle }: Props) => {
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [open, setOpen] = useState(false);
     const [gifted, setGifted] = useState(false);
     const [username, setUsername] = useState("");
@@ -44,12 +46,27 @@ const AlertPopover = ({ listener, icon, onPopoverToggle }: Props) => {
         useAlert(listener, value, username, message, tier, communityGift);
     }
 
+    // Debounce popover closing onMouseLeave so it doesn't flicker
+	const handleMouseEnter = () => {
+    if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+    }
+    setIsPopoverOpen(true);
+    };
+
+    const handleMouseLeave = () => {
+    closeTimeoutRef.current = setTimeout(() => {
+        setIsPopoverOpen(false);
+    }, 200);
+    };
+
     return (
-        <Popover onOpenChange={onPopoverToggle}>
+        <Popover open={isPopoverOpen} onOpenChange={onPopoverToggle}>
             <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm"> {icon} </Button>
+                <Button variant="ghost" size="sm" onClick={() => dispatchAlert('random')} onMouseEnter={() => handleMouseEnter()} onMouseLeave={() => handleMouseLeave()}> {icon} </Button>
             </PopoverTrigger>
-            <PopoverContent className={`flex flex-col gap-2 ${listener === 'cheer-latest' ? 'w-90' : listener === 'raid-latest' ? 'w-80' : ''}`}>
+            <PopoverContent onMouseEnter={() => handleMouseEnter()} onMouseLeave={() => handleMouseLeave()} className={`flex flex-col gap-2 ${listener === 'cheer-latest' ? 'w-90' : listener === 'raid-latest' ? 'w-80' : ''}`}>
                 <Input onChange={(event) => setUsername(event.target.value)} onKeyDown={handleCustomInput} type='text' placeholder='Username' autoComplete='off'/>
                 <Textarea onChange={(event) => setMessage(event.target.value)} onKeyDown={handleCustomInput} placeholder='Message'/>
                 {listener === 'subscriber-latest' && 
