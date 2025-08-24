@@ -610,3 +610,22 @@ iframe {
     border-left: var(--tr-100) 1px solid;
     border-right: var(--tr-100) 1px solid;
 }
+
+/* Chat */
+
+.chat-button{
+    bottom: 3.125rem;
+    right: 3.125rem;
+}
+
+.chat{
+    bottom: 50px;
+    right: 0;
+    z-index: 1000;
+}
+
+.chat textarea{
+    resize: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}

@@ -8,11 +8,12 @@ import IconButton from './Buttons/IconButton';
 import type { OverlayInstance, WidgetInstance } from '../types/';
 import { Link, useParams } from 'react-router-dom';
 import useSoftDelete from '@/hooks/useSoftDelete';
-import { ArrowLeft, CircleDollarSign, ClipboardClock, Cog, Diamond, FlagTriangleRight, Heart, Shuffle, Star } from 'lucide-react';
+import { ArrowLeft, CircleDollarSign, ClipboardClock, Cog, Diamond, FlagTriangleRight, Heart, MessageCircle, Shuffle, Star, X } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import useAlert from '@/hooks/useAlert';
 import AlertPopover from './AlertPopover';
+import Chat from './Chat';
 
 interface Template{
 	label: string;
@@ -117,11 +118,13 @@ const Overlay = () => {
 
 	return (
 		<div className="overlay">
+			{/* Sidebar Button */}
 			<div className="sidebar-button absolute" data-sidebar-visible={isSidebarVisible}>
 				<IconButton onClick={() => handleSidebarToggle()}>
 					<SidebarExpand />
 				</IconButton>
 			</div>
+			{/* Navbar */}
 			<div className="overlay-navbar-container">
 				<div className="overlay-navbar" data-popover-visible={isPopoverVisible}>
 					<div className="flex items-center">
@@ -145,19 +148,28 @@ const Overlay = () => {
 					</div>
 				</div>
 			</div>
+			{/* Sidebar */}
 			<Sidebar
 				isVisible={isSidebarVisible}
 				overlay={overlayData}
 				widget={activeWidget}
 				onToggle={() => handleSidebarToggle()}
 			/>
+			{/* Add new button */}
 			<div
 				className="flex gap-16 absolute OverlayButtonContainer depth-shadow"
 				data-sidebar-visible={isSidebarVisible}>
-				<IconPopupButton popupItems={templates} popupPosition="top">
-					<IconPlus />
+				<IconPopupButton icon={<IconPlus />} popupItems={templates} popupPosition="top">
+					
 				</IconPopupButton>
 			</div>
+			{/* Chat */}
+			<div className="chat-button absolute">
+				<IconPopupButton icon={<MessageCircle size={16} />}>
+					{(closePopup) => <Chat closePopup={closePopup}/> }
+				</IconPopupButton>
+			</div>
+			{/* Widgets */}
 			{overlayData.widgets.map((widget) => (
 				<Widget
 					key={widget.id}
@@ -180,6 +192,7 @@ const Overlay = () => {
 					}
 				/>
 			))}
+			{/* Liquid ass SVG */}
 			<svg id="lens-map" style={{ display: 'none' }}>
 				<linearGradient id="red"></linearGradient>
 				<linearGradient id="blue"></linearGradient>

@@ -7,21 +7,24 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 
 interface Props {
-	children: React.ReactNode;
+	icon: React.ReactNode;
 	popupItems?: {
 		label: string;
 		icon?: React.ReactNode;
 		action: (name: string) => void;
 	}[];
+	children?: (closePopup: () => void) => React.ReactNode;
 	popupPosition?: 'top' | 'bottom' | 'left' | 'right';
 	disabled?: boolean;
+	onClose?: () => void;
 }
 
-const IconPopupButton = ({ children, popupItems, popupPosition }: Props) => {
+const IconPopupButton = ({ children, icon, popupItems, popupPosition }: Props) => {
 	const [isPopupVisible, setIsPopupVisible] = useState(false);
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const nameRef = useRef<HTMLInputElement>(null);
 	const popupRef = useRef<HTMLDivElement>(null);
+	const closePopup = () => setIsPopupVisible(false);
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
@@ -62,14 +65,17 @@ const IconPopupButton = ({ children, popupItems, popupPosition }: Props) => {
 		}
 	};
 
+	if(popupItems && children) return;
+
 	return (
 		<div className="icon-button-container" style={{ position: 'relative' }}>
 			<button
 				className="regular"
 				ref={buttonRef}
-				onClick={() => popupItems && setIsPopupVisible(!isPopupVisible)}>
-				{children}
+				onClick={() => setIsPopupVisible(!isPopupVisible)}>
+				{icon}
 			</button>
+			{isPopupVisible && children && <>{children(closePopup)}</>}
 			{isPopupVisible && popupItems && (
 				<div
 					ref={popupRef}
