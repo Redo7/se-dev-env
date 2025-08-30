@@ -523,7 +523,16 @@ iframe {
     width: 100%;
     border-top: rgba(255, 255, 255, 0.2) 0.0625rem solid;
     border-bottom: rgba(255, 255, 255, 0.2) 0.0625rem solid;
-    overflow: scroll;
+    overflow: auto;
+    /* scrollbar-gutter: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--tr-100) transparent; */
+}
+
+.sidebar-fields-container::-webkit-scrollbar{
+    position: absolute;
+    width: 0;
+    height: 0;
 }
 
 .add-group-container {
@@ -622,6 +631,8 @@ iframe {
     bottom: 50px;
     right: 0;
     z-index: 1000;
+    scrollbar-width: thin;
+    scrollbar-color: var(--tr-100) transparent;
 }
 
 .chat textarea{

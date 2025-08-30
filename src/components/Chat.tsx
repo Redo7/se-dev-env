@@ -65,16 +65,18 @@ const Chat = ({ closePopup }: Props) => {
         });
         let element = document.createElement('div');
         element.innerHTML = `<span class='font-[700]'>${username}</span>: <span class='text-zinc-300'>${chatInput.current.value}</span></div>`
-        document.querySelector('.chat-container')?.appendChild(element)
+        document.querySelector('.chat-container')?.prepend(element)
     }
   return (
-    <div className="chat bg-zinc-900 rounded-lg border overflow-hidden absolute w-70">
+    <div className="chat bg-zinc-900 rounded-lg border absolute w-70">
         <div className="flex justify-between items-center p-2 px-3">
             <p className='text-[.75rem] tracking-wide font-[500]'>Chat</p>
             <Button variant="ghost" size="xs" onClick={closePopup}><X size={16}/></Button>
         </div>
         <Separator />
-        <div className="chat-container p-2 h-40 w-full text-sm overflow-scroll flex flex-col justify-end gap-1"></div>
+        <div className="h-40 flex flex-col justify-end gap-1">
+            <div className="chat-container overflow-y-scroll p-2 w-full text-sm flex flex-col-reverse"></div>
+        </div>
         <form action={handleChatMessage}>
             <Input ref={chatInput} className='rounded-lg min-h-auto py-3' placeholder='Type your message' />
         </form>
