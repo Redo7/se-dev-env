@@ -466,7 +466,7 @@ app.put('/api/SE_API/set', async (req, res) => {
     
     const dataFilePath = join(__dirname, "data", 'SE_API.json');
     await fs.writeFile(dataFilePath, JSON.stringify(data, null, "\t"), 'utf-8');
-    res.status(200);
+    res.status(200).json({message: `${key} updated successfully`});
 })
 
 app.get('/api/SE_API/get/:key', async (req, res) => {
