@@ -435,11 +435,6 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 			style={combinedStyle}
 			onClick={onClick}
 			onMouseDown={handleMouseDown}>
-			<div className="widget-remove-button absolute top-0 right-0 z-20">
-				<SubtleButton width="2rem" height="2rem" onClick={onDelete}>
-					<IconTrash />
-				</SubtleButton>
-			</div>
 			{currentScriptVersion == 1.2 ? (
 				<iframe ref={iframeRef} id={id} src={src} sandbox="allow-scripts allow-same-origin" />
 			) : (
@@ -458,6 +453,11 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 					<Button variant="secondary" className='bg-zinc-900 hover:bg-zinc-700 text-zinc-300 dark:bg-zinc-50 dark:hover:bg-zinc-300 dark:text-zinc-900 h-8' onClick={() => updateIframeScript()}> Update </Button>
 				</div>
 			)}
+			<div className="widget-remove-button absolute top-0 right-0 z-20">
+				<SubtleButton width="2rem" height="2rem" onClick={onDelete}>
+					<IconTrash />
+				</SubtleButton>
+			</div>
 			{resizable && (
 				<>
 					<div
