@@ -8,7 +8,7 @@ import IconButton from './Buttons/IconButton';
 import type { OverlayInstance, WidgetInstance } from '../types/';
 import { Link, useParams } from 'react-router-dom';
 import useSoftDelete from '@/hooks/useSoftDelete';
-import { ArrowLeft, CircleDollarSign, ClipboardClock, Cog, Diamond, FlagTriangleRight, Heart, MessageCircle, Shuffle, Star, X } from 'lucide-react';
+import { ArrowLeft, CircleDollarSign, ClipboardClock, Cog, Diamond, FlagTriangleRight, Heart, MessageCircle, Shuffle, Star } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import useAlert from '@/hooks/useAlert';
