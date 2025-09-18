@@ -3,6 +3,7 @@ export interface OverlayInstance{
 	id: string,
 	widgets: WidgetInstance[]
 	deleteAfter?: number;
+	lastUpdate?: undefined | number
 }
 
 export interface WidgetInstance {

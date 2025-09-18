@@ -10,6 +10,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import useSoftDelete from '@/hooks/useSoftDelete';
 import HomeScreenSidebar from './HomeScreenSidebar';
 import { Separator } from './ui/separator';
+import useRelativeTime from '@/hooks/useRelativeTime';
 
 const HomeScreen = () => {
 	const [overlays, setOverlays] = useState<OverlayInstance[]>([]);
@@ -104,7 +105,7 @@ const HomeScreen = () => {
 										<i className="bi bi-folder-fill tx text-xl"></i>
 										<div className="tx flex flex-col gap-1">
 											<p>{overlay.name}</p>
-											<p className="overlay-last-opened">15 minutes ago</p>
+											<p className="overlay-last-opened">{overlay.lastUpdate ? useRelativeTime(overlay.lastUpdate) : "Never opened"}</p>
 										</div>
 									</Link>
 
