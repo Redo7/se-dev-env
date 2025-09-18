@@ -242,7 +242,8 @@ app.delete('/api/delete/', async (req, res) => {
         if(Object.keys(deletionData[overlayID].widgets).length <= 1){
             delete deletionData[overlayID];
         } else {
-            delete deletionData[overlayID][widgetID];
+            const updatedDeletionDataWidgets = deletionData[overlayID].widgets.filter(widget => widget.id != widgetID)
+            deletionData[overlayID].widgets = updatedDeletionDataWidgets;
         }
         fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, "\t"), 'utf-8');
 
@@ -327,6 +328,8 @@ app.put('/api/update-widget-settings', async (req, res) => {
     try {
         const updatedWidgetsArray = currWidgetsArray.widgets.map(widget => widget.id === id ? { ...widget, ...newSettings } : widget);
         currWidgetsArray.widgets = updatedWidgetsArray;
+        console.log(currWidgetsArray);
+        currWidgetsArray.lastUpdate = Date.now();
         fs.writeFileSync(instancePath, JSON.stringify(currWidgetsArray, null, "\t"), 'utf-8');
         res.send();
     } catch (error) {
