@@ -9,6 +9,7 @@ import type { OverlayInstance, WidgetInstance } from '../types/';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import useSoftDelete from '@/hooks/useSoftDelete';
 import HomeScreenSidebar from './HomeScreenSidebar';
+import { Separator } from './ui/separator';
 
 const HomeScreen = () => {
 	const [overlays, setOverlays] = useState<OverlayInstance[]>([]);
@@ -29,7 +30,10 @@ const HomeScreen = () => {
 	const getOverlays = async () => {
 		const res = await fetch('/api/get-overlays');
 		const data = await res.json();
-		const filteredData = data.filter((overlay: {name: string, id: string, deleteAfter?: number, widgets: WidgetInstance[]}) => !overlay.deleteAfter)
+		const filteredData = data.filter(
+			(overlay: { name: string; id: string; deleteAfter?: number; widgets: WidgetInstance[] }) =>
+				!overlay.deleteAfter
+		);
 		setOverlays(filteredData);
 	};
 
@@ -49,9 +53,10 @@ const HomeScreen = () => {
 	return (
 		<div className="flex">
 			<HomeScreenSidebar />
-			<div className="home-screen flex flex-col p-50 gap-4">
-				<div className="flex justify-between">
-					<div className="home-screen-heading pb-5 w-100 flex justify-between">
+			<div className="home-screen flex p-50 w-full">
+				{/* Recent */}
+				<div className="recent-overlays flex flex-col gap-4 w-100 box-content">
+					<div className="home-screen-heading w-100 flex justify-between">
 						<h1>Overlays</h1>
 						<Popover>
 							<PopoverTrigger className="home-screen-create p-4 py-2 rounded-md bg-tr-100">
@@ -75,33 +80,49 @@ const HomeScreen = () => {
 							</PopoverContent>
 						</Popover>
 					</div>
+					<div className="flex gap-4 items-center">
+						<p>Recent</p>
+						<Separator className="data-[orientation=horizontal]:w-auto grow" />
+					</div>
+					<div className="overlay-container flex flex-col gap-4">
+						{/* Recent overlays will appear here */}
+					</div>
 				</div>
-				<div className="overlay-container flex flex-col gap-4">
-					{overlays.map((overlay: OverlayInstance) => {
-						return (
-							<div
-								className="home-screen-overlay py-3 pr-4 pl-0 rounded-md hover:bg-background dark:hover:bg-tr-50 w-100 flex items-center gap-6"
-								key={overlay.id}>
-								<Link className="flex items-center gap-6 flex-grow" to={`/${overlay.id}`}>
-									<i className="bi bi-folder-fill tx text-xl"></i>
-									<div className="tx flex flex-col gap-1">
-										<p>{overlay.name}</p>
-										<p className="overlay-last-opened">15 minutes ago</p>
-									</div>
-								</Link>
+				{/* All Overlays */}
+				<div className="all-overlays flex flex-col gap-4 grow">
+					<div className="flex gap-4 items-center mt-12 2-full pl-10">
+						<p>All Overlays</p>
+						<Separator className="data-[orientation=horizontal]:w-auto grow" />
+					</div>
+					<div className="all-overlays-container flex flex-col gap-4 flex-wrap h-full overflow-scroll pl-10 pr-4">
+						{overlays.map((overlay: OverlayInstance) => {
+							return (
+								<div
+									className="home-screen-overlay py-3 pr-4 pl-0 rounded-md hover:bg-background dark:hover:bg-tr-50 w-100 flex items-center gap-6"
+									key={overlay.id}>
+									<Link className="flex items-center gap-6 flex-grow" to={`/${overlay.id}`}>
+										<i className="bi bi-folder-fill tx text-xl"></i>
+										<div className="tx flex flex-col gap-1">
+											<p>{overlay.name}</p>
+											<p className="overlay-last-opened">15 minutes ago</p>
+										</div>
+									</Link>
 
-								<div className="overlay-action-buttons flex gap-2 p-1.5 px-2 rounded-sm">
-									<button type="button">
-										<i className="bi bi-pencil-square"></i>
-									</button>
-									<span className="overlay-action-buttons-divider"></span>
-									<button type="button" onClick={() => softRemoveWidget(overlay.name, overlay.id)}>
-										<i className="bi bi-trash3"></i>
-									</button>
+									<div className="overlay-action-buttons flex gap-2 p-1.5 px-2 rounded-sm">
+										<button type="button">
+											<i className="bi bi-pencil-square"></i>
+										</button>
+										<span className="overlay-action-buttons-divider"></span>
+										<button
+											type="button"
+											onClick={() => softRemoveWidget(overlay.name, overlay.id)}>
+											<i className="bi bi-trash3"></i>
+										</button>
+									</div>
 								</div>
-							</div>
-						);
-					})}
+							);
+						})}
+					</div>
 				</div>
 			</div>
 		</div>

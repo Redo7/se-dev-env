@@ -243,11 +243,8 @@ body[clean-bg="true"]{
 }
 
 .home-screen {
-    height: 100vh;
-}
-
-.home-screen-heading{
-    border-bottom: var(--tr-100) 0.0625rem solid;
+    height: calc(100vh - 400px);
+    box-sizing: content-box;
 }
 
 .home-screen-heading h1 {
@@ -321,6 +318,10 @@ body[clean-bg="true"]{
 p.overlay-last-opened{
     font-size: 12px;
     opacity: .5;
+}
+
+.all-overlays-container{
+    mask-image: linear-gradient(to right, transparent, #fff 2rem, #fff calc(100% - 4rem), transparent);
 }
 
 /* Overlay */
