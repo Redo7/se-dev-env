@@ -76,7 +76,8 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 					Object.entries(groupedFields).map(([groupName, fieldsInGroup]) => (
 						<FieldGroup key={groupName} name={groupName}>
 							{fieldsInGroup.map(({ fieldName, fieldConfig }) => {
-								const Component = componentMap[fieldConfig.type.toLowerCase()];
+								const componentName = fieldConfig.type.toLowerCase() === 'googlefont' ? 'googleFont' : fieldConfig.type.toLowerCase();
+								const Component = componentMap[componentName];
 
 								if (!Component) {
 									console.warn(`No component found for type: ${fieldConfig.type}`);
