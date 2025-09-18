@@ -322,6 +322,8 @@ p.overlay-last-opened{
 
 .all-overlays-container{
     mask-image: linear-gradient(to right, transparent, #fff 2rem, #fff calc(100% - 4rem), transparent);
+    scrollbar-width: thin;
+    scrollbar-color: var(--tr-100) transparent;
 }
 
 /* Overlay */
