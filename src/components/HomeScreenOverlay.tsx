@@ -14,7 +14,7 @@ const HomeScreenOverlay = ({ overlay, onOverlayDelete}: Props) => {
 			<Link className="flex items-center gap-6 flex-grow" to={`/${overlay.id}`}>
 				<i className="bi bi-folder-fill tx text-xl"></i>
 				<div className="tx flex flex-col gap-1">
-					<p>{overlay.name}</p>
+					<p className="max-w-[24ch] truncate">{overlay.name}</p>
 					<p className="overlay-last-opened">
 						{overlay.lastUpdate ? useRelativeTime(overlay.lastUpdate) : 'Never opened'}
 					</p>
