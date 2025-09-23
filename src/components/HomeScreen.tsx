@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import '../App.css';
 import { useEffect, useRef, useState } from 'react';
 import SubtleButton from './Buttons/SubtleButton';
@@ -10,10 +9,11 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import useSoftDelete from '@/hooks/useSoftDelete';
 import HomeScreenSidebar from './HomeScreenSidebar';
 import { Separator } from './ui/separator';
-import useRelativeTime from '@/hooks/useRelativeTime';
+import HomeScreenOverlay from './HomeScreenOverlay';
 
 const HomeScreen = () => {
 	const [overlays, setOverlays] = useState<OverlayInstance[]>([]);
+	const [sortedOverlays, setSortedOverlays] = useState<OverlayInstance[]>([]);
 	const nameRef = useRef<HTMLInputElement>(null);
 
 	document.body.setAttribute('clean-bg', 'true');
@@ -36,13 +36,22 @@ const HomeScreen = () => {
 				!overlay.deleteAfter
 		);
 		setOverlays(filteredData);
+		const sort = [...filteredData].sort(
+			(a: OverlayInstance, b: OverlayInstance) => {
+			  if (!a.lastUpdate && !b.lastUpdate) return 0;
+			  if (!a.lastUpdate) return 1;
+			  if (!b.lastUpdate) return -1; 
+			  return b.lastUpdate - a.lastUpdate;
+			}
+		  );
+		setSortedOverlays(sort)
 	};
 
 	useEffect(() => {
 		getOverlays();
 	}, []);
 
-	const softRemoveWidget = async (overlayName: string, overlayID: string) => {
+	const softRemoveOverlay = async (overlayName: string, overlayID: string) => {
 		try {
 			await useSoftDelete(overlayName, overlayID, undefined, undefined);
 			getOverlays();
@@ -85,8 +94,8 @@ const HomeScreen = () => {
 						<p>Recent</p>
 						<Separator className="data-[orientation=horizontal]:w-auto grow" />
 					</div>
-					<div className="overlay-container flex flex-col gap-4">
-						{/* Recent overlays will appear here */}
+					<div className="overlay-container overflow-hidden flex flex-col gap-4">
+						{sortedOverlays.map((overlay: OverlayInstance) => { return ( <HomeScreenOverlay overlay={overlay} onOverlayDelete={softRemoveOverlay} /> ); })}
 					</div>
 				</div>
 				{/* All Overlays */}
@@ -96,33 +105,7 @@ const HomeScreen = () => {
 						<Separator className="data-[orientation=horizontal]:w-auto grow" />
 					</div>
 					<div className="all-overlays-container flex flex-col gap-4 flex-wrap h-full overflow-scroll pl-10 pr-4">
-						{overlays.map((overlay: OverlayInstance) => {
-							return (
-								<div
-									className="home-screen-overlay py-3 pr-4 pl-0 rounded-md hover:bg-background dark:hover:bg-tr-50 w-100 flex items-center gap-6"
-									key={overlay.id}>
-									<Link className="flex items-center gap-6 flex-grow" to={`/${overlay.id}`}>
-										<i className="bi bi-folder-fill tx text-xl"></i>
-										<div className="tx flex flex-col gap-1">
-											<p>{overlay.name}</p>
-											<p className="overlay-last-opened">{overlay.lastUpdate ? useRelativeTime(overlay.lastUpdate) : "Never opened"}</p>
-										</div>
-									</Link>
-
-									<div className="overlay-action-buttons flex gap-2 p-1.5 px-2 rounded-sm">
-										<button type="button">
-											<i className="bi bi-pencil-square"></i>
-										</button>
-										<span className="overlay-action-buttons-divider"></span>
-										<button
-											type="button"
-											onClick={() => softRemoveWidget(overlay.name, overlay.id)}>
-											<i className="bi bi-trash3"></i>
-										</button>
-									</div>
-								</div>
-							);
-						})}
+						{overlays.map((overlay: OverlayInstance) => { return ( <HomeScreenOverlay overlay={overlay} onOverlayDelete={softRemoveOverlay} /> ); })}
 					</div>
 				</div>
 			</div>
