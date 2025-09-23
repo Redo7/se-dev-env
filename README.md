@@ -7,7 +7,7 @@ This app aims to bridge the gap between efficient development and StreamElements
 
 ---
 
-<img width="3840" height="2486" alt="image" src="https://github.com/user-attachments/assets/899513b6-2cbc-4ac8-9d59-fe400cb0af94" />
+<img width="3840" height="2486" alt="image" src="https://github.com/user-attachments/assets/9c581933-35e3-413a-9b57-5e1422cea2a6" />
 <img width="3840" height="2486" alt="image" src="https://github.com/user-attachments/assets/c020b829-6771-44bb-bcb6-d19e56747254" />
 
 ---
