@@ -36,7 +36,9 @@ npm run dev
 - [ ] On-screen console toasts
 - [ ] [widget.io](https://chromewebstore.google.com/detail/widgetio/fcgbjpajcfjnjgfdeookpnoefgcliljj) `import`/`export`
 - [ ] Finish home screen design
-    - [ ] Display relative time on recents
+    - [ ] Add search
+    - [ ] Add sort
+    - [x] Display relative time on recents
 - [ ] Overlay and widget renaming
 - [ ] Fields
     - [ ] Movable
@@ -47,4 +49,6 @@ npm run dev
     - [ ] Custom events
     - [ ] Update `data/onSessionUpdate` and `data/onWidgetLoad` when related events happen
 - [ ] Chat emulation
+    - [x] Basic implementation
+    - [ ] Identities
 - [ ] Finish light mode
