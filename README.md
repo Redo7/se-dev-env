@@ -42,6 +42,7 @@ npm run dev
     - [ ] Add sort
     - [x] Display relative time on recents
 - [ ] Overlay and widget renaming
+- [ ] Native way of creating templates
 - [ ] Fields
     - [ ] Movable
     - [ ] Field Creator
