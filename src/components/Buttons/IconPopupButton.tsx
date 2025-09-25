@@ -70,7 +70,7 @@ const IconPopupButton = ({ children, icon, popupItems, popupPosition }: Props) =
 	return (
 		<div className="icon-button-container" style={{ position: 'relative' }}>
 			<button
-				className="regular"
+				className="regular depth-shadow"
 				ref={buttonRef}
 				onClick={() => setIsPopupVisible(!isPopupVisible)}>
 				{icon}

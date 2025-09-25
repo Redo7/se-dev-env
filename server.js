@@ -5,6 +5,7 @@ import { dirname, join } from 'path';
 import fs from 'fs-extra';
 import { v4 as uuidv4 } from 'uuid';
 import util from 'util'
+import AdmZip from "adm-zip";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -328,7 +329,6 @@ app.put('/api/update-widget-settings', async (req, res) => {
     try {
         const updatedWidgetsArray = currWidgetsArray.widgets.map(widget => widget.id === id ? { ...widget, ...newSettings } : widget);
         currWidgetsArray.widgets = updatedWidgetsArray;
-        console.log(currWidgetsArray);
         currWidgetsArray.lastUpdate = Date.now();
         fs.writeFileSync(instancePath, JSON.stringify(currWidgetsArray, null, "\t"), 'utf-8');
         res.send();
@@ -481,6 +481,27 @@ app.get('/api/SE_API/get/:key', async (req, res) => {
         res.json(null);
     }
 })
+
+app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName', async (req, res) => {
+    const { overlayID, widgetID, widgetName } = req.params;
+    const filePath = join(__dirname, 'overlays', overlayID, `${widgetID}`, 'src');
+    const to_zip = fs.readdirSync(filePath);
+    
+    const zp = new AdmZip();
+    zp.addLocalFolder(filePath);
+    zp.addLocalFile(join(__dirname, 'data', "widget.ini"));
+
+    const zipPath = join(__dirname, `${widgetName}.zip`);
+    zp.writeZip(zipPath);
+    
+    res.download(zipPath, `${widgetName}.zip`, (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send("Download failed");
+        }
+        fs.unlinkSync(zipPath);
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);

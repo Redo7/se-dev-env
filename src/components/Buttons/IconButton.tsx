@@ -1,18 +1,29 @@
-import React from 'react';
-import './Buttons.css';
-import '../../App.css';
+import { Slot } from "@radix-ui/react-slot"
+import "./Buttons.css"
+import "../../App.css"
+import { forwardRef } from "react"
 
-interface Props {
-	children: React.ReactNode;
-	onClick: () => void;
+export interface IconButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  asChild?: boolean
 }
 
-const IconButton = ({ children, onClick }: Props) => {
-	return (
-		<button className="regular depth-shadow" onClick={onClick}>
-			{children}
-		</button>
-	);
-};
+const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
+  ({ children, asChild = false, className, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
 
-export default IconButton;
+    return (
+      <Comp
+        ref={ref}
+        className={`regular depth-shadow ${className ?? ""}`}
+        {...props}
+      >
+        {children}
+      </Comp>
+    )
+  }
+)
+
+IconButton.displayName = "IconButton"
+
+export default IconButton

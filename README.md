@@ -33,8 +33,10 @@ npm run dev
 # 1.0 Release Roadmap
 
 - [x] `SE_API` storage persistance
-- [ ] On-screen console toasts
-- [ ] [widget.io](https://chromewebstore.google.com/detail/widgetio/fcgbjpajcfjnjgfdeookpnoefgcliljj) `import`/`export`
+- [x] On-screen console toasts
+- [ ] [widget.io](https://chromewebstore.google.com/detail/widgetio/fcgbjpajcfjnjgfdeookpnoefgcliljj)
+    - [ ] Import
+    - [x] Export
 - [ ] Finish home screen design
     - [ ] Add search
     - [ ] Add sort

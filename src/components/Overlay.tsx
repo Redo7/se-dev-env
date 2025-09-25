@@ -16,6 +16,7 @@ import AlertPopover from './AlertPopover';
 import Chat from './Chat';
 import ConsoleNotification from './ConsoleNotification';
 import type { Notification } from './ConsoleNotification';
+import Widgetio from './Widgetio';
 
 interface Template{
 	label: string;
@@ -198,11 +199,10 @@ const Overlay = () => {
 			/>
 			{/* Add new button */}
 			<div
-				className="flex gap-16 absolute OverlayButtonContainer depth-shadow"
+				className="flex gap-4 absolute OverlayButtonContainer"
 				data-sidebar-visible={isSidebarVisible}>
-				<IconPopupButton icon={<IconPlus />} popupItems={templates} popupPosition="top">
-					
-				</IconPopupButton>
+				<IconPopupButton icon={<IconPlus />} popupItems={templates} popupPosition="top"/>
+				<Widgetio overlay={overlayData} widgets={overlayData.widgets}/>
 			</div>
 			{/* Chat */}
 			<div className="chat-button absolute">

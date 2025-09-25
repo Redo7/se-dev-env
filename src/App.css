@@ -219,7 +219,6 @@ body[clean-bg="true"]{
     background: linear-gradient(180deg, var(--background) 0%, #e1e1e1 100%);
 }
 
-
 .dark .home-screen-sidebar{
     background: #000;
     background: linear-gradient(180deg, var(--background) 0%, #191919 100%);
@@ -597,7 +596,7 @@ iframe {
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
-    
+
     background: #fff;
     color: var(--foreground);
     border: var(--tr-100) 1px solid;
