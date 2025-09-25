@@ -15,7 +15,7 @@ const PORT = 3001;
 app.use(cors())
 app.use(express.json());
 
-const SCRIPT_VER = 1.2; // Latest version of the iframe. Used to track whether any changes were made to the templates/iframe/ files, which would require widgets to have those files copied into their dir in order to work again.
+const SCRIPT_VER = 1.3; // Latest version of the iframe. Used to track whether any changes were made to the templates/iframe/ files, which would require widgets to have those files copied into their dir in order to work again.
 const copyFilePromise = util.promisify(fs.copyFile);
 
 // Helper functions

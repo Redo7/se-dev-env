@@ -1,9 +1,75 @@
-// Script version: 1.2
+// Script version: 1.3
 
-const originalConsole = window.console;
-window.console = new Proxy(originalConsole, { get(target, prop) { return typeof target[prop] === "function" ? target[prop].bind(target) : target[prop]; } });
+function detectType(arg) {
+    if (arg === null) return "null";
+    if (Array.isArray(arg)) return "array";
+    return typeof arg; // gives "string", "number", "boolean", "object", "function", "undefined", "symbol", "bigint"
+  }
+  
+  function serializeArg(arg) {
+    if (arg === null || arg === undefined) return String(arg);
+  
+    // Arrays
+    if (Array.isArray(arg)) {
+      try {
+        return JSON.stringify(arg);
+      } catch {
+        return "[Unserializable Array]";
+      }
+    }
+  
+    // Plain objects
+    if (typeof arg === "object") {
+      try {
+        return JSON.stringify(arg, null, 2);
+      } catch {
+        return "[Unserializable Object]";
+      }
+    }
+  
+    // Functions
+    if (typeof arg === "function") return `[Function: ${arg.name || "anonymous"}]`;
+  
+    // Everything else
+    return String(arg);
+  }
+  
+  const originalConsole = window.console;
+  
+  window.console = new Proxy(originalConsole, {
+    get(target, prop) {
+      if (prop === "log" || prop === "error") {
+        return (...args) => {
+          target[prop](...args);
+  
+          // Each argument gets serialized + type
+          const processed = args.map((arg) => ({
+            message: serializeArg(arg),
+            messageType: detectType(arg),
+          }));
+  
+          if (window.parent !== window) {
+            window.parent.postMessage(
+              {
+                type: "iframeConsole",
+                iframeId: IFRAME_ID,
+                level: prop, // log or error
+                args: processed, // [{message, messageType}, ...]
+              },
+              "*"
+            );
+          }
+        };
+      }
+  
+      return typeof target[prop] === "function"
+        ? target[prop].bind(target)
+        : target[prop];
+    },
+});
 
 let IFRAME_ID = null;
+let IFRAME_NAME = null;
 let isContentLoaded = false;
 
 function replaceVariables(text, variables) {
@@ -91,7 +157,7 @@ async function loadWidgetContentAll(htmlPath, cssPath, jsPath, variables, onComp
 const __mockStore = {}, __mockCounters = {}, __mockFieldData = {};
 
 $(document).ready(function () {
-    if (window.frameElement && window.frameElement.id) { IFRAME_ID = window.frameElement.id; }
+    if (window.frameElement && window.frameElement.id) { IFRAME_ID = window.frameElement.id; IFRAME_NAME = window.frameElement.name}    
     if (window.parent !== window && window.parent) { window.parent.postMessage({ type: "iframeInitialized", iframeId: IFRAME_ID }, "*"); }
 });
 
@@ -137,3 +203,42 @@ window.addEventListener("message", async (obj) => {
         if (window.parent !== window) { window.parent.postMessage({ type: "widgetLoadError", iframeId: IFRAME_ID, error: e.message }, "*"); }
     }
 });
+
+// Catch synchronous JS errors
+window.onerror = function (message, source, lineno, colno, error) {
+  if (window.parent !== window) {
+    window.parent.postMessage(
+      {
+        type: "iframeError",
+        iframeName: IFRAME_NAME,
+        error: {
+          message: String(message),
+          source,
+          lineno,
+          colno,
+          stack: error && error.stack ? error.stack : null,
+        },
+      },
+      "*"
+    );
+  }
+  // return false lets console still show it in devtools
+  return false;
+};
+
+// Catch unhandled promise rejections
+window.onunhandledrejection = function (event) {
+  if (window.parent !== window) {
+    window.parent.postMessage(
+      {
+        type: "iframeError",
+        iframeName: IFRAME_NAME,
+        error: {
+          message: event.reason ? String(event.reason) : "Unhandled promise rejection",
+          stack: event.reason && event.reason.stack ? event.reason.stack : null,
+        },
+      },
+      "*"
+    );
+  }
+};

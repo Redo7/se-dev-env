@@ -435,8 +435,8 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 			style={combinedStyle}
 			onClick={onClick}
 			onMouseDown={handleMouseDown}>
-			{currentScriptVersion == 1.2 ? (
-				<iframe ref={iframeRef} id={id} src={src} sandbox="allow-scripts allow-same-origin" />
+			{currentScriptVersion == 1.3 ? (
+				<iframe ref={iframeRef} id={id} name={name} src={src} sandbox="allow-scripts allow-same-origin" />
 			) : (
 				<div className="script-notice flex gap-4 p-4 py-3 bg-zinc-50 dark:bg-zinc-900">
 					<i className="bi bi-exclamation-diamond-fill text-md text-rose-500 opacity-50"></i>

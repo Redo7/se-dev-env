@@ -14,6 +14,8 @@ import { Button } from './ui/button';
 import useAlert from '@/hooks/useAlert';
 import AlertPopover from './AlertPopover';
 import Chat from './Chat';
+import ConsoleNotification from './ConsoleNotification';
+import type { Notification } from './ConsoleNotification';
 
 interface Template{
 	label: string;
@@ -29,6 +31,7 @@ const Overlay = () => {
 	const [templates, setTemplates] = useState<Template[]>([]);
 	const [overlayData, setOverlayData] = useState<OverlayInstance>({name: 'Overlay Name', id: 'overlay-id', widgets: []});
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
+	const [notifications, setNotifications] = useState<Notification[]>([])
 
 	document.body.setAttribute('clean-bg', 'false');
 
@@ -41,7 +44,45 @@ const Overlay = () => {
 
 	useEffect(() => {
 		getOverlayData();
+		window.addEventListener("message", (event) => {
+			if (event.data?.type === 'iframeConsole') {
+				const { level, args } = event.data;
+				const id = crypto.randomUUID();
+				const duration = 5300
+				const notification = { id, level: level, duration, content: args, close: (id: string) => removeNotification(id)}
+				setNotifications((prev) => [
+					...prev,
+					notification,
+				]);
+			}
+			if (event.data?.type === "iframeError") {
+				const { error, iframeName } = event.data;
+				setNotifications((prev) => [
+				  ...prev,
+				  {
+					id: crypto.randomUUID(),
+					level: "error",
+					title: `${iframeName} - Line ${error.lineno}:${error.colno}`,
+					content: [{ message: error.message, messageType: "string" }],
+					close: removeNotification,
+					duration: 5300 
+				  }
+				]);
+			}
+		  });
 	}, []);
+
+	const removeNotification = (id: string) => {
+		setNotifications(prev =>
+			prev.map(n =>
+			  n.id === id ? { ...n, closing: true } : n
+			)
+		  );
+		  
+		  setTimeout(() => {
+			setNotifications(prev => prev.filter(n => n.id !== id));
+		}, 300); 
+	}
 
 	useEffect(() => {
 		const getTemplates = async () => {
@@ -168,6 +209,12 @@ const Overlay = () => {
 				<IconPopupButton icon={<MessageCircle size={16} />}>
 					{(closePopup) => <Chat closePopup={closePopup}/> }
 				</IconPopupButton>
+			</div>
+			{/* Notifications */}
+			<div className="notification-area absolute flex flex-col-reverse justify-end p-10 gap-4">
+				{notifications.map((notification) => {
+					return <ConsoleNotification key={notification.id} notification={{...notification}}/>
+				})}
 			</div>
 			{/* Widgets */}
 			{overlayData.widgets.map((widget) => (

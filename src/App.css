@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -642,4 +643,167 @@ iframe {
     resize: none;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+}
+
+/* Notifications */
+
+.notification-area{
+    top: 0;
+    right: 0;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.console-notification{
+    position: relative;
+}
+
+.console-notification.log{
+    --bg: #2C2C30;
+    --title: #7C7A87;
+}
+
+.console-notification.error{
+    --bg: #ed1b53;
+    --title: #FFFFFF;
+    --error-name: #FFB3D1;
+}
+
+.console-notification .error-name{
+    color: var(--error-name);
+    font-family: 'inter', sans-serif !important;
+    font-size: 0.625rem;
+}
+
+.notification-body{
+    background: var(--bg);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    display: flex;
+    gap: 0.75rem;
+    width: 18.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification-body .title{
+    color: var(--title);
+    font-size: 0.625rem;
+    font-weight: 700;
+}
+
+.notification-body .output{
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.625rem;
+    font-weight: 700;
+}
+
+.notification-timer{
+    width: 100%;
+    height: 0.125rem;
+    background: var(--tr-300);
+    bottom: 0;
+    left: 0;
+}
+
+.notification-timer-fill{
+    width: 100%;
+    height: 0.125rem;
+    background: var(--tr-950);
+    animation: notifTimer 5000ms linear 300ms 1 forwards;
+}
+
+.console-notification:hover .notification-timer-fill {
+    animation-play-state: paused;
+}
+
+@keyframes notifTimer {
+    to{
+        transform: translateX(-100%);
+    }
+}
+
+.console-notification{
+    animation: notifIn 300ms ease 0s 1 forwards;
+}
+
+.console-notification.animOut{
+    animation: notifOut 500ms ease 0s 1 forwards;
+}
+
+.notification-close{
+    --close-icon: var(--color-zinc-700);
+    transition: opacity 500ms ease, background 150ms ease;
+    background: var(--color-zinc-100);
+    border-radius: 100%;
+    aspect-ratio: 1/1;
+    opacity: 0;
+    display: flex;
+    position: absolute;
+    top: -.4rem;
+    right: -.4rem;
+    padding: 0.15rem;
+    z-index: 1;
+}
+
+.notification-close svg{
+    transition: stroke 150ms ease;
+}
+
+.console-notification:hover .notification-close{
+    opacity: 0.5;
+}
+
+.console-notification:hover .notification-close:hover{
+    opacity: 1;
+}
+
+.notification-close:active{
+    --close-icon: var(--color-zinc-100);
+    background: var(--color-zinc-700);
+}
+
+.notification-close svg{
+    vertical-align: middle;
+}
+
+.react-json-view{
+    background-color: var(--tr-100) !important;
+    padding: .25rem;
+    border-radius: .25rem;
+    width: 100%;
+}
+
+.react-json-view .variable-row, .react-json-view .object-meta-data{
+    position: relative;
+}
+
+.react-json-view .copy-to-clipboard-container{
+    position: absolute;
+    display: inline-block !important;
+    opacity: 0;
+    transition: opacity 150ms ease;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.react-json-view .variable-row:hover .copy-to-clipboard-container, .react-json-view .object-meta-data:hover .copy-to-clipboard-container{
+    opacity: 0.5;
+}
+
+.react-json-view .variable-row:hover .copy-to-clipboard-container:hover, .react-json-view .object-meta-data:hover .copy-to-clipboard-container{
+    opacity: 1;
+}
+
+@keyframes notifIn {
+    from{
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes notifOut {
+    to{
+        opacity: 0;
+    }
 }
