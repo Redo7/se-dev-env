@@ -38,7 +38,7 @@ npm run dev
     - [ ] Import
     - [x] Export
         - [ ] Obfuscate
-- [ ] Finish home screen design
+- [x] Finish home screen design
     - [x] Add search
     - [x] Add sort
     - [x] Display relative time on recents
