@@ -37,15 +37,19 @@ npm run dev
 - [ ] [widget.io](https://chromewebstore.google.com/detail/widgetio/fcgbjpajcfjnjgfdeookpnoefgcliljj)
     - [ ] Import
     - [x] Export
+        - [ ] Obfuscate
 - [ ] Finish home screen design
-    - [ ] Add search
-    - [ ] Add sort
+    - [x] Add search
+    - [x] Add sort
     - [x] Display relative time on recents
 - [ ] Overlay and widget renaming
+    - [ ] Rename entries in `deletion-data.json`
 - [ ] Native way of creating templates
 - [ ] Fields
     - [ ] Movable
     - [ ] Field Creator
+        - [ ]  Creating new field should put the template name by default
+        - [ ]  Increment number when adding multiple times
     - [ ] Field Group redesign
 - [ ] Events emulation
     - [x] Basic implementation
@@ -55,3 +59,13 @@ npm run dev
     - [x] Basic implementation
     - [ ] Identities
 - [ ] Finish light mode
+- [ ] Widget menu
+    - [ ]  Rename
+    - [ ]  Export
+    - [ ]  Make a template
+    - [ ]  Open folder
+    - [ ]  Open in Editor
+        - [ ]  Editor can be set in settings
+    - [ ]  Pointer events
+    - [ ]  Delete
+- [ ] Animations

@@ -9,7 +9,7 @@ interface Props{
 const HomeScreenOverlay = ({ overlay, onOverlayDelete}: Props) => {
 	return (
 		<div
-			className="home-screen-overlay py-3 pr-4 pl-0 rounded-md hover:bg-background dark:hover:bg-tr-50 w-100 flex items-center gap-6"
+			className="home-screen-overlay snap-start py-3 pr-4 pl-0 rounded-md hover:bg-background dark:hover:bg-tr-50 w-100 flex items-center gap-6"
 			key={overlay.id}>
 			<Link className="flex items-center gap-6 flex-grow" to={`/${overlay.id}`}>
 				<i className="bi bi-folder-fill tx text-xl"></i>
