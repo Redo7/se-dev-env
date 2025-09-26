@@ -488,7 +488,11 @@ app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName', async (req, re
     const to_zip = fs.readdirSync(filePath);
     
     const zp = new AdmZip();
-    zp.addLocalFolder(filePath);
+    zp.addLocalFile(join(filePath, 'html.html'), "", "html.txt");
+    zp.addLocalFile(join(filePath, 'css.css'), "", "css.txt");
+    zp.addLocalFile(join(filePath, 'js.js'), "", "js.txt");
+    zp.addLocalFile(join(filePath, 'fields.json'), "", "fields.txt");
+    zp.addLocalFile(join(filePath, 'data.json'), "", "data.txt");
     zp.addLocalFile(join(__dirname, 'data', "widget.ini"));
 
     const zipPath = join(__dirname, `${widgetName}.zip`);
