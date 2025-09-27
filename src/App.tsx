@@ -1,10 +1,11 @@
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Overlay from "./components/Overlay";
-import HomeScreen from "./components/HomeScreen";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Overlay from './components/Overlay';
+import HomeScreen from './components/HomeScreen';
 import { ThemeProvider } from './components/ThemeProvider';
 import { useEffect } from 'react';
 import Trash from './components/Trash';
+import { Toaster } from './components/ui/sonner';
 
 const App = () => {
 	// const [isDarkMode, setIsDarkMode] = useState(true);
@@ -15,7 +16,7 @@ const App = () => {
 		type DeletionData = Record<string, Record<string, number>>;
 		const data: DeletionData = await res.json();
 		const now = Date.now();
-		const widgetsToDelete: { overlay: string; widget: string | undefined}[] = [];
+		const widgetsToDelete: { overlay: string; widget: string | undefined }[] = [];
 
 		for (const [overlayKey, overlayData] of Object.entries(data)) {
 			if (overlayData.deleteAfter < now) {
@@ -28,13 +29,13 @@ const App = () => {
 				}
 			}
 		}
-		widgetsToDelete.forEach(entry => {
+		widgetsToDelete.forEach((entry) => {
 			removeWidget(entry.overlay, entry.widget);
-		})
+		});
 	};
 
 	useEffect(() => {
-			deletionExpiryCheck();
+		deletionExpiryCheck();
 	}, []);
 
 	const removeWidget = async (overlayID: string, widgetID: string | undefined) => {
@@ -43,7 +44,7 @@ const App = () => {
 			await fetch('/api/delete', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ overlayID, widgetID }), 
+				body: JSON.stringify({ overlayID, widgetID }),
 			}).then((response) => {
 				if (!response.ok) {
 					throw new Error(`Something went wrong while deleting ${widgetID}`);
@@ -54,18 +55,29 @@ const App = () => {
 			console.error(`Error removing ${widgetID}`, error);
 		}
 	};
-	
+
 	return (
 		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+			<Toaster
+				position="top-center"
+				duration={5000}
+				richColors
+				closeButton
+				toastOptions={{
+					classNames: {
+						description: 'opacity-75 text-[12px]',
+					},
+				}}
+			/>
 			<Router>
-			<Routes>
-				<Route path="/" element={<HomeScreen />} />
-				<Route path="/:id" element={<Overlay />} />
-				<Route path="/trash" element={<Trash />} />
-			</Routes>
+				<Routes>
+					<Route path="/" element={<HomeScreen />} />
+					<Route path="/:id" element={<Overlay />} />
+					<Route path="/trash" element={<Trash />} />
+				</Routes>
 			</Router>
 		</ThemeProvider>
-	  );
-}
+	);
+};
 
-export default App
+export default App;

@@ -39,7 +39,7 @@ npm run dev
 -   [x] `SE_API` storage persistance
 -   [x] On-screen console toasts
 -   [ ] [widget.io](https://chromewebstore.google.com/detail/widgetio/fcgbjpajcfjnjgfdeookpnoefgcliljj)
-    -   [ ] Import
+    -   [x] Import
     -   [x] Export
         -   [ ] Obfuscate
 -   [x] Finish home screen design
@@ -73,4 +73,4 @@ npm run dev
     -   [ ] Pointer events
     -   [ ] Delete
 -   [ ] Animations
--   [ ] Add toasts to the app
+-   [x] Add toasts to the app

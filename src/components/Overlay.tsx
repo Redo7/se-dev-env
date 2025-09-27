@@ -6,7 +6,7 @@ import { SidebarExpand, IconPlus, IconPlusSm } from '../assets/Icons/';
 import Sidebar from './Sidebar';
 import IconButton from './Buttons/IconButton';
 import type { OverlayInstance, WidgetInstance } from '../types/';
-import { data, Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import useSoftDelete from '@/hooks/useSoftDelete';
 import {
 	ArrowLeft,
@@ -29,8 +29,8 @@ import Chat from './Chat';
 import ConsoleNotification from './ConsoleNotification';
 import type { Notification } from './ConsoleNotification';
 import Widgetio from './Widgetio';
-import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
+import useLocaleDate from '@/hooks/useLocaleDate';
 
 interface Template {
 	label: string;
@@ -136,8 +136,12 @@ const Overlay = () => {
 				};
 			});
 			console.log('Created ' + data.name);
+			toast.success(`Created ${data.name}`);
 		} catch (error) {
 			console.error(error);
+			toast.error(`Error creating widget`, {
+				description: `${error}`,
+			});
 		}
 	};
 
@@ -150,28 +154,15 @@ const Overlay = () => {
 		try {
 			await useSoftDelete(overlayName, overlayID, widgetName, widgetID);
 			getOverlayData();
-			const deletionDate = new Date(Date.now() + 2592000000);
-			const day = () => {
-				const d = deletionDate.getDay();
-				if (d > 3 && d < 21) return d + 'th';
-				switch (d % 10) {
-					case 1:
-						return d + 'st';
-					case 2:
-						return d + 'nd';
-					case 3:
-						return d + 'rd';
-					default:
-						return d + 'th';
-				}
-			};
-			const month = deletionDate.toLocaleString('default', { month: 'long' });
 			toast(`${widgetName} was moved to trash`, {
-				description: `You can recover it until ${month} ${day()} ${deletionDate.getFullYear()}`,
+				description: `You can recover it until ${useLocaleDate(Date.now() + 2592000000)}`,
 				icon: <Trash size={16} />,
 			});
 		} catch (error) {
 			console.error(`Error removing ${widgetID}`, error);
+			toast.error(`Error removing ${widgetID}`, {
+				description: `${error}`,
+			});
 		}
 	};
 
@@ -296,17 +287,6 @@ const Overlay = () => {
 					return <ConsoleNotification key={notification.id} notification={{ ...notification }} />;
 				})}
 			</div>
-			<Toaster
-				position="top-center"
-				duration={5000}
-				richColors
-				closeButton
-				toastOptions={{
-					classNames: {
-						description: 'opacity-75 text-[12px]',
-					},
-				}}
-			/>
 			{/* Widgets */}
 			{overlayData.widgets.map((widget) => (
 				<Widget

@@ -5,6 +5,7 @@ import useFields from '../hooks/useFieldData';
 import type { OverlayInstance, WidgetInstance } from '../types/';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { toast } from 'sonner';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -57,11 +58,35 @@ const fetchOnWidgetLoad = async (): Promise<OnWidgetLoadData | undefined> => {
 		return data;
 	} catch (error) {
 		console.error('[Parent App] Error fetching onWidgetLoad data:', error);
+		toast.error(`Error fetching onWidgetLoad data:`, {
+			description: `${error}`,
+		});
 		return undefined;
 	}
 };
 
-const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initialWidth, height: initialHeight, onClick, onDelete, onSettingsChange, onDragStart, onDragEnd, onDragging, initialPosition = { x: 0, y: 0 }, style, resizable = false, onResizeStart, onResizeEnd, onResizing, }: Props) => {
+const Widget = ({
+	overlay,
+	template,
+	name,
+	id,
+	src,
+	scriptVersion,
+	width: initialWidth,
+	height: initialHeight,
+	onClick,
+	onDelete,
+	onSettingsChange,
+	onDragStart,
+	onDragEnd,
+	onDragging,
+	initialPosition = { x: 0, y: 0 },
+	style,
+	resizable = false,
+	onResizeStart,
+	onResizeEnd,
+	onResizing,
+}: Props) => {
 	const [isDragging, setIsDragging] = useState(false);
 	const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
 	const [position, setPosition] = useState(initialPosition);
@@ -82,52 +107,49 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 	const [onWidgetLoadData, setOnWidgetLoadData] = useState<OnWidgetLoadData | undefined>(undefined);
 	const [currentScriptVersion, setCurrentScriptVersion] = useState(scriptVersion);
 	const widgetIdRef = useRef(id);
-	
+
 	const pendingDataRef = useRef<OnWidgetLoadData | undefined>(undefined);
 	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	const updateIframeScript = async () => {
-		const res = await fetch( `/api/update-iframe-files`,
-			{
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ overlayID: overlay.id, widgetID: id }),
-			}
-		);
+		const res = await fetch(`/api/update-iframe-files`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ overlayID: overlay.id, widgetID: id }),
+		});
 		const data = await res.json();
-		if(!res.ok){
+		if (!res.ok) {
+			toast.error(`Something went wrong while updating iframe files for ${id}`);
 			throw new Error(`Something went wrong while updating iframe files for ${id}`);
 		}
-		onSettingsChange(
-			overlay.id,
-			{	
-				name: name,
-				id: id,
-				src: src,
-				template: template,
-				scriptVersion: data.scriptVersion,
-			
-				width: Math.max(dimensions.width, 50),
-				height: Math.max(dimensions.height, 50),
-				posX: position.x,
-				posY: position.y
-			}
-		);
-		setCurrentScriptVersion(data.scriptVersion)
-	}
+		onSettingsChange(overlay.id, {
+			name: name,
+			id: id,
+			src: src,
+			template: template,
+			scriptVersion: data.scriptVersion,
+
+			width: Math.max(dimensions.width, 50),
+			height: Math.max(dimensions.height, 50),
+			posX: position.x,
+			posY: position.y,
+		});
+		toast.success(`Successfully updated iframe files for ${name}`);
+		setCurrentScriptVersion(data.scriptVersion);
+	};
 
 	const getOnWidgetLoadData = useCallback(async () => {
 		try {
 			const [data, fieldData] = await Promise.all([
-				fetchOnWidgetLoad(), 
-				useFields(overlay.id, widgetIdRef.current)
+				fetchOnWidgetLoad(),
+				useFields(overlay.id, widgetIdRef.current),
 			]);
 
 			if (data && fieldData) {
-				const combinedData = { 
-					...data, 
+				const combinedData = {
+					...data,
 					fieldData: { ...fieldData },
-					widgetId: widgetIdRef.current
+					widgetId: widgetIdRef.current,
 				};
 				setOnWidgetLoadData(combinedData);
 				return combinedData;
@@ -166,7 +188,7 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 
 	useEffect(() => {
 		getOnWidgetLoadData();
-		
+
 		return () => {
 			if (retryTimeoutRef.current) {
 				clearTimeout(retryTimeoutRef.current);
@@ -198,7 +220,7 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 				case 'iframeInitialized':
 					// console.log(`[Parent App] Iframe initialized for ${widgetIdRef.current}`);
 					hasIframeInitialized.current = true;
-					
+
 					// Send data immediately if available
 					if (onWidgetLoadData) {
 						sendDataToIframe(onWidgetLoadData);
@@ -208,18 +230,18 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 						console.warn('[Parent App] No data available to send to initialized iframe');
 					}
 					break;
-					
+
 				case 'widgetLoadComplete':
 					// console.log(`[Parent App] Widget load complete for ${widgetIdRef.current}`);
 					break;
-					
+
 				case 'widgetLoadError':
 					console.error(`[Parent App] Widget load error for ${widgetIdRef.current}:`, event.data.error);
 					break;
-					
+
 				default:
-					// Uncomment for debugging
-					// console.log('[Parent App] Unknown message type from iframe:', event.data);
+				// Uncomment for debugging
+				// console.log('[Parent App] Unknown message type from iframe:', event.data);
 			}
 		};
 
@@ -233,7 +255,7 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 	useEffect(() => {
 		if (onWidgetLoadData) {
 			pendingDataRef.current = onWidgetLoadData;
-			
+
 			if (hasIframeInitialized.current) {
 				sendDataToIframe(onWidgetLoadData);
 			}
@@ -251,10 +273,10 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 
 				if (incomingWidgetId === widgetIdRef.current) {
 					// console.log(`[Parent App] Hot reload triggered for ${widgetIdRef.current}`);
-					
+
 					if (iframeRef.current) {
 						hasIframeInitialized.current = false;
-						
+
 						try {
 							const newData = await getOnWidgetLoadData();
 							if (newData) {
@@ -346,25 +368,36 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 				setIsResizing(null);
 				onResizeEnd?.(e as unknown as React.MouseEvent<HTMLDivElement>, currentDims, position);
 			}
-			onSettingsChange(
-				overlay.id,
-				{	
-					name: name,
-					id: id,
-					src: src,
-					template: template,
-					scriptVersion: scriptVersion,
-				
-					width: Math.max(dimensions.width, 50),
-					height: Math.max(dimensions.height, 50),
-					posX: position.x,
-					posY: position.y
-				}
-			);
+			onSettingsChange(overlay.id, {
+				name: name,
+				id: id,
+				src: src,
+				template: template,
+				scriptVersion: scriptVersion,
+
+				width: Math.max(dimensions.width, 50),
+				height: Math.max(dimensions.height, 50),
+				posX: position.x,
+				posY: position.y,
+			});
 			document.removeEventListener('mousemove', handleGlobalMouseMove);
 			document.removeEventListener('mouseup', handleGlobalMouseUp);
 		},
-		[isDragging, isResizing, position, dimensions, onDragEnd, onResizeEnd, handleGlobalMouseMove, overlay, id, name, template, src, onSettingsChange]
+		[
+			isDragging,
+			isResizing,
+			position,
+			dimensions,
+			onDragEnd,
+			onResizeEnd,
+			handleGlobalMouseMove,
+			overlay,
+			id,
+			name,
+			template,
+			src,
+			onSettingsChange,
+		]
 	);
 
 	useEffect(() => {
@@ -444,13 +477,28 @@ const Widget = ({ overlay, template, name, id, src, scriptVersion, width: initia
 						<span className="text-[0.75rem] flex items-center gap-1">
 							<p className="opacity-50">Script is outdated</p>
 							<Tooltip>
-								<TooltipTrigger><i className="bi bi-question-circle-fill opacity-50 hover:opacity-75"></i></TooltipTrigger>
-								<TooltipContent className='bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200 depth-shadow'> <p className='text-center'>This widget was created on an older version of the app,<br/>and requires the iframe files to be updated in order to work properly.</p> </TooltipContent>
+								<TooltipTrigger>
+									<i className="bi bi-question-circle-fill opacity-50 hover:opacity-75"></i>
+								</TooltipTrigger>
+								<TooltipContent className="bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200 depth-shadow">
+									{' '}
+									<p className="text-center">
+										This widget was created on an older version of the app,
+										<br />
+										and requires the iframe files to be updated in order to work properly.
+									</p>{' '}
+								</TooltipContent>
 							</Tooltip>
 						</span>
 						<p className="text-[0.875rem] text-zinc-900 dark:text-zinc-300">Click the button to update</p>
 					</div>
-					<Button variant="secondary" className='bg-zinc-900 hover:bg-zinc-700 text-zinc-300 dark:bg-zinc-50 dark:hover:bg-zinc-300 dark:text-zinc-900 h-8' onClick={() => updateIframeScript()}> Update </Button>
+					<Button
+						variant="secondary"
+						className="bg-zinc-900 hover:bg-zinc-700 text-zinc-300 dark:bg-zinc-50 dark:hover:bg-zinc-300 dark:text-zinc-900 h-8"
+						onClick={() => updateIframeScript()}>
+						{' '}
+						Update{' '}
+					</Button>
 				</div>
 			)}
 			<div className="widget-remove-button absolute top-0 right-0 z-20">
