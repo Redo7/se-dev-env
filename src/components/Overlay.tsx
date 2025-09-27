@@ -2,13 +2,25 @@ import '../App.css';
 import { useEffect, useState } from 'react';
 import Widget from './Widget';
 import IconPopupButton from './Buttons/IconPopupButton';
-import {SidebarExpand, IconPlus, IconPlusSm} from '../assets/Icons/';
+import { SidebarExpand, IconPlus, IconPlusSm } from '../assets/Icons/';
 import Sidebar from './Sidebar';
 import IconButton from './Buttons/IconButton';
 import type { OverlayInstance, WidgetInstance } from '../types/';
-import { Link, useParams } from 'react-router-dom';
+import { data, Link, useParams } from 'react-router-dom';
 import useSoftDelete from '@/hooks/useSoftDelete';
-import { ArrowLeft, CircleDollarSign, ClipboardClock, Cog, Diamond, FlagTriangleRight, Heart, MessageCircle, Shuffle, Star } from 'lucide-react';
+import {
+	ArrowLeft,
+	CircleDollarSign,
+	ClipboardClock,
+	Cog,
+	Diamond,
+	FlagTriangleRight,
+	Heart,
+	MessageCircle,
+	Shuffle,
+	Star,
+	Trash,
+} from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import useAlert from '@/hooks/useAlert';
@@ -17,8 +29,10 @@ import Chat from './Chat';
 import ConsoleNotification from './ConsoleNotification';
 import type { Notification } from './ConsoleNotification';
 import Widgetio from './Widgetio';
+import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
-interface Template{
+interface Template {
 	label: string;
 	icon: React.ReactNode | null;
 	action: () => void;
@@ -26,77 +40,80 @@ interface Template{
 
 const Overlay = () => {
 	const { id } = useParams<{ id: string }>();
-	if (!id) return (<>Incorrect Overlay ID: {id}</>);
+	if (!id) return <>Incorrect Overlay ID: {id}</>;
 	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 	const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 	const [templates, setTemplates] = useState<Template[]>([]);
-	const [overlayData, setOverlayData] = useState<OverlayInstance>({name: 'Overlay Name', id: 'overlay-id', widgets: []});
+	const [overlayData, setOverlayData] = useState<OverlayInstance>({
+		name: 'Overlay Name',
+		id: 'overlay-id',
+		widgets: [],
+	});
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
-	const [notifications, setNotifications] = useState<Notification[]>([])
+	const [notifications, setNotifications] = useState<Notification[]>([]);
 
 	document.body.setAttribute('clean-bg', 'false');
 
 	const getOverlayData = async () => {
 		const res = await fetch(`/api/get-overlay-data/${encodeURIComponent(id)}`);
 		const data = await res.json();
-		const filteredData = {...data, widgets: data.widgets.filter((widget: WidgetInstance) => !widget.deleteAfter)}
+		const filteredData = { ...data, widgets: data.widgets.filter((widget: WidgetInstance) => !widget.deleteAfter) };
 		setOverlayData(filteredData);
 	};
 
 	useEffect(() => {
 		getOverlayData();
-		window.addEventListener("message", (event) => {
+		window.addEventListener('message', (event) => {
 			if (event.data?.type === 'iframeConsole') {
 				const { level, args } = event.data;
 				const id = crypto.randomUUID();
-				const duration = 5300
-				const notification = { id, level: level, duration, content: args, close: (id: string) => removeNotification(id)}
-				setNotifications((prev) => [
-					...prev,
-					notification,
-				]);
+				const duration = 5300;
+				const notification = {
+					id,
+					level: level,
+					duration,
+					content: args,
+					close: (id: string) => removeNotification(id),
+				};
+				setNotifications((prev) => [...prev, notification]);
 			}
-			if (event.data?.type === "iframeError") {
+			if (event.data?.type === 'iframeError') {
 				const { error, iframeName } = event.data;
 				setNotifications((prev) => [
-				  ...prev,
-				  {
-					id: crypto.randomUUID(),
-					level: "error",
-					title: `${iframeName} - Line ${error.lineno}:${error.colno}`,
-					content: [{ message: error.message, messageType: "string" }],
-					close: removeNotification,
-					duration: 5300 
-				  }
+					...prev,
+					{
+						id: crypto.randomUUID(),
+						level: 'error',
+						title: `${iframeName} - Line ${error.lineno}:${error.colno}`,
+						content: [{ message: error.message, messageType: 'string' }],
+						close: removeNotification,
+						duration: 5300,
+					},
 				]);
 			}
-		  });
+		});
 	}, []);
 
 	const removeNotification = (id: string) => {
-		setNotifications(prev =>
-			prev.map(n =>
-			  n.id === id ? { ...n, closing: true } : n
-			)
-		  );
-		  
-		  setTimeout(() => {
-			setNotifications(prev => prev.filter(n => n.id !== id));
-		}, 300); 
-	}
+		setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, closing: true } : n)));
+
+		setTimeout(() => {
+			setNotifications((prev) => prev.filter((n) => n.id !== id));
+		}, 300);
+	};
 
 	useEffect(() => {
 		const getTemplates = async () => {
 			const res = await fetch('/api/get-templates');
 			const data = await res.json();
-			
+
 			const templateArray: Template[] = data[0].map((template: string) => ({
 				label: template[0].toUpperCase() + template.slice(1),
 				icon: <IconPlusSm />,
 				source: overlayData.id,
 				action: (name: string) => addWidget(name, template, overlayData.id),
 			}));
-			setTemplates(templateArray)
+			setTemplates(templateArray);
 		};
 		getTemplates();
 	}, [overlayData]);
@@ -114,20 +131,45 @@ const Overlay = () => {
 			const data = await res.json();
 			setOverlayData((prevOverlay) => {
 				return {
-				  ...prevOverlay,
-				  widgets: [...prevOverlay.widgets, data],
+					...prevOverlay,
+					widgets: [...prevOverlay.widgets, data],
 				};
-			  });
+			});
 			console.log('Created ' + data.name);
 		} catch (error) {
 			console.error(error);
 		}
 	};
 
-	const softRemoveWidget = async (overlayName: string, overlayID: string, widgetName: string, widgetID: string | undefined) => {
+	const softRemoveWidget = async (
+		overlayName: string,
+		overlayID: string,
+		widgetName: string,
+		widgetID: string | undefined
+	) => {
 		try {
 			await useSoftDelete(overlayName, overlayID, widgetName, widgetID);
 			getOverlayData();
+			const deletionDate = new Date(Date.now() + 2592000000);
+			const day = () => {
+				const d = deletionDate.getDay();
+				if (d > 3 && d < 21) return d + 'th';
+				switch (d % 10) {
+					case 1:
+						return d + 'st';
+					case 2:
+						return d + 'nd';
+					case 3:
+						return d + 'rd';
+					default:
+						return d + 'th';
+				}
+			};
+			const month = deletionDate.toLocaleString('default', { month: 'long' });
+			toast(`${widgetName} was moved to trash`, {
+				description: `You can recover it until ${month} ${day()} ${deletionDate.getFullYear()}`,
+				icon: <Trash size={16} />,
+			});
 		} catch (error) {
 			console.error(`Error removing ${widgetID}`, error);
 		}
@@ -137,7 +179,15 @@ const Overlay = () => {
 		await fetch('/api/update-widget-settings', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ overlayID: overlayID, id: widget.id, scriptVersion: widget.scriptVersion, width: widget.width, height: widget.height, posX: widget.posX, posY: widget.posY }),
+			body: JSON.stringify({
+				overlayID: overlayID,
+				id: widget.id,
+				scriptVersion: widget.scriptVersion,
+				width: widget.width,
+				height: widget.height,
+				posX: widget.posX,
+				posY: widget.posY,
+			}),
 		}).then((response) => {
 			if (!response.ok) {
 				throw new Error(`Something went wrong while changing settings for ${id}`);
@@ -170,23 +220,55 @@ const Overlay = () => {
 			<div className="overlay-navbar-container">
 				<div className="overlay-navbar" data-popover-visible={isPopoverVisible}>
 					<div className="flex items-center">
-						<Link to="/" className='sidebar-back opacity-50 hover:opacity-100'><ArrowLeft size={20} strokeWidth={1.5} /></Link>
-						<p className='text-sm tracking-wide ml-[1rem] mr-2'>{overlayData.name}</p>
-						<Badge variant="outline" className='opacity-50'>{overlayData.id}</Badge>
+						<Link to="/" className="sidebar-back opacity-50 hover:opacity-100">
+							<ArrowLeft size={20} strokeWidth={1.5} />
+						</Link>
+						<p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p>
+						<Badge variant="outline" className="opacity-50">
+							{overlayData.id}
+						</Badge>
 					</div>
 					<div className="flex">
-						<Button variant="ghost" size="sm"> <ClipboardClock size={16}/> </Button>
-						<Button variant="ghost" size="sm"> <Shuffle size={16}/> </Button>
+						<Button variant="ghost" size="sm">
+							{' '}
+							<ClipboardClock size={16} />{' '}
+						</Button>
+						<Button variant="ghost" size="sm">
+							{' '}
+							<Shuffle size={16} />{' '}
+						</Button>
 						<div className="test-alert-container px-2 mx-2 flex items-center">
-							<Button variant="ghost" size="sm" onClick={() => useAlert('follower-latest')}> <Heart size={16}/> </Button>
+							<Button variant="ghost" size="sm" onClick={() => useAlert('follower-latest')}>
+								{' '}
+								<Heart size={16} />{' '}
+							</Button>
 							{/* <span className='border-x-1 h-[50%] mx-2'></span> */}
 							{/* <span className='h-1 w-1 rounded-full bg-zinc-700 mx-2'></span> */}
-							<AlertPopover listener='subscriber-latest' icon={<Star size={16} />} onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}/>
-							<AlertPopover listener='tip-latest' icon={<CircleDollarSign size={16} />} onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}/>
-							<AlertPopover listener='cheer-latest' icon={<Diamond size={16} />} onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}/>
-							<AlertPopover listener='raid-latest' icon={<FlagTriangleRight size={16} />} onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}/>
+							<AlertPopover
+								listener="subscriber-latest"
+								icon={<Star size={16} />}
+								onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+							/>
+							<AlertPopover
+								listener="tip-latest"
+								icon={<CircleDollarSign size={16} />}
+								onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+							/>
+							<AlertPopover
+								listener="cheer-latest"
+								icon={<Diamond size={16} />}
+								onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+							/>
+							<AlertPopover
+								listener="raid-latest"
+								icon={<FlagTriangleRight size={16} />}
+								onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+							/>
 						</div>
-						<Button variant="ghost" size="sm"> <Cog size={16}/> </Button>
+						<Button variant="ghost" size="sm">
+							{' '}
+							<Cog size={16} />{' '}
+						</Button>
 					</div>
 				</div>
 			</div>
@@ -198,24 +280,33 @@ const Overlay = () => {
 				onToggle={() => handleSidebarToggle()}
 			/>
 			{/* Add new button */}
-			<div
-				className="flex gap-4 absolute OverlayButtonContainer"
-				data-sidebar-visible={isSidebarVisible}>
-				<IconPopupButton icon={<IconPlus />} popupItems={templates} popupPosition="top"/>
-				<Widgetio overlay={overlayData} widgets={overlayData.widgets}/>
+			<div className="flex gap-4 absolute OverlayButtonContainer" data-sidebar-visible={isSidebarVisible}>
+				<IconPopupButton icon={<IconPlus />} popupItems={templates} popupPosition="top" />
+				<Widgetio overlay={overlayData} widgets={overlayData.widgets} onWidgetImport={getOverlayData} />
 			</div>
 			{/* Chat */}
 			<div className="chat-button absolute">
 				<IconPopupButton icon={<MessageCircle size={16} />}>
-					{(closePopup) => <Chat closePopup={closePopup}/> }
+					{(closePopup) => <Chat closePopup={closePopup} />}
 				</IconPopupButton>
 			</div>
 			{/* Notifications */}
 			<div className="notification-area absolute flex flex-col-reverse justify-end p-10 gap-4">
 				{notifications.map((notification) => {
-					return <ConsoleNotification key={notification.id} notification={{...notification}}/>
+					return <ConsoleNotification key={notification.id} notification={{ ...notification }} />;
 				})}
 			</div>
+			<Toaster
+				position="top-center"
+				duration={5000}
+				richColors
+				closeButton
+				toastOptions={{
+					classNames: {
+						description: 'opacity-75 text-[12px]',
+					},
+				}}
+			/>
 			{/* Widgets */}
 			{overlayData.widgets.map((widget) => (
 				<Widget
@@ -232,11 +323,9 @@ const Overlay = () => {
 					resizable={true}
 					onClick={() => handleWidgetClick(widget)}
 					onDelete={() => softRemoveWidget(overlayData.name, overlayData.id, widget.name, widget.id)}
-					onSettingsChange={(id, widget) =>
-					{
-						updateWidgetSettings(id, widget)
-					}
-					}
+					onSettingsChange={(id, widget) => {
+						updateWidgetSettings(id, widget);
+					}}
 				/>
 			))}
 			{/* Liquid ass SVG */}

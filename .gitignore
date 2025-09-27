@@ -28,3 +28,4 @@ dist-ssr
 templates/user/*
 !templates/user/blank
 data/deletion-data.json
+uploads

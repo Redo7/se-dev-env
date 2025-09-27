@@ -1,11 +1,14 @@
 import express from 'express';
 import cors from 'cors'
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, basename } from 'path';
 import fs from 'fs-extra';
 import { v4 as uuidv4 } from 'uuid';
 import util from 'util'
 import AdmZip from "adm-zip";
+import multer from "multer";
+import ini from "ini";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,6 +20,7 @@ app.use(cors())
 app.use(express.json());
 
 const SCRIPT_VER = 1.3; // Latest version of the iframe. Used to track whether any changes were made to the templates/iframe/ files, which would require widgets to have those files copied into their dir in order to work again.
+const upload = multer({ dest: "uploads/" });
 const copyFilePromise = util.promisify(fs.copyFile);
 
 // Helper functions
@@ -43,7 +47,7 @@ async function fetchDataFile(file) {
     return file.includes('.json') ? JSON.parse(dataObject) : dataObject;
 }
 
-async function fetchOverlayData(overlayID){
+async function fetchOverlayData(overlayID) {
     const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
     const data = await fs.readFile(instancePath, 'utf-8');
     const currOverlayData = JSON.parse(data);
@@ -53,7 +57,7 @@ async function fetchOverlayData(overlayID){
 
 function copyFiles(srcDir, destDir, files) {
     return Promise.all(files.map(f => {
-       return copyFilePromise(join(srcDir, f), join(destDir, f));
+        return copyFilePromise(join(srcDir, f), join(destDir, f));
     }));
 }
 
@@ -75,7 +79,7 @@ app.post("/api/create-overlay/", async (req, res) => {
 
     const destinationPath = join(__dirname, "overlays", id);
     const overlayDataPath = join(__dirname, "overlays", id, 'overlay-data.json');
-    
+
     try {
         console.log(`Creating overlay: ${name}, in ${destinationPath}`);
         fs.mkdirSync(destinationPath, { recursive: true });
@@ -91,25 +95,25 @@ app.post("/api/create-overlay/", async (req, res) => {
 
 app.get("/api/get-overlays", async (req, res) => {
     try {
-      const dirents = await fs.readdir("./overlays/", { withFileTypes: true });
-  
-      const overlays = dirents
-        .filter((dirent) => dirent.isDirectory())
-        .map((dirent) => dirent.name);
-        
-  
-      const overlaysArray = await Promise.all(
-        overlays.map(async (overlay) => {
-          return await fetchOverlayData(overlay);
-        })
-      );
-  
-      res.json(overlaysArray);
+        const dirents = await fs.readdir("./overlays/", { withFileTypes: true });
+
+        const overlays = dirents
+            .filter((dirent) => dirent.isDirectory())
+            .map((dirent) => dirent.name);
+
+
+        const overlaysArray = await Promise.all(
+            overlays.map(async (overlay) => {
+                return await fetchOverlayData(overlay);
+            })
+        );
+
+        res.json(overlaysArray);
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: `Failed to load overlays: ${err}` });
+        console.error(err);
+        res.status(500).json({ error: `Failed to load overlays: ${err}` });
     }
-  });
+});
 
 // Get templates
 
@@ -130,7 +134,7 @@ app.get('/api/get-overlay-data/:overlayID', async (req, res) => {
 
     const { overlayID } = req.params;
     let currWidgetsArray = await fetchOverlayData(overlayID);
-    
+
     res.json(currWidgetsArray)
 })
 
@@ -191,26 +195,26 @@ app.put('/api/soft-delete/', async (req, res) => {
 
     try {
         let deletionData = JSON.parse(fs.readFileSync(deletionDataPath));
-        if(!deletionData) deletionData = {}; 
-        if(!deletionData[overlayID]) deletionData[overlayID] = {
+        if (!deletionData) deletionData = {};
+        if (!deletionData[overlayID]) deletionData[overlayID] = {
             name: overlayName,
             id: overlayID,
             widgets: []
         };
         let overlayData = await fetchOverlayData(overlayID);
         const deletionDate = Date.now() + 2592000000;
-        if(widgetName && widgetID){
-            deletionData[overlayID]['widgets'].push({name: widgetName, id: widgetID, deleteAfter: deletionDate});
-            overlayData.widgets = overlayData.widgets.map(widget => widget.id === widgetID ? {...widget, deleteAfter: deletionDate} : widget)
-        } else if(!widgetName && !widgetID) {
+        if (widgetName && widgetID) {
+            deletionData[overlayID]['widgets'].push({ name: widgetName, id: widgetID, deleteAfter: deletionDate });
+            overlayData.widgets = overlayData.widgets.map(widget => widget.id === widgetID ? { ...widget, deleteAfter: deletionDate } : widget)
+        } else if (!widgetName && !widgetID) {
             deletionData[overlayID].name = overlayName;
             deletionData[overlayID].deleteAfter = deletionDate;
             overlayData.deleteAfter = deletionDate;
         }
-        
+
         fs.writeFileSync(overlayDataPath, JSON.stringify(overlayData, null, "\t"), 'utf-8');
         fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, "\t"), 'utf-8');
-        
+
         res.status(200).send();
     } catch (error) {
         console.error(error);
@@ -230,9 +234,9 @@ app.delete('/api/delete/', async (req, res) => {
     let currWidgetsArray = await fetchOverlayData(overlayID);
     let target;
     try {
-        if(widgetID){
+        if (widgetID) {
             target = join(__dirname, 'overlays', overlayID, widgetID);
-            const updatedWidgetsArray = {...currWidgetsArray, widgets: currWidgetsArray.widgets.filter(widget => widget.id != widgetID)}
+            const updatedWidgetsArray = { ...currWidgetsArray, widgets: currWidgetsArray.widgets.filter(widget => widget.id != widgetID) }
             fs.writeFileSync(overlayDataPath, JSON.stringify(updatedWidgetsArray, null, "\t"), 'utf-8');
         } else {
             target = join(__dirname, 'overlays', overlayID);
@@ -240,7 +244,7 @@ app.delete('/api/delete/', async (req, res) => {
         fs.rmSync(target, { recursive: true, force: true });
 
         let deletionData = JSON.parse(fs.readFileSync(deletionDataPath));
-        if(Object.keys(deletionData[overlayID].widgets).length <= 1){
+        if (Object.keys(deletionData[overlayID].widgets).length <= 1) {
             delete deletionData[overlayID];
         } else {
             const updatedDeletionDataWidgets = deletionData[overlayID].widgets.filter(widget => widget.id != widgetID)
@@ -254,6 +258,7 @@ app.delete('/api/delete/', async (req, res) => {
         res.status(500).send();
     }
 })
+
 // Restore overlay / widget
 
 app.put('/api/restore/', async (req, res) => {
@@ -325,7 +330,7 @@ app.put('/api/update-widget-settings', async (req, res) => {
 
     const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
     let currWidgetsArray = await fetchOverlayData(overlayID);
-    
+
     try {
         const updatedWidgetsArray = currWidgetsArray.widgets.map(widget => widget.id === id ? { ...widget, ...newSettings } : widget);
         currWidgetsArray.widgets = updatedWidgetsArray;
@@ -339,7 +344,7 @@ app.put('/api/update-widget-settings', async (req, res) => {
 
 // Fetch files from /data/
 
-app.get('/api/data/:file', async (req, res) => { 
+app.get('/api/data/:file', async (req, res) => {
     if (!req.params.file) return res.status(400).json({ error: 'File is required' });
     const dataObject = await fetchDataFile(`${req.params.file}.json`); // this returns [object Object] I think?
     res.json(dataObject)
@@ -350,7 +355,7 @@ app.get('/api/data/:file', async (req, res) => {
 app.get('/api/fields/:overlay/:widget', async (req, res) => {
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
-    
+
     const dataFile = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'fields.json');
     const fieldData = await fs.readFile(dataFile, 'utf-8');
 
@@ -359,7 +364,7 @@ app.get('/api/fields/:overlay/:widget', async (req, res) => {
 
 // Fetch data.json
 
-app.post('/api/field-data/:overlay/:widget', async (req, res) => { 
+app.post('/api/field-data/:overlay/:widget', async (req, res) => {
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
 
@@ -377,14 +382,14 @@ app.post('/api/field-data/:overlay/:widget', async (req, res) => {
         const dataFile = fs.readFileSync(dataFilePath, 'utf-8');
         const data = JSON.parse(dataFile);
 
-        
+
         let content, regenerate = false;
         Object.keys(fields).forEach(key => {
-            if(data[key] === undefined) regenerate = true;
+            if (data[key] === undefined) regenerate = true;
         })
-        
+
         const defaultDataContent = JSON.stringify(fields, null, 2);
-        if(regenerate){
+        if (regenerate) {
             content = defaultDataContent;
             await fs.writeFile(dataFilePath, defaultDataContent, 'utf-8');
             console.log(`Fields data for ${dataFilePath} regenerated successfully`);
@@ -418,7 +423,7 @@ app.post('/api/field-data/:overlay/:widget', async (req, res) => {
 
 // Update the value of a specific field in data.json
 
-app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => { 
+app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
     if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
     if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
     if (!req.params.field) return res.status(400).json({ error: 'Field is required' });
@@ -451,7 +456,7 @@ app.put('/api/update-iframe-files/', async (req, res) => {
     const widgetPath = join(__dirname, "overlays", overlayID, widgetID);
 
     copyFiles(iframeTemplate, widgetPath, ['iframe.html', 'main.css', 'script.js']).then(async () => {
-        res.status(200).json({scriptVersion: SCRIPT_VER});
+        res.status(200).json({ scriptVersion: SCRIPT_VER });
     }).catch(err => {
         console.error(`Error updating ${widget} iframe:`, err);
         res.status(500).json({ error: 'Internal server error' });
@@ -466,16 +471,16 @@ app.put('/api/SE_API/set', async (req, res) => {
     } else {
         data[key] = value;
     }
-    
+
     const dataFilePath = join(__dirname, "data", 'SE_API.json');
     await fs.writeFile(dataFilePath, JSON.stringify(data, null, "\t"), 'utf-8');
-    res.status(200).json({message: `${key} updated successfully`});
+    res.status(200).json({ message: `${key} updated successfully` });
 })
 
 app.get('/api/SE_API/get/:key', async (req, res) => {
     const key = req.params.key;
     const data = await fetchDataFile('SE_API.json');
-    if(data[key]){
+    if (data[key]) {
         res.json(data[key]);
     } else {
         res.json(null);
@@ -486,25 +491,110 @@ app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName', async (req, re
     const { overlayID, widgetID, widgetName } = req.params;
     const filePath = join(__dirname, 'overlays', overlayID, `${widgetID}`, 'src');
     const to_zip = fs.readdirSync(filePath);
-    
-    const zp = new AdmZip();
-    zp.addLocalFile(join(filePath, 'html.html'), "", "html.txt");
-    zp.addLocalFile(join(filePath, 'css.css'), "", "css.txt");
-    zp.addLocalFile(join(filePath, 'js.js'), "", "js.txt");
-    zp.addLocalFile(join(filePath, 'fields.json'), "", "fields.txt");
-    zp.addLocalFile(join(filePath, 'data.json'), "", "data.txt");
-    zp.addLocalFile(join(__dirname, 'data', "widget.ini"));
+
+    const zip = new AdmZip();
+    zip.addLocalFile(join(filePath, 'html.html'), "", "html.txt");
+    zip.addLocalFile(join(filePath, 'css.css'), "", "css.txt");
+    zip.addLocalFile(join(filePath, 'js.js'), "", "js.txt");
+    zip.addLocalFile(join(filePath, 'fields.json'), "", "fields.txt");
+    zip.addLocalFile(join(filePath, 'data.json'), "", "data.txt");
+    zip.addLocalFile(join(__dirname, 'data', "widget.ini"));
 
     const zipPath = join(__dirname, `${widgetName}.zip`);
-    zp.writeZip(zipPath);
-    
+    zip.writeZip(zipPath);
+
     res.download(zipPath, `${widgetName}.zip`, (err) => {
         if (err) {
-          console.error(err);
-          res.status(500).send("Download failed");
+            console.error(err);
+            res.status(500).send("Download failed");
         }
         fs.unlinkSync(zipPath);
     });
+});
+
+app.post("/api/widget-io-import/:overlayID", upload.single("file"), async (req, res) => {
+    const overlayID = req.params.overlayID;
+    if (!req.file) {
+        return res.status(400).json({ error: "No file received" });
+    }
+    const baseName = req.file.originalname.split('.')[0];
+    const name = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+    const normalizedName = name.toLowerCase().replaceAll(" - ", "-").replaceAll(" ", "-") + "-" + uuidv4();
+
+    const basePath = join(__dirname, "overlays", overlayID, normalizedName);
+    const srcPath = join(basePath, "src");
+    const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
+
+    try {
+        await fs.ensureDir(srcPath);
+
+        // Extract + parse ini
+        const zip = new AdmZip(req.file.path);
+        const entries = zip.getEntries();
+
+        const widgetIniEntry = entries.find((e) => e.entryName.endsWith("widget.ini"));
+        if (!widgetIniEntry) throw new Error("widget.ini missing in ZIP");
+        const config = ini.parse(widgetIniEntry.getData().toString("utf8"));
+
+        const mapping = {
+            HTML: "html.html",
+            CSS: "css.css",
+            JS: "js.js",
+            FIELDS: "fields.json",
+            DATA: "data.json",
+        };
+
+        // Copy files
+        for (const [section, outFile] of Object.entries(mapping)) {
+            if (!config[section]?.path) continue;
+            const entryPath = config[section].path.replace(/['"]/g, "");
+            const zipEntry = entries.find(
+                (e) => basename(e.entryName) === basename(entryPath)
+            );
+            if (!zipEntry) continue;
+
+            let contents = zipEntry.getData().toString("utf8");
+
+            if (section === "FIELDS" || section === "DATA") {
+                try {
+                    contents = JSON.stringify(JSON.parse(contents), null, 2);
+                } catch {
+                    contents = JSON.stringify({ raw: contents }, null, 2);
+                }
+            }
+
+            await fs.writeFile(join(srcPath, outFile), contents, "utf8");
+        }
+
+        // Copy iframe template
+        const iframeTemplate = join(__dirname, "templates", "iframe");
+        await fs.copy(iframeTemplate, basePath, { overwrite: true });
+
+        // Create default widget data
+        const widgetData = {
+            name,
+            id: normalizedName,
+            src: `/overlays/${overlayID}/${normalizedName}/iframe.html`,
+            template: "imported-zip",
+            scriptVersion: SCRIPT_VER,
+            width: 500,
+            height: 500,
+            posX: 0,
+            posY: 0,
+        };
+
+        // Update overlay-data.json
+        let currWidgetsArray = await fetchOverlayData(overlayID);
+        currWidgetsArray.widgets.push(widgetData);
+        await fs.writeFile(instancePath, JSON.stringify(currWidgetsArray, null, 2), "utf8");
+
+        res.json(widgetData);
+    } catch (err) {
+        console.error("Error importing widget:", err);
+        res.status(500).json({ error: String(err) });
+    } finally {
+        if (req.file?.path) await fs.remove(req.file.path);
+    }
 });
 
 app.listen(PORT, () => {
