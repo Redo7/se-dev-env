@@ -70,7 +70,9 @@ npm run dev
     -   [ ] Open folder
     -   [ ] Open in Editor
         -   [ ] Editor can be set in settings
-    -   [ ] Pointer events
-    -   [ ] Delete
+    -   [x] Pointer events
+    -   [ ] Background color
+    -   [ ] Background blur
+    -   [x] Delete
 -   [ ] Animations
 -   [x] Add toasts to the app
