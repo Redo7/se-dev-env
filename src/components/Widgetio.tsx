@@ -11,6 +11,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
+import useWidgetExport from '@/hooks/useWidgetExport';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -23,28 +24,8 @@ const Widgetio = ({ overlay, widgets, onWidgetImport }: Props) => {
 	const [exportWidget, setExportWidget] = useState('');
 	const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-	const handleWidgetExport = async (widgetId: string, widgetName: string) => {
-		const res = await fetch(
-			`/api/widget-io-export/${encodeURIComponent(overlay.id)}/${encodeURIComponent(
-				widgetId
-			)}/${encodeURIComponent(widgetName)}/`
-		);
-		if (!res.ok) {
-			console.error('Failed to fetch export:', res.statusText);
-			return;
-		}
-
-		const blob = await res.blob();
-
-		const url = window.URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `${widgetName}.zip`;
-		document.body.appendChild(a);
-		a.click();
-
-		a.remove();
-		window.URL.revokeObjectURL(url);
+	const handleWidgetExport = async (widget: WidgetInstance) => {
+		await useWidgetExport(overlay, widget.id, widget.name);
 	};
 
 	async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -122,7 +103,7 @@ const Widgetio = ({ overlay, widgets, onWidgetImport }: Props) => {
 																currentValue === exportWidget ? '' : currentValue
 															);
 															setOpen(false);
-															handleWidgetExport(widget.id, widget.name);
+															handleWidgetExport(widget);
 														}}>
 														{widget.name}
 														<Check

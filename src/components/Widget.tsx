@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { EllipsisVertical } from 'lucide-react';
 import { CustomCheckboxItem } from './CustomCheckboxItem';
+import useWidgetExport from '@/hooks/useWidgetExport';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -529,7 +530,7 @@ const Widget = ({
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
 						<DropdownMenuItem disabled>Rename</DropdownMenuItem>
-						<DropdownMenuItem disabled>Export</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>Export</DropdownMenuItem>
 						<DropdownMenuItem disabled>Make a template</DropdownMenuItem>
 						<DropdownMenuItem disabled>Open folder</DropdownMenuItem>
 						<DropdownMenuItem disabled>Open in Editor</DropdownMenuItem>
