@@ -43,6 +43,7 @@ const Overlay = () => {
 	const { id } = useParams<{ id: string }>();
 	if (!id) return <>Incorrect Overlay ID: {id}</>;
 	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+	const [isNavbarOver, setIsNavbarOver] = useState(false);
 	const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 	const [templates, setTemplates] = useState<Template[]>([]);
 	const [overlayData, setOverlayData] = useState<OverlayInstance>({
@@ -213,61 +214,67 @@ const Overlay = () => {
 				</IconButton>
 			</div>
 			{/* Navbar */}
-			<div className="overlay-navbar-container">
-				<div className="overlay-navbar" data-popover-visible={isPopoverVisible}>
-					<div className="flex items-center">
-						<Link to="/" className="sidebar-back opacity-50 hover:opacity-100">
-							<ArrowLeft size={20} strokeWidth={1.5} />
-						</Link>
-						<p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p>
-						<Badge variant="outline" className="opacity-50">
-							{overlayData.id}
-						</Badge>
+			<div
+				className={`overlay-navbar ${isNavbarOver}`}
+				data-popover-visible={isPopoverVisible}
+				onMouseEnter={() => setIsNavbarOver(true)}
+				onMouseLeave={() => setIsNavbarOver(false)}>
+				<div className="flex items-center">
+					<Link to="/" className="sidebar-back opacity-50 hover:opacity-100">
+						<ArrowLeft size={20} strokeWidth={1.5} />
+					</Link>
+					<p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p>
+					<Badge variant="outline" className="opacity-50">
+						{overlayData.id}
+					</Badge>
+				</div>
+				<div className="flex">
+					<Button variant="ghost" size="sm">
+						{' '}
+						<ClipboardClock size={16} />{' '}
+					</Button>
+					<Button variant="ghost" size="sm">
+						{' '}
+						<Shuffle size={16} />{' '}
+					</Button>
+					<div className="test-alert-container px-2 mx-2 flex items-center">
+						<Button variant="ghost" size="sm" onClick={() => useAlert('follower-latest')}>
+							{' '}
+							<Heart size={16} />{' '}
+						</Button>
+						{/* <span className='border-x-1 h-[50%] mx-2'></span> */}
+						{/* <span className='h-1 w-1 rounded-full bg-zinc-700 mx-2'></span> */}
+						<AlertPopover
+							listener="subscriber-latest"
+							icon={<Star size={16} />}
+							onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+						/>
+						<AlertPopover
+							listener="tip-latest"
+							icon={<CircleDollarSign size={16} />}
+							onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+						/>
+						<AlertPopover
+							listener="cheer-latest"
+							icon={<Diamond size={16} />}
+							onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+						/>
+						<AlertPopover
+							listener="raid-latest"
+							icon={<FlagTriangleRight size={16} />}
+							onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+						/>
 					</div>
-					<div className="flex">
-						<Button variant="ghost" size="sm">
-							{' '}
-							<ClipboardClock size={16} />{' '}
-						</Button>
-						<Button variant="ghost" size="sm">
-							{' '}
-							<Shuffle size={16} />{' '}
-						</Button>
-						<div className="test-alert-container px-2 mx-2 flex items-center">
-							<Button variant="ghost" size="sm" onClick={() => useAlert('follower-latest')}>
-								{' '}
-								<Heart size={16} />{' '}
-							</Button>
-							{/* <span className='border-x-1 h-[50%] mx-2'></span> */}
-							{/* <span className='h-1 w-1 rounded-full bg-zinc-700 mx-2'></span> */}
-							<AlertPopover
-								listener="subscriber-latest"
-								icon={<Star size={16} />}
-								onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
-							/>
-							<AlertPopover
-								listener="tip-latest"
-								icon={<CircleDollarSign size={16} />}
-								onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
-							/>
-							<AlertPopover
-								listener="cheer-latest"
-								icon={<Diamond size={16} />}
-								onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
-							/>
-							<AlertPopover
-								listener="raid-latest"
-								icon={<FlagTriangleRight size={16} />}
-								onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
-							/>
-						</div>
-						<Button variant="ghost" size="sm">
-							{' '}
-							<Cog size={16} />{' '}
-						</Button>
-					</div>
+					<Button variant="ghost" size="sm">
+						{' '}
+						<Cog size={16} />{' '}
+					</Button>
 				</div>
 			</div>
+			<div
+				className="overlay-navbar-container"
+				onMouseEnter={() => setIsNavbarOver(true)}
+				onMouseLeave={() => setIsNavbarOver(false)}></div>
 			{/* Sidebar */}
 			<Sidebar
 				isVisible={isSidebarVisible}
