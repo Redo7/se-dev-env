@@ -9,10 +9,23 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { EllipsisVertical } from 'lucide-react';
+import {
+	Code,
+	CodeXml,
+	Download,
+	EllipsisVertical,
+	Folder,
+	FolderCode,
+	FolderGit2,
+	Palette,
+	Pointer,
+	TextCursor,
+	Trash,
+} from 'lucide-react';
 import { CustomCheckboxItem } from './CustomCheckboxItem';
 import useWidgetExport from '@/hooks/useWidgetExport';
 
@@ -530,26 +543,38 @@ const Widget = ({
 						</SubtleButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
+						<DropdownMenuLabel className="text-[0.75rem] opacity-50">General</DropdownMenuLabel>
 						<DropdownMenuItem className="line-through" disabled>
-							Rename
+							<TextCursor /> Rename
 						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>Export</DropdownMenuItem>
-						<DropdownMenuItem className="line-through" disabled>
-							Make a template
-						</DropdownMenuItem>
-						<DropdownMenuItem className="line-through" disabled>
-							Open folder
+						<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>
+							<Download /> Export
 						</DropdownMenuItem>
 						<DropdownMenuItem className="line-through" disabled>
-							Open in Editor
+							<FolderGit2 /> Make a template
 						</DropdownMenuItem>
+						<DropdownMenuItem className="line-through" disabled>
+							<Folder /> Open folder
+						</DropdownMenuItem>
+						<DropdownMenuItem className="line-through" disabled>
+							<CodeXml /> Open in Editor
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuLabel className="text-[0.75rem] opacity-50">iframe control</DropdownMenuLabel>
 						<CustomCheckboxItem mirror={true} checked={pointerEvents} onCheckedChange={setPointerEvents}>
-							Pointer events
+							<Pointer /> Pointer events
 						</CustomCheckboxItem>
+						<DropdownMenuItem className="line-through" disabled>
+							<Palette /> Background color
+						</DropdownMenuItem>
+						<DropdownMenuItem className="line-through" disabled>
+							<Palette /> Background blur
+						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							className="text-red-500 hover:bg-red-500/20! hover:text-red-500!"
 							onClick={onDelete}>
+							<Trash className="stroke-red-500" />
 							Delete
 						</DropdownMenuItem>
 					</DropdownMenuContent>
