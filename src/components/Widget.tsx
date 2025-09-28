@@ -14,6 +14,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EllipsisVertical } from 'lucide-react';
+import { CustomCheckboxItem } from './CustomCheckboxItem';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -478,7 +479,14 @@ const Widget = ({
 			onClick={onClick}
 			onMouseDown={handleMouseDown}>
 			{currentScriptVersion == 1.3 ? (
-				<iframe ref={iframeRef} id={id} name={name} src={src} sandbox="allow-scripts allow-same-origin" />
+				<iframe
+					ref={iframeRef}
+					id={id}
+					name={name}
+					src={src}
+					sandbox="allow-scripts allow-same-origin"
+					className={pointerEvents ? 'pointer-events-auto' : 'pointer-events-none'}
+				/>
 			) : (
 				<div className="script-notice flex gap-4 p-4 py-3 bg-zinc-50 dark:bg-zinc-900">
 					<i className="bi bi-exclamation-diamond-fill text-md text-rose-500 opacity-50"></i>
@@ -526,9 +534,9 @@ const Widget = ({
 						<DropdownMenuItem disabled>Make a template</DropdownMenuItem>
 						<DropdownMenuItem disabled>Open folder</DropdownMenuItem>
 						<DropdownMenuItem disabled>Open in Editor</DropdownMenuItem>
-						<DropdownMenuCheckboxItem disabled checked={pointerEvents} onCheckedChange={setPointerEvents}>
+						<CustomCheckboxItem mirror={true} checked={pointerEvents} onCheckedChange={setPointerEvents}>
 							Pointer events
-						</DropdownMenuCheckboxItem>
+						</CustomCheckboxItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							className="text-red-500 hover:bg-red-500/20! hover:text-red-500!"
