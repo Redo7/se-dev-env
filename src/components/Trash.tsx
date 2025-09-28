@@ -4,7 +4,7 @@ import type { OverlayInstance, WidgetInstance } from '../types/';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import HomeScreenSidebar from './HomeScreenSidebar';
-import { toast } from 'sonner';
+import useTrashRestore from '@/hooks/useTrashRestore';
 
 const Trash = () => {
 	const [overlays, setOverlays] = useState<OverlayInstance[]>([]);
@@ -22,18 +22,8 @@ const Trash = () => {
 		getDeleted();
 	}, []);
 
-	const handleRestore = async (overlayID: string, widgetID: string | undefined) => {
-		const res = await fetch('/api/restore', {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ overlayID, widgetID }),
-		});
-		const id = widgetID ? widgetID : overlayID;
-		if (!res.ok) {
-			toast.error(`Error restoring ${id}`);
-			return;
-		}
-		toast.success(`Successfully restored ${id}`);
+	const handleRestore = async (overlay: OverlayInstance, widget: WidgetInstance | undefined) => {
+		await useTrashRestore(overlay, widget);
 		getDeleted();
 	};
 
@@ -67,7 +57,7 @@ const Trash = () => {
 										</p>
 									</div>
 									<div className="overlay-action-buttons flex gap-2 p-1.5 px-2 rounded-sm">
-										<button type="button" onClick={() => handleRestore(overlay.id, undefined)}>
+										<button type="button" onClick={() => handleRestore(overlay, undefined)}>
 											{' '}
 											<i className="bi bi-arrow-counterclockwise"></i>{' '}
 										</button>
@@ -87,9 +77,7 @@ const Trash = () => {
 												</p>
 											</div>
 											<div className="overlay-action-buttons flex gap-2 p-1.5 px-2 rounded-sm">
-												<button
-													type="button"
-													onClick={() => handleRestore(overlay.id, widget.id)}>
+												<button type="button" onClick={() => handleRestore(overlay, widget)}>
 													{' '}
 													<i className="bi bi-arrow-counterclockwise"></i>{' '}
 												</button>

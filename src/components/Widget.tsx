@@ -1,11 +1,19 @@
 import { useRef, useState, type CSSProperties, useEffect, useCallback } from 'react';
 import SubtleButton from './Buttons/SubtleButton';
-import IconTrash from '../assets/Icons/IconTrash';
 import useFields from '../hooks/useFieldData';
 import type { OverlayInstance, WidgetInstance } from '../types/';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { toast } from 'sonner';
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { EllipsisVertical } from 'lucide-react';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -88,6 +96,7 @@ const Widget = ({
 	onResizing,
 }: Props) => {
 	const [isDragging, setIsDragging] = useState(false);
+	const [pointerEvents, setPointerEvents] = useState(false);
 	const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
 	const [position, setPosition] = useState(initialPosition);
 	const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
@@ -501,10 +510,33 @@ const Widget = ({
 					</Button>
 				</div>
 			)}
-			<div className="widget-remove-button absolute top-0 right-0 z-20">
-				<SubtleButton width="2rem" height="2rem" onClick={onDelete}>
+			<div className="widget-context-menu absolute top-0 right-0">
+				{/* <SubtleButton width="2rem" height="2rem" onClick={onDelete}>
 					<IconTrash />
-				</SubtleButton>
+				</SubtleButton> */}
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<SubtleButton width="2rem" height="2rem">
+							<EllipsisVertical strokeWidth={1} />
+						</SubtleButton>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent>
+						<DropdownMenuItem disabled>Rename</DropdownMenuItem>
+						<DropdownMenuItem disabled>Export</DropdownMenuItem>
+						<DropdownMenuItem disabled>Make a template</DropdownMenuItem>
+						<DropdownMenuItem disabled>Open folder</DropdownMenuItem>
+						<DropdownMenuItem disabled>Open in Editor</DropdownMenuItem>
+						<DropdownMenuCheckboxItem disabled checked={pointerEvents} onCheckedChange={setPointerEvents}>
+							Pointer events
+						</DropdownMenuCheckboxItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem
+							className="text-red-500 hover:bg-red-500/20! hover:text-red-500!"
+							onClick={onDelete}>
+							Delete
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 			{resizable && (
 				<>

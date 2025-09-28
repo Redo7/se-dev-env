@@ -31,6 +31,7 @@ import type { Notification } from './ConsoleNotification';
 import Widgetio from './Widgetio';
 import { toast } from 'sonner';
 import useLocaleDate from '@/hooks/useLocaleDate';
+import useTrashRestore from '@/hooks/useTrashRestore';
 
 interface Template {
 	label: string;
@@ -145,22 +146,26 @@ const Overlay = () => {
 		}
 	};
 
-	const softRemoveWidget = async (
-		overlayName: string,
-		overlayID: string,
-		widgetName: string,
-		widgetID: string | undefined
-	) => {
+	const softRemoveWidget = async (overlay: OverlayInstance, widget: WidgetInstance) => {
 		try {
-			await useSoftDelete(overlayName, overlayID, widgetName, widgetID);
+			await useSoftDelete(overlay.name, overlay.id, widget.name, widget.id);
 			getOverlayData();
-			toast(`${widgetName} was moved to trash`, {
-				description: `You can recover it until ${useLocaleDate(Date.now() + 2592000000)}`,
+			toast(`${widget.name} was moved to trash`, {
+				description: `You can recover it until\n${useLocaleDate(Date.now() + 2592000000)}`,
 				icon: <Trash size={16} />,
+				action: (
+					<Button
+						onClick={async () => {
+							await useTrashRestore(overlay, widget);
+							getOverlayData();
+						}}>
+						Undo
+					</Button>
+				),
 			});
 		} catch (error) {
-			console.error(`Error removing ${widgetID}`, error);
-			toast.error(`Error removing ${widgetID}`, {
+			console.error(`Error removing ${widget.name}`, error);
+			toast.error(`Error removing ${widget.name}`, {
 				description: `${error}`,
 			});
 		}
@@ -302,7 +307,7 @@ const Overlay = () => {
 					initialPosition={{ x: widget.posX, y: widget.posY }}
 					resizable={true}
 					onClick={() => handleWidgetClick(widget)}
-					onDelete={() => softRemoveWidget(overlayData.name, overlayData.id, widget.name, widget.id)}
+					onDelete={() => softRemoveWidget(overlayData, widget)}
 					onSettingsChange={(id, widget) => {
 						updateWidgetSettings(id, widget);
 					}}

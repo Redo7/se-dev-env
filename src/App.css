@@ -400,23 +400,23 @@ input #file-upload-button {
     transform: translate(-50%, -50%);
 }
 
-.widget-container>.widget-remove-button>button {
+.widget-container>.widget-context-menu>button {
     opacity: 0;
     transition: opacity 300ms ease;
 }
 
-.widget-container:hover>.widget-remove-button>button {
+.widget-container:hover>.widget-context-menu>button {
     opacity: 0.2;
 }
 
-.widget-container:hover>.widget-remove-button>button:hover {
+.widget-container:hover>.widget-context-menu>button:hover,
+.widget-context-menu>button:active {
     opacity: 1;
 }
 
-.widget-remove-button {
+.widget-context-menu {
     top: 1rem;
     right: 1rem;
-    z-index: 0;
 }
 
 iframe {
