@@ -22,9 +22,10 @@ button.regular:hover {
     transform: translateY(-.2rem);
 }
 
-button.subtle > * {
+button.subtle>* {
     display: inline;
 }
+
 /* Move this out to the popup component */
 .icon-button-container {
     display: inline-block;
@@ -70,7 +71,7 @@ button.subtle > * {
 
 /* Subtle */
 
-button.subtle{
+button.subtle {
     position: relative;
     color: var(--foreground);
     height: 1.25rem;
@@ -84,7 +85,7 @@ button.subtle{
     transition: background 300ms ease, opacity 300ms ease, transform 300ms ease, box-shadow 150ms ease;
 }
 
-button.subtle::before{
+button.subtle::before {
     content: "";
     width: 100%;
     height: 100%;
@@ -98,7 +99,7 @@ button.subtle::before{
     left: 0;
 }
 
-button:hover.subtle::before{
+button:hover.subtle::before {
     height: 1.25rem;
     width: 100%;
     background: linear-gradient(#fff, #ffffff00);
@@ -110,23 +111,28 @@ button:hover.subtle::before{
     left: 0;
 }
 
-.dark button.subtle{
+.dark button.subtle {
     background: linear-gradient(#FFFFFF1a, #ffffff1a);
 }
 
-.dark button.subtle::before{
+.dark button.subtle::before {
     background: linear-gradient(#ffffff4d, #ffffff00);
 }
 
-.dark button:hover.subtle::before{
+.dark button:hover.subtle::before {
     background: linear-gradient(#ffffff99, #ffffff00);
 }
 
-button:active.subtle{
+button:active.subtle {
     transform: scale(0.95);
     /* box-shadow: inset #ffffff20 0 0 0.5rem, #ffffff20 0 0 0.5rem; */
 }
 
-button:active.subtle::before{
+button:active.subtle::before {
     opacity: .5;
+}
+
+button:focus-visible,
+button:focus {
+    outline: none;
 }

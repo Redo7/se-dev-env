@@ -97,6 +97,7 @@ const Widget = ({
 	onResizing,
 }: Props) => {
 	const [isDragging, setIsDragging] = useState(false);
+	const [contextMenuOpen, setContextMenuOpen] = useState(false);
 	const [pointerEvents, setPointerEvents] = useState(false);
 	const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
 	const [position, setPosition] = useState(initialPosition);
@@ -522,18 +523,26 @@ const Widget = ({
 				{/* <SubtleButton width="2rem" height="2rem" onClick={onDelete}>
 					<IconTrash />
 				</SubtleButton> */}
-				<DropdownMenu>
+				<DropdownMenu onOpenChange={setContextMenuOpen}>
 					<DropdownMenuTrigger asChild>
-						<SubtleButton width="2rem" height="2rem">
+						<SubtleButton width="2rem" height="2rem" className={contextMenuOpen ? 'subtle open' : 'subtle'}>
 							<EllipsisVertical strokeWidth={1} />
 						</SubtleButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
-						<DropdownMenuItem disabled>Rename</DropdownMenuItem>
+						<DropdownMenuItem className="line-through" disabled>
+							Rename
+						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>Export</DropdownMenuItem>
-						<DropdownMenuItem disabled>Make a template</DropdownMenuItem>
-						<DropdownMenuItem disabled>Open folder</DropdownMenuItem>
-						<DropdownMenuItem disabled>Open in Editor</DropdownMenuItem>
+						<DropdownMenuItem className="line-through" disabled>
+							Make a template
+						</DropdownMenuItem>
+						<DropdownMenuItem className="line-through" disabled>
+							Open folder
+						</DropdownMenuItem>
+						<DropdownMenuItem className="line-through" disabled>
+							Open in Editor
+						</DropdownMenuItem>
 						<CustomCheckboxItem mirror={true} checked={pointerEvents} onCheckedChange={setPointerEvents}>
 							Pointer events
 						</CustomCheckboxItem>

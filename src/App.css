@@ -412,7 +412,8 @@ input #file-upload-button {
 }
 
 .widget-container:hover>.widget-context-menu>button:hover,
-.widget-context-menu>button:active {
+.widget-context-menu>button:active,
+.widget-context-menu>button.open {
     opacity: 1;
 }
 
