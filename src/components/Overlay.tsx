@@ -152,7 +152,13 @@ const Overlay = () => {
 			await useSoftDelete(overlay.name, overlay.id, widget.name, widget.id);
 			getOverlayData();
 			toast(`${widget.name} was moved to trash`, {
-				description: `You can recover it until\n${useLocaleDate(Date.now() + 2592000000)}`,
+				description: (
+					<>
+						You can recover it until
+						<br />
+						{useLocaleDate(Date.now() + 2592000000)}
+					</>
+				),
 				icon: <Trash size={16} />,
 				action: (
 					<Button
