@@ -14,12 +14,10 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-	Code,
 	CodeXml,
 	Download,
 	EllipsisVertical,
 	Folder,
-	FolderCode,
 	FolderGit2,
 	Palette,
 	Pointer,
