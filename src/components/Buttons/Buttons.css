@@ -39,6 +39,7 @@ button.subtle>* {
     padding: 0.5rem;
     font-size: .75rem;
     min-width: 7.5rem;
+    width: fit-content;
 
     display: flex;
     flex-direction: column;
@@ -52,6 +53,7 @@ button.subtle>* {
     align-items: center;
     cursor: pointer;
     letter-spacing: 0.03em;
+    white-space: nowrap;
     font-weight: 500;
     transition: background-color 0.2s;
 }

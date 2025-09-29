@@ -78,7 +78,7 @@ const Overlay = () => {
 			const data = await res.json();
 
 			const templateArray: Template[] = data[0].map((template: string) => ({
-				label: template[0].toUpperCase() + template.slice(1),
+				label: template[0].toUpperCase() + template.slice(1).replaceAll('-', ' '),
 				icon: <IconPlusSm />,
 				source: overlayData.id,
 				action: (name: string) => addWidget(name, template, overlayData.id),
