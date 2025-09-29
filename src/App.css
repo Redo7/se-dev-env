@@ -520,15 +520,24 @@ iframe {
 
 .sidebar-button {
     left: 3.125rem;
-    transition: left 750ms var(--redo-easing), opacity 750ms ease;
     top: 3.90625rem;
     opacity: 1;
     z-index: 2;
+
+    transition: left 750ms var(--redo-easing) 0ms, opacity 750ms ease 0ms, top 300ms var(--redo-easing) 0ms;
 }
 
 .sidebar-button[data-sidebar-visible="true"] {
     left: 14.9375rem;
     opacity: 0;
+}
+
+.sidebar-button[data-navbar-visible="false"] {
+    transition: left 750ms var(--redo-easing) 0ms, opacity 750ms ease 0ms, top 300ms var(--redo-easing) 2000ms;
+}
+
+.sidebar-button[data-navbar-visible="true"] {
+    top: 6.875rem;
 }
 
 .sidebar-fields-container {

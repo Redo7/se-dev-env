@@ -250,7 +250,10 @@ const Overlay = () => {
 	return (
 		<div className="overlay">
 			{/* Sidebar Button */}
-			<div className="sidebar-button absolute" data-sidebar-visible={isSidebarVisible}>
+			<div
+				className="sidebar-button absolute"
+				data-sidebar-visible={isSidebarVisible}
+				data-navbar-visible={isNavbarOver}>
 				<IconButton onClick={() => handleSidebarToggle()}>
 					<SidebarExpand />
 				</IconButton>
