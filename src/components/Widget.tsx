@@ -14,6 +14,8 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
+	ChevronDown,
+	ChevronUp,
 	CodeXml,
 	Download,
 	EllipsisVertical,
@@ -49,6 +51,7 @@ interface Props {
 	scriptVersion: number;
 	width: number;
 	height: number;
+	zIndex: number;
 	onClick: () => void;
 	onDelete: () => void;
 	onSettingsChange: (overlay: string, widget: WidgetInstance) => void;
@@ -107,6 +110,7 @@ const Widget = ({
 	scriptVersion,
 	width: initialWidth,
 	height: initialHeight,
+	zIndex,
 	onClick,
 	onDelete,
 	onSettingsChange,
@@ -148,6 +152,9 @@ const Widget = ({
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [widgetName, setWidgetName] = useState(name);
 	const rename = useRename();
+	// Would be best to clamp it to just the nearest values of the other widgets in the overlay
+	// That way there won't be a need to click the button multiple times
+	const [widgetZIndex, setWidgetZIndex] = useState(zIndex);
 
 	const updateIframeScript = async () => {
 		const res = await fetch(`/api/update-iframe-files`, {
@@ -171,6 +178,7 @@ const Widget = ({
 			height: Math.max(dimensions.height, 50),
 			posX: position.x,
 			posY: position.y,
+			zIndex: zIndex,
 		});
 		toast.success(`Successfully updated iframe files for ${name}`);
 		setCurrentScriptVersion(data.scriptVersion);
@@ -417,6 +425,7 @@ const Widget = ({
 				height: Math.max(dimensions.height, 50),
 				posX: position.x,
 				posY: position.y,
+				zIndex: widgetZIndex,
 			});
 			document.removeEventListener('mousemove', handleGlobalMouseMove);
 			document.removeEventListener('mouseup', handleGlobalMouseUp);
@@ -496,6 +505,7 @@ const Widget = ({
 		cursor: isDragging ? 'grabbing' : isResizing ? 'grabbing' : 'grab',
 		userSelect: 'none',
 		boxSizing: 'border-box',
+		zIndex: widgetZIndex,
 		...style,
 	};
 
@@ -505,6 +515,28 @@ const Widget = ({
 
 	const handleTemplateCreation = async () => {
 		useTemplateCreation(overlay.id, id, name);
+	};
+
+	const handleZIndex = (newValue: number) => {
+		if (
+			(newValue === widgetZIndex - 1 && widgetZIndex === 1) ||
+			(newValue === widgetZIndex + 1 && widgetZIndex === 9999)
+		)
+			return;
+		setWidgetZIndex(newValue);
+		onSettingsChange(overlay.id, {
+			name: name,
+			id: id,
+			src: src,
+			template: template,
+			scriptVersion: scriptVersion,
+
+			width: Math.max(dimensions.width, 50),
+			height: Math.max(dimensions.height, 50),
+			posX: position.x,
+			posY: position.y,
+			zIndex: newValue,
+		});
 	};
 
 	return (
@@ -592,6 +624,18 @@ const Widget = ({
 								onCheckedChange={setPointerEvents}>
 								<Pointer /> Pointer events
 							</CustomCheckboxItem>
+							<DropdownMenuItem
+								className={widgetZIndex === 9999 ? 'line-through' : ''}
+								disabled={widgetZIndex === 9999 ? true : false}
+								onClick={() => handleZIndex(widgetZIndex + 1)}>
+								<ChevronUp /> Layer above
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								className={widgetZIndex === 1 ? 'line-through' : ''}
+								disabled={widgetZIndex === 1 ? true : false}
+								onClick={() => handleZIndex(widgetZIndex - 1)}>
+								<ChevronDown /> Layer below
+							</DropdownMenuItem>
 							<DropdownMenuItem className="line-through" disabled>
 								<Palette /> Background color
 							</DropdownMenuItem>

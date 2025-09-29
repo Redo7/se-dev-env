@@ -1,9 +1,9 @@
-export interface OverlayInstance{
-	name: string,
-	id: string,
-	widgets: WidgetInstance[]
+export interface OverlayInstance {
+	name: string;
+	id: string;
+	widgets: WidgetInstance[];
 	deleteAfter?: number;
-	lastUpdate?: undefined | number
+	lastUpdate?: undefined | number;
 }
 
 export interface WidgetInstance {
@@ -18,4 +18,5 @@ export interface WidgetInstance {
 	height: number;
 	posX: number;
 	posY: number;
+	zIndex: number;
 }

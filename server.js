@@ -157,6 +157,7 @@ app.post("/api/create-widget/", async (req, res) => {
         height: 500,
         posX: 0,
         posY: 0,
+        zIndex: 5
     };
 
     const iframeTemplate = join(__dirname, "templates", "iframe");
@@ -318,7 +319,7 @@ app.put('/api/update-widget-settings', async (req, res) => {
     if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
     if (!req.body.id) return res.status(400).json({ error: 'Widget id is required' });
 
-    const { overlayID, id, scriptVersion, width, height, posX, posY } = req.body;
+    const { overlayID, id, scriptVersion, width, height, posX, posY, zIndex } = req.body;
 
     const newSettings = {
         scriptVersion: scriptVersion,
@@ -326,6 +327,7 @@ app.put('/api/update-widget-settings', async (req, res) => {
         height: height,
         posX: posX,
         posY: posY,
+        zIndex: zIndex
     }
 
     const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");

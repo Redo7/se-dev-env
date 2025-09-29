@@ -491,7 +491,7 @@ iframe {
     border-radius: 12px;
     transition: margin-left 750ms var(--redo-easing);
     position: relative;
-    z-index: 2;
+    z-index: 10000;
 }
 
 .sidebar[data-sidebar-visible="false"] {
@@ -621,7 +621,7 @@ iframe {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 10000;
 }
 
 .dark .overlay-navbar {
@@ -646,12 +646,12 @@ iframe {
 .chat-button {
     bottom: 3.125rem;
     right: 3.125rem;
+    z-index: 10000;
 }
 
 .chat {
     bottom: 50px;
     right: 0;
-    z-index: 1000;
     scrollbar-width: thin;
     scrollbar-color: var(--tr-100) transparent;
 }
