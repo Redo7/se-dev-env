@@ -628,6 +628,16 @@ app.post("/api/rename/", async (req, res) => {
             await fs.rename(dir, newDir);
         }
 
+        // Rename overlay if it exists in deletion-data.json
+        // This covers cases when an overlay is renamed while it has a widget pending deletion
+        const deletionDataPath = join(__dirname, "data", "deletion-data.json");
+        let deletionData = JSON.parse(fs.readFileSync(deletionDataPath));
+        if (Object.keys(deletionData).includes(overlayID)) {
+            deletionData[newID] = { ...deletionData[overlayID], name, id: newID }
+            delete deletionData[overlayID];
+            fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, "\t"), 'utf-8');
+        }
+
         res.json({ id: newID });
     } catch (error) {
         res.json({ error })
