@@ -1,7 +1,7 @@
 const useLocaleDate = (timestamp: number) => {
 	const date = new Date(timestamp);
 	const month = date.toLocaleString('default', { month: 'long' });
-	return `${month} ${day(date.getDay())} ${date.getFullYear()}`;
+	return `${month} ${day(date.getDate())} ${date.getFullYear()}`;
 };
 
 const day = (d: number) => {
