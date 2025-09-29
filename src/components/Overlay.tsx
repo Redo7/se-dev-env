@@ -73,20 +73,6 @@ const Overlay = () => {
 	useEffect(() => {
 		// Fetch overlay data
 		getOverlayData();
-		// Fetch templates
-		const getTemplates = async () => {
-			const res = await fetch('/api/get-templates');
-			const data = await res.json();
-
-			const templateArray: Template[] = data[0].map((template: string) => ({
-				label: template[0].toUpperCase() + template.slice(1).replaceAll('-', ' '),
-				icon: <IconPlusSm />,
-				source: overlayData.id,
-				action: (name: string) => addWidget(name, template, overlayData.id),
-			}));
-			setTemplates(templateArray);
-		};
-		getTemplates();
 		// Listen for iframe console logs and send notifications
 		window.addEventListener('message', (event) => {
 			if (event.data?.type === 'iframeConsole') {
@@ -118,6 +104,23 @@ const Overlay = () => {
 			}
 		});
 	}, []);
+
+	useEffect(() => {
+		// Fetch templates
+		const getTemplates = async () => {
+			const res = await fetch('/api/get-templates');
+			const data = await res.json();
+
+			const templateArray: Template[] = data[0].map((template: string) => ({
+				label: template[0].toUpperCase() + template.slice(1).replaceAll('-', ' '),
+				icon: <IconPlusSm />,
+				source: overlayData.id,
+				action: (name: string) => addWidget(name, template, overlayData.id),
+			}));
+			setTemplates(templateArray);
+		};
+		getTemplates();
+	}, [overlayData]);
 
 	const removeNotification = (id: string) => {
 		setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, closing: true } : n)));
