@@ -507,7 +507,7 @@ const Widget = ({
 		cursor: isDragging ? 'grabbing' : isResizing ? 'grabbing' : 'grab',
 		userSelect: 'none',
 		boxSizing: 'border-box',
-		zIndex: isActive ? 9999 : widgetZIndex,
+		zIndex: isActive ? 100 : widgetZIndex,
 		...style,
 	};
 
@@ -522,7 +522,7 @@ const Widget = ({
 	const handleZIndex = (newValue: number) => {
 		if (
 			(newValue === widgetZIndex - 1 && widgetZIndex === 1) ||
-			(newValue === widgetZIndex + 1 && widgetZIndex === 9999)
+			(newValue === widgetZIndex + 1 && widgetZIndex === 100)
 		)
 			return;
 		setWidgetZIndex(newValue);
@@ -623,7 +623,7 @@ const Widget = ({
 								<EllipsisVertical strokeWidth={1} />
 							</SubtleButton>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent>
+						<DropdownMenuContent className="z-100">
 							<DropdownMenuLabel className="text-[0.75rem] opacity-50">General</DropdownMenuLabel>
 							<DialogTrigger className="w-full" onClick={() => setDialogOpen(true)}>
 								<DropdownMenuItem>
@@ -677,7 +677,7 @@ const Widget = ({
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
-					<DialogContent className="sm:max-w-md">
+					<DialogContent className="sm:max-w-md z-1000">
 						<DialogHeader>
 							<DialogTitle>Rename widget</DialogTitle>
 							<DialogDescription>

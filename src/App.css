@@ -491,7 +491,7 @@ iframe {
     border-radius: 12px;
     transition: margin-left 750ms var(--redo-easing);
     position: relative;
-    z-index: 10000;
+    z-index: 105;
 }
 
 .sidebar[data-sidebar-visible="false"] {
