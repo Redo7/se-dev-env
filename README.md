@@ -80,5 +80,5 @@ npm run dev
     -   [x] Delete
 -   [ ] Animations
 -   [ ] Run script
--   [ ] Automatic widget layering onClick
+-   [x] Automatic widget layering onClick
 -   [x] Add toasts to the app
