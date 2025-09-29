@@ -267,7 +267,7 @@ const Overlay = () => {
 					</Link>
 					<Input
 						value={overlayName}
-						size={overlayName.length - 1 || 1}
+						size={overlayName.length || 1}
 						onChange={(e) => handleNameInput(e.target.value)}
 						className="ml-[1rem] mr-2 tracking-wide dark:bg-transparent! dark:border-0 text-sm! dark:hover:bg-tr-50! transition-colors rounded-sm h-6 focus-visible:ring-[0px] dark:focus-visible:bg-tr-50! w-fit! -translate-x-1 px-2!"
 					/>

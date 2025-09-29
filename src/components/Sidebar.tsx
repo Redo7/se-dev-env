@@ -90,7 +90,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 					<Input
 						value={widgetName}
 						onChange={(e) => handleNameInput(e.target.value)}
-						size={widgetName.length - 1 || 1}
+						size={widgetName.length || 1}
 						className="dark:bg-transparent! dark:border-0 text-[12px]! dark:hover:bg-tr-50! transition-colors rounded-sm h-6 focus-visible:ring-[0px] dark:focus-visible:bg-tr-50! w-fit! -translate-x-1 px-2!"
 					/>
 				) : (
