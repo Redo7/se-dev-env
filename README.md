@@ -25,6 +25,8 @@ npm run dev
 
 2. Open [http://localhost:5173/](http://localhost:5173/)
 3. Then just run `npm run dev` in the app's directory whenever you want to start the server
+> [!NOTE]
+> It's recommended you create private repos inside of `/templates/user/` and `/overlays/` and push them to a remote in order to have a backup of your files.
 
 # Configuration
 
