@@ -646,6 +646,26 @@ app.post("/api/rename/", async (req, res) => {
 
 })
 
+app.put('/api/make-template/', async (req, res) => {
+    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
+    if (!req.body.widgetID) return res.status(400).json({ error: 'Widget id is required' });
+    if (!req.body.templateName) return res.status(400).json({ error: 'Template name is required' });
+
+    try {
+        const { overlayID, widgetID, templateName } = req.body;
+        const normalizedName = templateName.replaceAll(' - ', '-').replaceAll(' ', '-');
+        const instancePath = join(__dirname, "overlays", overlayID, widgetID, "src");
+        const destinationPath = join(__dirname, "templates", "user", normalizedName);
+
+        await fs.promises.cp(instancePath, destinationPath, { recursive: true });
+
+        res.json({ name: normalizedName })
+    } catch (error) {
+        res.json({ error })
+        console.log(error);
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);
 })

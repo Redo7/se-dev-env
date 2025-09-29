@@ -38,6 +38,7 @@ import useWidgetExport from '@/hooks/useWidgetExport';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import useRename from '@/hooks/useRename';
+import useTemplateCreation from '@/hooks/useTemplateCreation';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -500,6 +501,10 @@ const Widget = ({
 
 	const handleNameInput = async (name: string) => {
 		rename(overlay, { name, id }, name, true);
+	};
+
+	const handleTemplateCreation = async (name: string) => {
+		useTemplateCreation(overlay.id, id, name);
 	};
 
 	return (
