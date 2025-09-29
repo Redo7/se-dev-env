@@ -503,7 +503,7 @@ const Widget = ({
 		rename(overlay, { name, id }, name, true);
 	};
 
-	const handleTemplateCreation = async (name: string) => {
+	const handleTemplateCreation = async () => {
 		useTemplateCreation(overlay.id, id, name);
 	};
 
@@ -575,7 +575,7 @@ const Widget = ({
 							<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>
 								<Download /> Export
 							</DropdownMenuItem>
-							<DropdownMenuItem className="line-through" disabled>
+							<DropdownMenuItem onClick={() => handleTemplateCreation()}>
 								<FolderGit2 /> Make a template
 							</DropdownMenuItem>
 							<DropdownMenuItem className="line-through" disabled>
