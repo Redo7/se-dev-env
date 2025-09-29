@@ -46,8 +46,8 @@ npm run dev
     -   [x] Add search
     -   [x] Add sort
     -   [x] Display relative time on recents
--   [ ] Overlay and widget renaming
-    -   [ ] Rename entries in `deletion-data.json`
+-   [x] Overlay and widget renaming
+    -   [x] Rename entries in `deletion-data.json`
 -   [ ] Native way of creating templates
 -   [ ] Fields
     -   [ ] Movable
@@ -66,11 +66,13 @@ npm run dev
 -   [ ] Widget menu
     -   [x] Rename
     -   [x] Export
-    -   [ ] Make a template
+    -   [x] Make a template
     -   [ ] Open folder
     -   [ ] Open in Editor
         -   [ ] Editor can be set in settings
     -   [x] Pointer events
+    -   [x] Layer above
+    -   [x] Layer below
     -   [ ] Background color
     -   [ ] Background blur
     -   [x] Delete
