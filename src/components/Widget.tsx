@@ -52,6 +52,7 @@ interface Props {
 	width: number;
 	height: number;
 	zIndex: number;
+	isActive: boolean;
 	onClick: () => void;
 	onDelete: () => void;
 	onSettingsChange: (overlay: string, widget: WidgetInstance) => void;
@@ -110,6 +111,7 @@ const Widget = ({
 	scriptVersion,
 	width: initialWidth,
 	height: initialHeight,
+	isActive,
 	zIndex,
 	onClick,
 	onDelete,
@@ -178,7 +180,7 @@ const Widget = ({
 			height: Math.max(dimensions.height, 50),
 			posX: position.x,
 			posY: position.y,
-			zIndex: zIndex,
+			zIndex: widgetZIndex,
 		});
 		toast.success(`Successfully updated iframe files for ${name}`);
 		setCurrentScriptVersion(data.scriptVersion);
@@ -505,7 +507,7 @@ const Widget = ({
 		cursor: isDragging ? 'grabbing' : isResizing ? 'grabbing' : 'grab',
 		userSelect: 'none',
 		boxSizing: 'border-box',
-		zIndex: widgetZIndex,
+		zIndex: isActive ? 9999 : widgetZIndex,
 		...style,
 	};
 

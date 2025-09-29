@@ -54,6 +54,7 @@ const Overlay = () => {
 		widgets: [],
 	});
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
+	const [activeWidgetId, setActiveWidgetId] = useState('');
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [overlayName, setOverlayName] = useState(overlayData.name);
 	const renameTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -216,6 +217,7 @@ const Overlay = () => {
 			return;
 		}
 		setActiveWidget(widget);
+		setActiveWidgetId(widget.id);
 	};
 
 	const handleNameInput = async (name: string) => {
@@ -358,6 +360,7 @@ const Overlay = () => {
 					width={widget.width}
 					height={widget.height}
 					initialPosition={{ x: widget.posX, y: widget.posY }}
+					isActive={activeWidgetId === widget.id}
 					zIndex={widget.zIndex ? widget.zIndex : 5}
 					resizable={true}
 					onClick={() => handleWidgetClick(widget)}
