@@ -1,12 +1,14 @@
 import '../App.css';
 import SubtleButton from './Buttons/SubtleButton';
 import SidebarCollapse from '../assets/Icons/SidebarCollapse';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import FieldGroup from './Fields/FieldGroup';
 import type { OverlayInstance, WidgetInstance } from '../types/';
 import useFields from '../hooks/useFields';
 import componentMap from '../utils/componentMap';
 import useFieldData from '../hooks/useFieldData';
+import { Input } from './ui/input';
+import useRename from '@/hooks/useRename';
 
 interface StreamElementsField {
 	type: string;
@@ -35,6 +37,9 @@ interface Props {
 const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	const [currWidgetFields, setCurrWidgetFields] = useState<StreamElementsConfig>();
 	const [currWidgetFieldData, setCurrWidgetFieldData] = useState<StreamElementsConfig>();
+	const [widgetName, setWidgetName] = useState(widget ? widget.name : 'No widget selected');
+	const renameTimeout = useRef<NodeJS.Timeout | null>(null);
+	const rename = useRename();
 	useEffect(() => {
 		if (!widget) return;
 		const fetchFields = async () => {
@@ -44,6 +49,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 			setCurrWidgetFieldData(fieldData);
 		};
 		fetchFields();
+		setWidgetName(widget.name);
 	}, [widget]);
 
 	const groupedFields = useMemo(() => {
@@ -63,10 +69,33 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 		return groups;
 	}, [currWidgetFields]);
 
+	const handleNameInput = async (name: string) => {
+		setWidgetName(name);
+		if (renameTimeout.current) {
+			clearTimeout(renameTimeout.current);
+			renameTimeout.current = null;
+		}
+		renameTimeout.current = setTimeout(async () => {
+			rename(overlay, widget, name, true);
+			if (widget) {
+				widget.name = name;
+			}
+		}, 500);
+	};
+
 	return (
 		<div className="sidebar depth-shadow" data-sidebar-visible={isVisible}>
 			<div className="sidebar-heading flex">
-				<p className="sidebar-overlay-name">{widget ? widget.name : 'No widget selected'}</p>
+				{widget ? (
+					<Input
+						value={widgetName}
+						onChange={(e) => handleNameInput(e.target.value)}
+						size={widgetName.length - 1 || 1}
+						className="dark:bg-transparent! dark:border-0 text-[12px]! dark:hover:bg-tr-50! transition-colors rounded-sm h-6 focus-visible:ring-[0px] dark:focus-visible:bg-tr-50! w-fit! -translate-x-1 px-2!"
+					/>
+				) : (
+					<p className="sidebar-overlay-name">No widget selected</p>
+				)}
 				<SubtleButton onClick={onToggle} cssClass="subtle flex center" width={24} height={24}>
 					<SidebarCollapse />
 				</SubtleButton>
@@ -76,7 +105,10 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 					Object.entries(groupedFields).map(([groupName, fieldsInGroup]) => (
 						<FieldGroup key={groupName} name={groupName}>
 							{fieldsInGroup.map(({ fieldName, fieldConfig }) => {
-								const componentName = fieldConfig.type.toLowerCase() === 'googlefont' ? 'googleFont' : fieldConfig.type.toLowerCase();
+								const componentName =
+									fieldConfig.type.toLowerCase() === 'googlefont'
+										? 'googleFont'
+										: fieldConfig.type.toLowerCase();
 								const Component = componentMap[componentName];
 
 								if (!Component) {

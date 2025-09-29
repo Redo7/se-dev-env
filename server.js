@@ -597,6 +597,45 @@ app.post("/api/widget-io-import/:overlayID", upload.single("file"), async (req, 
     }
 });
 
+app.post("/api/rename/", async (req, res) => {
+    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
+    if (!req.body.name) return res.status(400).json({ error: "New name is required" });
+
+    const { overlayID, widgetID, name } = req.body;
+    const newID = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-') + '-' + uuidv4();
+    const dir = join(__dirname, "overlays", overlayID);
+    const newDir = join(__dirname, "overlays", newID);
+    const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
+    let overlayData = await fetchOverlayData(overlayID);
+
+    try {
+        // Rename widget/overlay
+        if (widgetID != undefined) {
+            const updatedData = overlayData.widgets.map(widget => widget.id === widgetID ? { ...widget, name, id: newID, src: widget.src.replace(widgetID, newID) } : widget);
+            overlayData.widgets = updatedData;
+            fs.writeFileSync(instancePath, JSON.stringify(overlayData, null, "\t"), 'utf-8');
+            // Rename folder
+            const oldWidgetPath = join(__dirname, "overlays", overlayID, widgetID)
+            const newWidgetPath = join(__dirname, "overlays", overlayID, newID)
+            await fs.rename(oldWidgetPath, newWidgetPath);
+        } else {
+            const updatedWidgetData = overlayData.widgets.map(widget => ({ ...widget, src: widget.src.replace(overlayID, newID) }));
+            overlayData.widgets = updatedWidgetData;
+            const updatedData = { ...overlayData, name, id: newID };
+            overlayData = updatedData;
+            fs.writeFileSync(instancePath, JSON.stringify(overlayData, null, "\t"), 'utf-8');
+            // Rename folder
+            await fs.rename(dir, newDir);
+        }
+
+        res.json({ id: newID });
+    } catch (error) {
+        res.json({ error })
+        console.error(error);
+    }
+
+})
+
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);
 })

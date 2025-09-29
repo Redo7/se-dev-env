@@ -1,5 +1,5 @@
 import '../App.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Widget from './Widget';
 import IconPopupButton from './Buttons/IconPopupButton';
 import { SidebarExpand, IconPlus, IconPlusSm } from '../assets/Icons/';
@@ -32,6 +32,8 @@ import Widgetio from './Widgetio';
 import { toast } from 'sonner';
 import useLocaleDate from '@/hooks/useLocaleDate';
 import useTrashRestore from '@/hooks/useTrashRestore';
+import useRename from '@/hooks/useRename';
+import { Input } from './ui/input';
 
 interface Template {
 	label: string;
@@ -53,6 +55,9 @@ const Overlay = () => {
 	});
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
 	const [notifications, setNotifications] = useState<Notification[]>([]);
+	const [overlayName, setOverlayName] = useState(overlayData.name);
+	const renameTimeout = useRef<NodeJS.Timeout | null>(null);
+	const rename = useRename();
 
 	document.body.setAttribute('clean-bg', 'false');
 
@@ -61,6 +66,7 @@ const Overlay = () => {
 		const data = await res.json();
 		const filteredData = { ...data, widgets: data.widgets.filter((widget: WidgetInstance) => !widget.deleteAfter) };
 		setOverlayData(filteredData);
+		setOverlayName(filteredData.name);
 	};
 
 	useEffect(() => {
@@ -211,6 +217,18 @@ const Overlay = () => {
 		setActiveWidget(widget);
 	};
 
+	const handleNameInput = async (name: string) => {
+		setOverlayName(name);
+		if (renameTimeout.current) {
+			clearTimeout(renameTimeout.current);
+			renameTimeout.current = null;
+		}
+		renameTimeout.current = setTimeout(async () => {
+			rename(overlayData, undefined, name, true);
+			overlayData.name = name;
+		}, 500);
+	};
+
 	return (
 		<div className="overlay">
 			{/* Sidebar Button */}
@@ -229,7 +247,13 @@ const Overlay = () => {
 					<Link to="/" className="sidebar-back opacity-50 hover:opacity-100">
 						<ArrowLeft size={20} strokeWidth={1.5} />
 					</Link>
-					<p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p>
+					<Input
+						value={overlayName}
+						size={overlayName.length - 1 || 1}
+						onChange={(e) => handleNameInput(e.target.value)}
+						className="ml-[1rem] mr-2 tracking-wide dark:bg-transparent! dark:border-0 text-sm! dark:hover:bg-tr-50! transition-colors rounded-sm h-6 focus-visible:ring-[0px] dark:focus-visible:bg-tr-50! w-fit! -translate-x-1 px-2!"
+					/>
+					{/* <p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p> */}
 					<Badge variant="outline" className="opacity-50">
 						{overlayData.id}
 					</Badge>

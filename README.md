@@ -64,8 +64,8 @@ npm run dev
     -   [ ] Identities
 -   [ ] Finish light mode
 -   [ ] Widget menu
-    -   [ ] Rename
-    -   [ ] Export
+    -   [x] Rename
+    -   [x] Export
     -   [ ] Make a template
     -   [ ] Open folder
     -   [ ] Open in Editor

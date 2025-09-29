@@ -24,8 +24,20 @@ import {
 	TextCursor,
 	Trash,
 } from 'lucide-react';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
 import { CustomCheckboxItem } from './CustomCheckboxItem';
 import useWidgetExport from '@/hooks/useWidgetExport';
+import { Label } from './ui/label';
+import { Input } from './ui/input';
+import useRename from '@/hooks/useRename';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -132,6 +144,9 @@ const Widget = ({
 
 	const pendingDataRef = useRef<OnWidgetLoadData | undefined>(undefined);
 	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [widgetName, setWidgetName] = useState(name);
+	const rename = useRename();
 
 	const updateIframeScript = async () => {
 		const res = await fetch(`/api/update-iframe-files`, {
@@ -483,6 +498,10 @@ const Widget = ({
 		...style,
 	};
 
+	const handleNameInput = async (name: string) => {
+		rename(overlay, { name, id }, name, true);
+	};
+
 	return (
 		<div
 			className="widget-container relative depth-shadow"
@@ -531,52 +550,88 @@ const Widget = ({
 				</div>
 			)}
 			<div className="widget-context-menu absolute top-0 right-0">
-				{/* <SubtleButton width="2rem" height="2rem" onClick={onDelete}>
-					<IconTrash />
-				</SubtleButton> */}
-				<DropdownMenu onOpenChange={setContextMenuOpen}>
-					<DropdownMenuTrigger asChild>
-						<SubtleButton width="2rem" height="2rem" className={contextMenuOpen ? 'subtle open' : 'subtle'}>
-							<EllipsisVertical strokeWidth={1} />
-						</SubtleButton>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent>
-						<DropdownMenuLabel className="text-[0.75rem] opacity-50">General</DropdownMenuLabel>
-						<DropdownMenuItem className="line-through" disabled>
-							<TextCursor /> Rename
-						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>
-							<Download /> Export
-						</DropdownMenuItem>
-						<DropdownMenuItem className="line-through" disabled>
-							<FolderGit2 /> Make a template
-						</DropdownMenuItem>
-						<DropdownMenuItem className="line-through" disabled>
-							<Folder /> Open folder
-						</DropdownMenuItem>
-						<DropdownMenuItem className="line-through" disabled>
-							<CodeXml /> Open in Editor
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
-						<DropdownMenuLabel className="text-[0.75rem] opacity-50">iframe control</DropdownMenuLabel>
-						<CustomCheckboxItem mirror={true} checked={pointerEvents} onCheckedChange={setPointerEvents}>
-							<Pointer /> Pointer events
-						</CustomCheckboxItem>
-						<DropdownMenuItem className="line-through" disabled>
-							<Palette /> Background color
-						</DropdownMenuItem>
-						<DropdownMenuItem className="line-through" disabled>
-							<Palette /> Background blur
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem
-							className="text-red-500 hover:bg-red-500/20! hover:text-red-500!"
-							onClick={onDelete}>
-							<Trash className="stroke-red-500" />
-							Delete
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+					<DropdownMenu onOpenChange={setContextMenuOpen}>
+						<DropdownMenuTrigger asChild>
+							<SubtleButton
+								width="2rem"
+								height="2rem"
+								className={contextMenuOpen ? 'subtle open' : 'subtle'}>
+								<EllipsisVertical strokeWidth={1} />
+							</SubtleButton>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent>
+							<DropdownMenuLabel className="text-[0.75rem] opacity-50">General</DropdownMenuLabel>
+							<DialogTrigger className="w-full" onClick={() => setDialogOpen(true)}>
+								<DropdownMenuItem>
+									<TextCursor /> Rename
+								</DropdownMenuItem>
+							</DialogTrigger>
+							<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>
+								<Download /> Export
+							</DropdownMenuItem>
+							<DropdownMenuItem className="line-through" disabled>
+								<FolderGit2 /> Make a template
+							</DropdownMenuItem>
+							<DropdownMenuItem className="line-through" disabled>
+								<Folder /> Open folder
+							</DropdownMenuItem>
+							<DropdownMenuItem className="line-through" disabled>
+								<CodeXml /> Open in Editor
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<DropdownMenuLabel className="text-[0.75rem] opacity-50">iframe control</DropdownMenuLabel>
+							<CustomCheckboxItem
+								mirror={true}
+								checked={pointerEvents}
+								onCheckedChange={setPointerEvents}>
+								<Pointer /> Pointer events
+							</CustomCheckboxItem>
+							<DropdownMenuItem className="line-through" disabled>
+								<Palette /> Background color
+							</DropdownMenuItem>
+							<DropdownMenuItem className="line-through" disabled>
+								<Palette /> Background blur
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem
+								className="text-red-500 hover:bg-red-500/20! hover:text-red-500!"
+								onClick={onDelete}>
+								<Trash className="stroke-red-500" />
+								Delete
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+					<DialogContent className="sm:max-w-md">
+						<DialogHeader>
+							<DialogTitle>Rename widget</DialogTitle>
+							<DialogDescription>
+								Thie action will rename it in both the app and the files.
+							</DialogDescription>
+						</DialogHeader>
+						<div className="flex items-center gap-2">
+							<div className="grid flex-1 gap-2">
+								<Label htmlFor="name" className="sr-only">
+									New name
+								</Label>
+								<Input
+									id="name"
+									onChange={(e) => setWidgetName(e.target.value)}
+									defaultValue={widgetName}
+								/>
+							</div>
+						</div>
+						<DialogFooter className="sm:justify-start">
+							<Button
+								onClick={() => handleNameInput(widgetName)}
+								className="ml-auto"
+								type="button"
+								variant="default">
+								Rename
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
 			</div>
 			{resizable && (
 				<>
