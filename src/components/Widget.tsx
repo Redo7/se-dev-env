@@ -539,6 +539,30 @@ const Widget = ({
 		});
 	};
 
+	const handleFolderOpen = async () => {
+		const res = await fetch(`/api/open-folder/${encodeURIComponent(overlay.id)}/${encodeURIComponent(id)}`);
+		if (res.ok) {
+			toast.success('Folder opened');
+			return;
+		}
+		const data = await res.json();
+		toast.error(`Error opening folder`, {
+			description: `${data.error}`,
+		});
+	};
+
+	const handleEditorOpen = async () => {
+		const res = await fetch(`/api/open-editor/${encodeURIComponent(overlay.id)}/${encodeURIComponent(id)}`);
+		if (res.ok) {
+			toast.success('Editor opened');
+			return;
+		}
+		const data = await res.json();
+		toast.error(`Error opening editor`, {
+			description: `${data.error}`,
+		});
+	};
+
 	return (
 		<div
 			className="widget-container relative depth-shadow"
@@ -610,10 +634,10 @@ const Widget = ({
 							<DropdownMenuItem onClick={() => handleTemplateCreation()}>
 								<FolderGit2 /> Make a template
 							</DropdownMenuItem>
-							<DropdownMenuItem className="line-through" disabled>
+							<DropdownMenuItem onClick={handleFolderOpen}>
 								<Folder /> Open folder
 							</DropdownMenuItem>
-							<DropdownMenuItem className="line-through" disabled>
+							<DropdownMenuItem onClick={handleEditorOpen}>
 								<CodeXml /> Open in Editor
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />

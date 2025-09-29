@@ -230,6 +230,18 @@ const Overlay = () => {
 		}, 500);
 	};
 
+	const handleFolderOpen = async () => {
+		const res = await fetch(`/api/open-folder/${encodeURIComponent(id)}/null`);
+		if (res.ok) {
+			toast.success('Folder opened');
+			return;
+		}
+		const data = await res.json();
+		toast.error(`Error opening folder`, {
+			description: `${data.error}`,
+		});
+	};
+
 	return (
 		<div className="overlay">
 			{/* Sidebar Button */}
@@ -255,7 +267,10 @@ const Overlay = () => {
 						className="ml-[1rem] mr-2 tracking-wide dark:bg-transparent! dark:border-0 text-sm! dark:hover:bg-tr-50! transition-colors rounded-sm h-6 focus-visible:ring-[0px] dark:focus-visible:bg-tr-50! w-fit! -translate-x-1 px-2!"
 					/>
 					{/* <p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p> */}
-					<Badge variant="outline" className="opacity-50">
+					<Badge
+						variant="outline"
+						className="opacity-50 hover:bg-zinc-50/10 hover:opacity-65 transition-colors transition-opacity cursor-pointer select-none"
+						onClick={handleFolderOpen}>
 						{overlayData.id}
 					</Badge>
 				</div>

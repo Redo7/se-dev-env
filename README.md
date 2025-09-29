@@ -25,8 +25,8 @@ npm run dev
 
 2. Open [http://localhost:5173/](http://localhost:5173/)
 3. Then just run `npm run dev` in the app's directory whenever you want to start the server
-> [!NOTE]
-> It's recommended you create private repos inside of `/templates/user/` and `/overlays/` and push them to a remote in order to have a backup of your files.
+    > [!NOTE]
+    > It's recommended you create private repos inside of `/templates/user/` and `/overlays/` and push them to a remote in order to have a backup of your files.
 
 # Configuration
 
@@ -69,8 +69,8 @@ npm run dev
     -   [x] Rename
     -   [x] Export
     -   [x] Make a template
-    -   [ ] Open folder
-    -   [ ] Open in Editor
+    -   [x] Open folder
+    -   [x] Open in Editor
         -   [ ] Editor can be set in settings
     -   [x] Pointer events
     -   [x] Layer above
@@ -79,4 +79,6 @@ npm run dev
     -   [ ] Background blur
     -   [x] Delete
 -   [ ] Animations
+-   [ ] Run script
+-   [ ] Automatic widget layering onClick
 -   [x] Add toasts to the app

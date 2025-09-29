@@ -8,6 +8,7 @@ import util from 'util'
 import AdmZip from "adm-zip";
 import multer from "multer";
 import ini from "ini";
+import { exec } from "child_process";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -666,6 +667,48 @@ app.put('/api/make-template/', async (req, res) => {
         res.json({ error })
         console.log(error);
     }
+})
+
+app.get('/api/open-folder/:overlayID/:widgetID', async (req, res) => {
+    const { overlayID, widgetID } = req.params;
+    const instancePath = widgetID == "null" ? join(__dirname, "overlays", overlayID) : join(__dirname, "overlays", overlayID, widgetID);
+
+    let command;
+
+    if (process.platform === "darwin") {
+        command = `open "${instancePath}"`;
+    } else if (process.platform === "win32") {
+        command = `start "" "${instancePath}"`;
+    } else if (process.platform === "linux") {
+        command = `xdg-open "${instancePath}"`;
+    } else {
+        throw new Error("Unsupported operating system");
+    }
+
+    exec(command, (error) => {
+        if (error) {
+            res.json({ error })
+            console.error("Error opening folder:", error);
+            return
+        }
+    });
+    res.send()
+})
+
+app.get('/api/open-editor/:overlayID/:widgetID', async (req, res) => {
+    const { overlayID, widgetID } = req.params;
+    const instancePath = join(__dirname, "overlays", overlayID, widgetID, "src");
+
+    const command = `code "${instancePath}"`;
+
+    exec(command, (error) => {
+        if (error) {
+            res.json({ error })
+            console.error("Error opening editor:", error);
+            return
+        }
+    });
+    res.send()
 })
 
 app.listen(PORT, () => {
