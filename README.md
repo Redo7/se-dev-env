@@ -68,6 +68,8 @@ npm run dev
 -   [ ] Widget menu
     -   [x] Rename
     -   [x] Export
+    -   [ ] Duplicate
+    -   [ ] Move to
     -   [x] Make a template
     -   [x] Open folder
     -   [x] Open in Editor
@@ -75,8 +77,8 @@ npm run dev
     -   [x] Pointer events
     -   [x] Layer above
     -   [x] Layer below
-    -   [ ] Background color
-    -   [ ] Background blur
+    -   [ ] Accent color
+    -   [ ] Show frame
     -   [x] Delete
 -   [ ] Animations
 -   [ ] Run script
