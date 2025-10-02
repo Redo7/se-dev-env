@@ -12,7 +12,7 @@ This app aims to bridge the gap between efficient development and StreamElements
 
 ---
 
-# Installation
+# Installation and launching
 
 1. Run this command in the terminal
 
@@ -20,21 +20,29 @@ This app aims to bridge the gap between efficient development and StreamElements
 git clone https://github.com/Redo7/se-dev-env
 cd se-dev-env
 npm install
-npm run dev
 ```
-
-2. Open [http://localhost:5173/](http://localhost:5173/)
-3. Then just run `npm run dev` in the app's directory whenever you want to start the server
-    > [!NOTE]
-    > It's recommended you create private repos inside of `/templates/user/` and `/overlays/` and push them to a remote in order to have a backup of your files.
+2. Create a `.env` file in the root directory with these values:
+  -   `VITE_GOOGLE_FONTS_API_KEY = your-api-key-here`
+3. To run the app, choose one of the options below
+  - Terminal: `npm run dev`
+  - VSCode: Run `code .` in the terminal to open the app's folder in the editor. Then just run `npm run dev` in its integrated terminal
+    - Not a lot of difference, but at least you can close the other terminal window
+4. Open [http://localhost:5173/](http://localhost:5173/)
 
 # Configuration
 
 1. You can add your own widget templates and create them on any overlay by simply putting your `html.html`, `css.css`, `js.js`, `fields.json`, and `data.json` inside of `/templates/user/{your template name}`. The app is going to scan that directory, and will automatically add them to the `+` button on the overlay.
+  - Or just import a widget.io compatible widget, edit it's files if needed, and click `Make a template` from the context menu.
 
-2. Create a `.env` file in the root directory with these values:
+> [!NOTE]
+> 2. It's recommended you create private repos inside of `/templates/user/` and `/overlays/` and push them to a remote in order to have a backup of your files.
 
--   `VITE_GOOGLE_FONTS_API_KEY = your-api-key-here`
+# Using the app
+
+1. Make a new overlay
+2. Make or Import a new widget
+3. Hover over the widget and click the 3 dots to open the context menu
+4. Click `Open in Editor` to open the widgets files in VSCode (for now just VSCode)
 
 # 1.0 Release Roadmap
 

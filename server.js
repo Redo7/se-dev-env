@@ -697,9 +697,12 @@ app.get('/api/open-folder/:overlayID/:widgetID', async (req, res) => {
 
 app.get('/api/open-editor/:overlayID/:widgetID', async (req, res) => {
     const { overlayID, widgetID } = req.params;
-    const instancePath = join(__dirname, "overlays", overlayID, widgetID, "src");
+    const html = join(__dirname, "overlays", overlayID, widgetID, "src", "html.html");
+    const css = join(__dirname, "overlays", overlayID, widgetID, "src", "css.css");
+    const js = join(__dirname, "overlays", overlayID, widgetID, "src", "js.js");
+    const fields = join(__dirname, "overlays", overlayID, widgetID, "src", "fields.json");
 
-    const command = `code "${instancePath}"`;
+    const command = `code --reuse-window "${html}" "${css}" "${js}" "${fields}"`;
 
     exec(command, (error) => {
         if (error) {
