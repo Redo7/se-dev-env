@@ -38,8 +38,9 @@ const useAlert = (
     if(communityGift && eventAmount && eventAmount > 1){
         detail.event.bulkGifted = true;
     } else if (communityGift){
+		const filtered = names.filter(name => name != eventUsername);
+        detail.event.sender = filtered[Math.floor(Math.random() * (filtered.length))];
         detail.event.gifted = true;
-        detail.event.sender = names.filter(name => name != eventUsername)[Math.floor(Math.random() * names.length)];
     }
     
 	const iframes = document.querySelectorAll('iframe');
