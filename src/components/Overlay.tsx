@@ -348,7 +348,7 @@ const Overlay = () => {
 				</IconPopupButton>
 			</div>
 			{/* Notifications */}
-			<div className="notification-area absolute flex flex-col-reverse justify-end p-10 gap-4">
+			<div className="notification-area absolute flex flex-col-reverse justify-end p-10 gap-4 z-106!">
 				{notifications.map((notification) => {
 					return <ConsoleNotification key={notification.id} notification={{ ...notification }} />;
 				})}
