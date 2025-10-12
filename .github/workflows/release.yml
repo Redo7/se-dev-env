@@ -75,9 +75,14 @@ jobs:
       - name: Get tag annotation (release title)
         id: tag_info
         run: |
-          TAG_NAME=${GITHUB_REF_NAME}
-          TITLE=$(git for-each-ref refs/tags/$TAG_NAME --format='%(contents:subject)')
-          echo "title=$TITLE" >> $GITHUB_OUTPUT
+          TAG_NAME="${GITHUB_REF_NAME}"
+          git fetch --tags --force --prune --unshallow
+          TITLE=$(git tag -l "$TAG_NAME" --format='%(contents)' | head -n 1 | xargs)
+          # Fallback to tag name if no annotation (lightweight tag)
+          if [ -z "$TITLE" ]; then
+            TITLE="$TAG_NAME"
+          fi
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         id: create_release
