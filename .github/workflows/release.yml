@@ -38,7 +38,12 @@ jobs:
 
       - name: Zip repository contents
         run: |
-          zip -r release.zip . -x "*.git*"
+          repo_name=$(basename "$GITHUB_REPOSITORY")
+          mkdir -p build/$repo_name
+          cp -R . build/$repo_name/
+          cd build
+          zip -r ../release.zip "$repo_name" -x "*.git*"
+          cd ..
 
       - name: Create GitHub Release
         id: create_release
