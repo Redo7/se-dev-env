@@ -36,6 +36,30 @@ jobs:
           echo "Generated changelog:"
           cat CHANGELOG.md
 
+          - name: Add installation instructions to release body
+          run: |
+            cat << 'EOF' >> CHANGELOG.md
+  
+            ---
+  
+            # Installation and launching
+  
+            1. Run this command in the terminal
+  
+            ```bash
+            git clone https://github.com/Redo7/se-dev-env
+            cd se-dev-env
+            npm install
+            ```
+            2. Create a \`.env\` file in the root directory with these values:
+               - \`VITE_GOOGLE_FONTS_API_KEY = your-api-key-here\`
+            3. To run the app, choose one of the options below
+               - Terminal: \`npm run dev\`
+               - VSCode: Run \`code .\` in the terminal to open the app's folder in the editor. Then just run \`npm run dev\` in its integrated terminal
+                 - Not a lot of difference, but at least you can close the other terminal window
+            4. Open [http://localhost:5173/](http://localhost:5173/)
+            EOF
+
       - name: Zip repository contents
         run: |
           repo_name=$(basename "$GITHUB_REPOSITORY")
