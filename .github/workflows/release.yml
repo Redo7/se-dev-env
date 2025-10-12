@@ -31,8 +31,10 @@ jobs:
       - name: Generate changelog since last release
         id: changelog
         run: |
-          # Generate changelog since last release into a temporary file
-          conventional-changelog -p angular -r 1 > CHANGELOG.md | tail -n +3 > CHANGELOG.md
+          # Generate changelog into a temporary file
+          conventional-changelog -p angular -r 1 > tmp_changelog.md
+          # Remove the first two lines (adjust -n +3 if needed)
+          tail -n +3 tmp_changelog.md > CHANGELOG.md
           echo "Generated changelog:"
           cat CHANGELOG.md
 
