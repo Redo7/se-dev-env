@@ -65,10 +65,11 @@ jobs:
       - name: Zip repository contents
         run: |
           repo_name=$(basename "$GITHUB_REPOSITORY")
-          mkdir -p build/$repo_name
-          cp -R . build/$repo_name/
+          mkdir -p build
+          # Copy everything except build/ itself and .git/
+          rsync -av --exclude 'build' --exclude '.git' --exclude '.github' ./ build/$repo_name
           cd build
-          zip -r ../release.zip "$repo_name" -x "*.git*"
+          zip -r ../release.zip "$repo_name"
           cd ..
 
       - name: Create GitHub Release
