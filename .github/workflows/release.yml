@@ -76,7 +76,7 @@ jobs:
         id: tag_info
         run: |
           TAG_NAME="${GITHUB_REF_NAME}"
-          git fetch --tags --force --prune --unshallow
+          git fetch --tags --force --prune
           TITLE=$(git tag -l "$TAG_NAME" --format='%(contents)' | head -n 1 | xargs)
           # Fallback to tag name if no annotation (lightweight tag)
           if [ -z "$TITLE" ]; then
