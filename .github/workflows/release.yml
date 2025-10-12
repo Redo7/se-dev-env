@@ -32,7 +32,7 @@ jobs:
         id: changelog
         run: |
           # Generate changelog since last release into a temporary file
-          conventional-changelog -p angular -r 1 > CHANGELOG.md
+          conventional-changelog -p angular -r 1 > CHANGELOG.md | tail -n +3 > CHANGELOG.md
           echo "Generated changelog:"
           cat CHANGELOG.md
 
