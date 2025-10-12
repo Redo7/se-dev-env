@@ -17,10 +17,12 @@ import {
 	ChevronDown,
 	ChevronUp,
 	CodeXml,
+	Copy,
 	Download,
 	EllipsisVertical,
 	Folder,
 	FolderGit2,
+	FolderOutput,
 	Palette,
 	Pointer,
 	TextCursor,
@@ -630,6 +632,12 @@ const Widget = ({
 									<TextCursor /> Rename
 								</DropdownMenuItem>
 							</DialogTrigger>
+								<DropdownMenuItem className="line-through" disabled>
+									<Copy /> Duplicate
+								</DropdownMenuItem>
+								<DropdownMenuItem className="line-through" disabled>
+									<FolderOutput /> Copy to...
+								</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>
 								<Download /> Export
 							</DropdownMenuItem>
