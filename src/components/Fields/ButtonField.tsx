@@ -23,7 +23,7 @@ const ButtonField = ({ name, label }: Props) => {
 			<SubtleButton
 				id={name}
 				onClick={handleButtonClick}
-				cssClass='subtle text-sm'
+				cssClass='subtle text-sm whitespace-nowrap'
 				width="fit-content"
 				padding=".25rem .75rem"
 				height="2rem">
