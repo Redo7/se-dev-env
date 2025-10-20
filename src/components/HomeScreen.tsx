@@ -29,6 +29,7 @@ const HomeScreen = () => {
 	const nameRef = useRef<HTMLInputElement>(null);
 
 	document.body.setAttribute('clean-bg', 'true');
+	document.title = "se-dev-env"
 
 	const createOverlay = async (name: string) => {
 		const res = await fetch('/api/create-overlay', {
