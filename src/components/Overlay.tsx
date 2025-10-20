@@ -106,6 +106,8 @@ const Overlay = () => {
 	}, []);
 
 	useEffect(() => {
+		// Change page title to Overlay name
+		document.title = overlayData.name;
 		// Fetch templates
 		const getTemplates = async () => {
 			const res = await fetch('/api/get-templates');
@@ -221,6 +223,8 @@ const Overlay = () => {
 		}
 		setActiveWidget(widget);
 		setActiveWidgetId(widget.id);
+		// Change page title to Overlay name | Widget name
+		document.title = `${overlayData.name} | ${widget.name}`;
 	};
 
 	const handleNameInput = async (name: string) => {
