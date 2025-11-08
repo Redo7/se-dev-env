@@ -167,7 +167,6 @@ app.post("/api/create-widget/", async (req, res) => {
     const widgetFilesPath = join(__dirname, "overlays", overlayID, normalizedName, "src");
     const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
 
-
     try {
         console.log(`Copying ${template} files to ${destinationPath}`);
         await fs.promises.cp(iframeTemplate, destinationPath, { recursive: true });
@@ -180,6 +179,52 @@ app.post("/api/create-widget/", async (req, res) => {
         res.json(widgetData);
     } catch (error) {
         console.error("Error creating widget:", error);
+        res.status(500).json({ error: "Failed to create widget" });
+    }
+});
+
+// Duplicate Widget
+
+app.post("/api/duplicate-widget/", async (req, res) => {
+    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
+    if (!req.body.widgetID) return res.status(400).json({ error: "Widget id is required" });
+    if (!req.body.name) return res.status(400).json({ error: "Widget name is required" });
+    if (!req.body.template) return res.status(400).json({ error: "Template name is required" });
+
+    const { overlayID, widgetID, name, template } = req.body;
+    
+    const normalizedName = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-') + '-' + uuidv4();
+    const widgetData = {
+        name: name,
+        id: normalizedName,
+        src: `/overlays/${overlayID}/${normalizedName}/iframe.html`,
+        template: template,
+        scriptVersion: SCRIPT_VER,
+        width: 500,
+        height: 500,
+        posX: 0,
+        posY: 0,
+        zIndex: 5
+    };
+
+    const iframeTemplate = join(__dirname, "templates", "iframe");
+    const destinationPath = join(__dirname, "overlays", overlayID, normalizedName);
+    const widgetFilesPath = join(__dirname, "overlays", overlayID, widgetID, "src");
+    const newWidgetFilesPath = join(__dirname, "overlays", overlayID, normalizedName, "src");
+    const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
+
+    try {
+        console.log(`Duplicating ${name} files in ${destinationPath}`);
+        await fs.promises.cp(iframeTemplate, destinationPath, { recursive: true });
+        await fs.promises.cp(widgetFilesPath, newWidgetFilesPath, { recursive: true });
+
+        let currWidgetsArray = await fetchOverlayData(overlayID);
+        currWidgetsArray.widgets.push(widgetData);
+        await fs.promises.writeFile(instancePath, JSON.stringify(currWidgetsArray, null, "\t"), "utf-8",);
+
+        res.json(widgetData);
+    } catch (error) {
+        console.error("Error duplicating widget:", error);
         res.status(500).json({ error: "Failed to create widget" });
     }
 });

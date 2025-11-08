@@ -58,6 +58,7 @@ interface Props {
 	onClick: () => void;
 	onDelete: () => void;
 	onSettingsChange: (overlay: string, widget: WidgetInstance) => void;
+	onWidgetDuplicate: (widgetID: string, name: string, template: string) => void;
 
 	onDragStart?: (event: React.MouseEvent<HTMLDivElement>) => void;
 	onDragEnd?: (event: React.MouseEvent<HTMLDivElement>, newPosition: { x: number; y: number }) => void;
@@ -118,6 +119,7 @@ const Widget = ({
 	onClick,
 	onDelete,
 	onSettingsChange,
+	onWidgetDuplicate,
 	onDragStart,
 	onDragEnd,
 	onDragging,
@@ -632,7 +634,7 @@ const Widget = ({
 									<TextCursor /> Rename
 								</DropdownMenuItem>
 							</DialogTrigger>
-								<DropdownMenuItem className="line-through" disabled>
+								<DropdownMenuItem onClick={() => onWidgetDuplicate(id, name, template)}>
 									<Copy /> Duplicate
 								</DropdownMenuItem>
 								<DropdownMenuItem className="line-through" disabled>

@@ -251,6 +251,23 @@ const Overlay = () => {
 		});
 	};
 
+	const handleDuplicate = async (widgetID: string, name: string, template: string) => {
+		const res = await fetch(`/api/duplicate-widget/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ overlayID: overlayData.id, widgetID, name, template }),
+		});
+		if (res.ok) {
+			toast.success('Widget duplicated successfully');
+			getOverlayData();
+			return;
+		}
+		const data = await res.json();
+		toast.error(`Error duplicating widget`, {
+			description: `${data.error}`,
+		});
+	};
+
 	return (
 		<div className="overlay">
 			{/* Sidebar Button */}
@@ -375,6 +392,7 @@ const Overlay = () => {
 					resizable={true}
 					onClick={() => handleWidgetClick(widget)}
 					onDelete={() => softRemoveWidget(overlayData, widget)}
+					onWidgetDuplicate={() => handleDuplicate(widget.id, widget.name, widget.template)}
 					onSettingsChange={(id, widget) => {
 						updateWidgetSettings(id, widget);
 					}}
