@@ -58,7 +58,7 @@ npm install
     -   [x] Display relative time on recents
 -   [x] Overlay and widget renaming
     -   [x] Rename entries in `deletion-data.json`
--   [ ] Native way of creating templates
+-   [x] Native way of creating templates
 -   [ ] Fields
     -   [ ] Movable
     -   [ ] Field Creator
