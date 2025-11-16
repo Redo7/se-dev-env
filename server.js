@@ -365,26 +365,18 @@ app.get('/overlays/:overlayID/:template-:id/iframe.html', async (req, res) => {
 
 app.put('/api/update-widget-settings', async (req, res) => {
     if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
-    if (!req.body.id) return res.status(400).json({ error: 'Widget id is required' });
+    if (!req.body.widgetID) return res.status(400).json({ error: 'Widget id is required' });
+    if (!req.body.updates) return res.status(400).json({ error: 'Updated values object is required' });
 
-    const { overlayID, id, scriptVersion, width, height, posX, posY, blur, pointerEvents, frameVisible, zIndex } = req.body;
-    const newSettings = {
-        scriptVersion: scriptVersion,
-        width: width,
-        height: height,
-        posX: posX,
-        posY: posY,
-        blur: blur,
-        pointerEvents: pointerEvents,
-        frameVisible: frameVisible,
-        zIndex: zIndex
-    }
+    const { overlayID, widgetID, updates } = req.body;
 
     const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
     let currWidgetsArray = await fetchOverlayData(overlayID);
 
     try {
-        const updatedWidgetsArray = currWidgetsArray.widgets.map(widget => widget.id === id ? { ...widget, ...newSettings } : widget);
+        const updatedWidgetsArray = currWidgetsArray.widgets.map((widget) =>
+            widget.id === widgetID ? { ...widget, ...updates } : widget
+        );
         currWidgetsArray.widgets = updatedWidgetsArray;
         currWidgetsArray.lastUpdate = Date.now();
         fs.writeFileSync(instancePath, JSON.stringify(currWidgetsArray, null, "\t"), 'utf-8');

@@ -190,22 +190,14 @@ const Overlay = () => {
 		}
 	};
 
-	const updateWidgetSettings = async (overlayID: string, widget: WidgetInstance) => {
+	const updateWidgetSettings = async (overlayID: string, widgetID: string, updates: Partial<WidgetInstance>) => {
 		await fetch('/api/update-widget-settings', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				overlayID: overlayID,
-				id: widget.id,
-				scriptVersion: widget.scriptVersion,
-				width: widget.width,
-				height: widget.height,
-				posX: widget.posX,
-				posY: widget.posY,
-				blur: widget.blur,
-				pointerEvents: widget.pointerEvents,
-				frameVisible: widget.frameVisible,
-				zIndex: widget.zIndex,
+				overlayID,
+				widgetID,
+				updates,
 			}),
 		}).then((response) => {
 			if (!response.ok) {
@@ -399,8 +391,8 @@ const Overlay = () => {
 					onClick={() => handleWidgetClick(widget)}
 					onDelete={() => softRemoveWidget(overlayData, widget)}
 					onWidgetDuplicate={() => handleDuplicate(widget.id, widget.name, widget.template)}
-					onSettingsChange={(id, widget) => {
-						updateWidgetSettings(id, widget);
+					onSettingsChange={(id, widgetID, updates) => {
+						updateWidgetSettings(id, widgetID, updates);
 					}}
 				/>
 			))}

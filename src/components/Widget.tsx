@@ -60,7 +60,7 @@ interface Props {
 	isActive: boolean;
 	onClick: () => void;
 	onDelete: () => void;
-	onSettingsChange: (overlay: string, widget: WidgetInstance) => void;
+	onSettingsChange: (overlay: string, widgetID: string, updates: Partial<WidgetInstance>) => void;
 	onWidgetDuplicate: (widgetID: string, name: string, template: string) => void;
 
 	onDragStart?: (event: React.MouseEvent<HTMLDivElement>) => void;
@@ -181,21 +181,8 @@ const Widget = ({
 			toast.error(`Something went wrong while updating iframe files for ${id}`);
 			throw new Error(`Something went wrong while updating iframe files for ${id}`);
 		}
-		onSettingsChange(overlay.id, {
-			name: name,
-			id: id,
-			src: src,
-			template: template,
+		onSettingsChange(overlay.id, id, {
 			scriptVersion: data.scriptVersion,
-
-			width: Math.max(dimensions.width, 50),
-			height: Math.max(dimensions.height, 50),
-			posX: position.x,
-			posY: position.y,
-			blur: bgBlur,
-			pointerEvents: pointerEvents,
-			frameVisible: showFrame,
-			zIndex: widgetZIndex,
 		});
 		toast.success(`Successfully updated iframe files for ${name}`);
 		setCurrentScriptVersion(data.scriptVersion);
@@ -431,21 +418,11 @@ const Widget = ({
 				setIsResizing(null);
 				onResizeEnd?.(e as unknown as React.MouseEvent<HTMLDivElement>, currentDims, position);
 			}
-			onSettingsChange(overlay.id, {
-				name: name,
-				id: id,
-				src: src,
-				template: template,
-				scriptVersion: scriptVersion,
-
+			onSettingsChange(overlay.id, id, {
 				width: Math.max(dimensions.width, 50),
 				height: Math.max(dimensions.height, 50),
 				posX: position.x,
 				posY: position.y,
-				blur: bgBlur,
-				pointerEvents: pointerEvents,
-				frameVisible: showFrame,
-				zIndex: widgetZIndex,
 			});
 			document.removeEventListener('mousemove', handleGlobalMouseMove);
 			document.removeEventListener('mouseup', handleGlobalMouseUp);
@@ -544,20 +521,7 @@ const Widget = ({
 		)
 			return;
 		setWidgetZIndex(newValue);
-		onSettingsChange(overlay.id, {
-			name: name,
-			id: id,
-			src: src,
-			template: template,
-			scriptVersion: scriptVersion,
-
-			width: Math.max(dimensions.width, 50),
-			height: Math.max(dimensions.height, 50),
-			posX: position.x,
-			posY: position.y,
-			blur: bgBlur,
-			pointerEvents: pointerEvents,
-			frameVisible: showFrame,
+		onSettingsChange(overlay.id, id, {
 			zIndex: newValue,
 		});
 	};
@@ -587,61 +551,22 @@ const Widget = ({
 	};
 
 	const handlePointerEvents = () => {
-		onSettingsChange(overlay.id, {
-			name: name,
-			id: id,
-			src: src,
-			template: template,
-			scriptVersion: scriptVersion,
-			
-			width: Math.max(dimensions.width, 50),
-			height: Math.max(dimensions.height, 50),
-			posX: position.x,
-			posY: position.y,
-			blur: bgBlur,
+		onSettingsChange(overlay.id, id, {
 			pointerEvents: !pointerEvents,
-			frameVisible: showFrame,
-			zIndex: zIndex,
 		});
 		setPointerEvents(!pointerEvents);
 	}
 
 	const handleBgBlurChange = () => {
-		onSettingsChange(overlay.id, {
-			name: name,
-			id: id,
-			src: src,
-			template: template,
-			scriptVersion: scriptVersion,
-			
-			width: Math.max(dimensions.width, 50),
-			height: Math.max(dimensions.height, 50),
-			posX: position.x,
-			posY: position.y,
+		onSettingsChange(overlay.id, id, {
 			blur: !bgBlur,
-			pointerEvents: pointerEvents,
-			frameVisible: showFrame,
-			zIndex: zIndex,
 		});
 		setBgBlur(!bgBlur);
 	}
 
 	const handleBgToggle = () => {
-		onSettingsChange(overlay.id, {
-			name: name,
-			id: id,
-			src: src,
-			template: template,
-			scriptVersion: scriptVersion,
-			
-			width: Math.max(dimensions.width, 50),
-			height: Math.max(dimensions.height, 50),
-			posX: position.x,
-			posY: position.y,
-			blur: bgBlur,
-			pointerEvents: pointerEvents,
+		onSettingsChange(overlay.id, id, {
 			frameVisible: !showFrame,
-			zIndex: zIndex,
 		});
 		setShowFrame(!showFrame);
 	}
