@@ -20,6 +20,8 @@ import {
 	Copy,
 	Download,
 	EllipsisVertical,
+	FileDown,
+	FileInput,
 	Folder,
 	FolderGit2,
 	FolderOutput,
@@ -647,6 +649,12 @@ const Widget = ({
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => handleTemplateCreation()}>
 								<FolderGit2 /> Make a template
+							</DropdownMenuItem>
+							<DropdownMenuItem disabled>
+								<FileDown /> Save current fields as default
+							</DropdownMenuItem>
+							<DropdownMenuItem disabled>
+								<FileInput /> Regenerate data.json
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={handleFolderOpen}>
 								<Folder /> Open folder
