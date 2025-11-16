@@ -140,7 +140,7 @@ const Widget = ({
 	const [contextMenuOpen, setContextMenuOpen] = useState(false);
 	const [pointerEvents, setPointerEvents] = useState(pointerEventsEnabled);
 	const [bgBlur, setBgBlur] = useState(blur);
-	const [showFrame, setShowFrame] = useState(blur);
+	const [showFrame, setShowFrame] = useState(frameVisible);
 	const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
 	const [position, setPosition] = useState(initialPosition);
 	const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
@@ -586,6 +586,26 @@ const Widget = ({
 		});
 	};
 
+	const handlePointerEvents = () => {
+		onSettingsChange(overlay.id, {
+			name: name,
+			id: id,
+			src: src,
+			template: template,
+			scriptVersion: scriptVersion,
+			
+			width: Math.max(dimensions.width, 50),
+			height: Math.max(dimensions.height, 50),
+			posX: position.x,
+			posY: position.y,
+			blur: bgBlur,
+			pointerEvents: !pointerEvents,
+			frameVisible: showFrame,
+			zIndex: zIndex,
+		});
+		setPointerEvents(!pointerEvents);
+	}
+
 	const handleBgBlurChange = () => {
 		onSettingsChange(overlay.id, {
 			name: name,
@@ -714,7 +734,7 @@ const Widget = ({
 							<CustomCheckboxItem
 								mirror={true}
 								checked={pointerEvents}
-								onCheckedChange={setPointerEvents}>
+								onCheckedChange={handlePointerEvents}>
 								<Pointer /> Pointer events
 							</CustomCheckboxItem>
 							<DropdownMenuItem
