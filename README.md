@@ -87,8 +87,9 @@ npm install
     -   [x] Pointer events
     -   [x] Layer above
     -   [x] Layer below
+    -   [x] Toggle bg
     -   [ ] Accent color
-    -   [x] Show frame
+    -   [x] Toggle blur
     -   [x] Delete
 -   [ ] Animations
 -   [ ] Run script
