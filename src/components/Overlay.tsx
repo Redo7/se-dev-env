@@ -202,6 +202,8 @@ const Overlay = () => {
 				height: widget.height,
 				posX: widget.posX,
 				posY: widget.posY,
+				blur: widget.blur,
+				pointerEvents: widget.pointerEvents,
 				zIndex: widget.zIndex,
 			}),
 		}).then((response) => {
@@ -386,9 +388,11 @@ const Overlay = () => {
 					template={widget.template}
 					width={widget.width}
 					height={widget.height}
+					blur={widget.blur ? widget.blur : true}
+					pointerEventsEnabled={widget.pointerEvents ? widget.pointerEvents : true}
+					zIndex={widget.zIndex ? widget.zIndex : 5}
 					initialPosition={{ x: widget.posX, y: widget.posY }}
 					isActive={activeWidgetId === widget.id}
-					zIndex={widget.zIndex ? widget.zIndex : 5}
 					resizable={true}
 					onClick={() => handleWidgetClick(widget)}
 					onDelete={() => softRemoveWidget(overlayData, widget)}

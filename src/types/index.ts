@@ -18,5 +18,7 @@ export interface WidgetInstance {
 	height: number;
 	posX: number;
 	posY: number;
+	blur: boolean;
+	pointerEvents: boolean;
 	zIndex: number;
 }

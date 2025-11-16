@@ -53,6 +53,8 @@ interface Props {
 	scriptVersion: number;
 	width: number;
 	height: number;
+	blur: boolean;
+	pointerEventsEnabled: boolean;
 	zIndex: number;
 	isActive: boolean;
 	onClick: () => void;
@@ -114,8 +116,10 @@ const Widget = ({
 	scriptVersion,
 	width: initialWidth,
 	height: initialHeight,
-	isActive,
+	blur,
+	pointerEventsEnabled,
 	zIndex,
+	isActive,
 	onClick,
 	onDelete,
 	onSettingsChange,
@@ -132,7 +136,8 @@ const Widget = ({
 }: Props) => {
 	const [isDragging, setIsDragging] = useState(false);
 	const [contextMenuOpen, setContextMenuOpen] = useState(false);
-	const [pointerEvents, setPointerEvents] = useState(false);
+	const [pointerEvents, setPointerEvents] = useState(pointerEventsEnabled);
+	const [bgBlur, setBgBlur] = useState(blur);
 	const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
 	const [position, setPosition] = useState(initialPosition);
 	const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
@@ -184,6 +189,8 @@ const Widget = ({
 			height: Math.max(dimensions.height, 50),
 			posX: position.x,
 			posY: position.y,
+			blur: bgBlur,
+			pointerEvents: pointerEvents,
 			zIndex: widgetZIndex,
 		});
 		toast.success(`Successfully updated iframe files for ${name}`);
@@ -431,6 +438,8 @@ const Widget = ({
 				height: Math.max(dimensions.height, 50),
 				posX: position.x,
 				posY: position.y,
+				blur: bgBlur,
+				pointerEvents: pointerEvents,
 				zIndex: widgetZIndex,
 			});
 			document.removeEventListener('mousemove', handleGlobalMouseMove);
@@ -541,6 +550,8 @@ const Widget = ({
 			height: Math.max(dimensions.height, 50),
 			posX: position.x,
 			posY: position.y,
+			blur: bgBlur,
+			pointerEvents: pointerEvents,
 			zIndex: newValue,
 		});
 	};
@@ -569,9 +580,28 @@ const Widget = ({
 		});
 	};
 
+	const handleBgBlurChange = () => {
+		onSettingsChange(overlay.id, {
+			name: name,
+			id: id,
+			src: src,
+			template: template,
+			scriptVersion: scriptVersion,
+			
+			width: Math.max(dimensions.width, 50),
+			height: Math.max(dimensions.height, 50),
+			posX: position.x,
+			posY: position.y,
+			blur: !bgBlur,
+			pointerEvents: pointerEvents,
+			zIndex: zIndex,
+		});
+		setBgBlur(!bgBlur);
+	}
+
 	return (
 		<div
-			className="widget-container relative depth-shadow"
+			className={`widget-container relative depth-shadow ${bgBlur ? 'bgblur' : ''}`}
 			ref={widgetRef}
 			style={combinedStyle}
 			onClick={onClick}
@@ -675,9 +705,12 @@ const Widget = ({
 							<DropdownMenuItem className="line-through" disabled>
 								<Palette /> Background color
 							</DropdownMenuItem>
-							<DropdownMenuItem className="line-through" disabled>
+							<CustomCheckboxItem
+								mirror={true}
+								checked={bgBlur}
+								onCheckedChange={handleBgBlurChange}>
 								<Palette /> Background blur
-							</DropdownMenuItem>
+							</CustomCheckboxItem>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
 								className="text-red-500 hover:bg-red-500/20! hover:text-red-500!"

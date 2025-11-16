@@ -76,12 +76,14 @@ npm install
 -   [ ] Widget menu
     -   [x] Rename
     -   [x] Export
-    -   [ ] Duplicate
+    -   [x] Duplicate
     -   [ ] Move to
     -   [x] Make a template
     -   [x] Open folder
     -   [x] Open in Editor
         -   [ ] Editor can be set in settings
+    -   [ ] Regenerate widget data.json with default values
+    -   [ ] Set current field.json defaults from current data.json values
     -   [x] Pointer events
     -   [x] Layer above
     -   [x] Layer below
