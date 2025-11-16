@@ -55,6 +55,7 @@ interface Props {
 	height: number;
 	blur: boolean;
 	pointerEventsEnabled: boolean;
+	frameVisible: boolean;
 	zIndex: number;
 	isActive: boolean;
 	onClick: () => void;
@@ -118,6 +119,7 @@ const Widget = ({
 	height: initialHeight,
 	blur,
 	pointerEventsEnabled,
+	frameVisible,
 	zIndex,
 	isActive,
 	onClick,
@@ -138,6 +140,7 @@ const Widget = ({
 	const [contextMenuOpen, setContextMenuOpen] = useState(false);
 	const [pointerEvents, setPointerEvents] = useState(pointerEventsEnabled);
 	const [bgBlur, setBgBlur] = useState(blur);
+	const [showFrame, setShowFrame] = useState(blur);
 	const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
 	const [position, setPosition] = useState(initialPosition);
 	const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
@@ -191,6 +194,7 @@ const Widget = ({
 			posY: position.y,
 			blur: bgBlur,
 			pointerEvents: pointerEvents,
+			frameVisible: showFrame,
 			zIndex: widgetZIndex,
 		});
 		toast.success(`Successfully updated iframe files for ${name}`);
@@ -440,6 +444,7 @@ const Widget = ({
 				posY: position.y,
 				blur: bgBlur,
 				pointerEvents: pointerEvents,
+				frameVisible: showFrame,
 				zIndex: widgetZIndex,
 			});
 			document.removeEventListener('mousemove', handleGlobalMouseMove);
@@ -552,6 +557,7 @@ const Widget = ({
 			posY: position.y,
 			blur: bgBlur,
 			pointerEvents: pointerEvents,
+			frameVisible: showFrame,
 			zIndex: newValue,
 		});
 	};
@@ -594,14 +600,35 @@ const Widget = ({
 			posY: position.y,
 			blur: !bgBlur,
 			pointerEvents: pointerEvents,
+			frameVisible: showFrame,
 			zIndex: zIndex,
 		});
 		setBgBlur(!bgBlur);
 	}
 
+	const handleBgToggle = () => {
+		onSettingsChange(overlay.id, {
+			name: name,
+			id: id,
+			src: src,
+			template: template,
+			scriptVersion: scriptVersion,
+			
+			width: Math.max(dimensions.width, 50),
+			height: Math.max(dimensions.height, 50),
+			posX: position.x,
+			posY: position.y,
+			blur: bgBlur,
+			pointerEvents: pointerEvents,
+			frameVisible: !showFrame,
+			zIndex: zIndex,
+		});
+		setShowFrame(!showFrame);
+	}
+
 	return (
 		<div
-			className={`widget-container relative depth-shadow ${bgBlur ? 'bgblur' : ''}`}
+			className={`widget-container relative depth-shadow ${bgBlur ? 'bgblur' : ''} ${showFrame ? '' : 'hide-bg'} `}
 			ref={widgetRef}
 			style={combinedStyle}
 			onClick={onClick}
@@ -702,6 +729,12 @@ const Widget = ({
 								onClick={() => handleZIndex(widgetZIndex - 1)}>
 								<ChevronDown /> Layer below
 							</DropdownMenuItem>
+							<CustomCheckboxItem
+								mirror={true}
+								checked={showFrame}
+								onCheckedChange={handleBgToggle}>
+								<Palette /> Background
+							</CustomCheckboxItem>
 							<DropdownMenuItem className="line-through" disabled>
 								<Palette /> Background color
 							</DropdownMenuItem>

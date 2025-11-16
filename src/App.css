@@ -386,6 +386,17 @@ input #file-upload-button {
     border-color: #ffffff20;
 }
 
+.widget-container.hide-bg{
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: unset !important;
+}
+
+.hide-bg.widget-container::before {
+    backdrop-filter: unset !important;
+    filter: unset !important;
+}
+
 .widget-container::before {
     content: "";
     width: 100%;

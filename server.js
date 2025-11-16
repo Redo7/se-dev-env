@@ -367,8 +367,8 @@ app.put('/api/update-widget-settings', async (req, res) => {
     if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
     if (!req.body.id) return res.status(400).json({ error: 'Widget id is required' });
 
-    const { overlayID, id, scriptVersion, width, height, posX, posY, blur, pointerEvents, zIndex } = req.body;
-
+    const { overlayID, id, scriptVersion, width, height, posX, posY, blur, pointerEvents, frameVisible, zIndex } = req.body;
+    console.log(pointerEvents);
     const newSettings = {
         scriptVersion: scriptVersion,
         width: width,
@@ -377,6 +377,7 @@ app.put('/api/update-widget-settings', async (req, res) => {
         posY: posY,
         blur: blur,
         pointerEvents: pointerEvents,
+        frameVisible: frameVisible,
         zIndex: zIndex
     }
 

@@ -390,6 +390,7 @@ const Overlay = () => {
 					height={widget.height}
 					blur={widget.blur ? widget.blur : true}
 					pointerEventsEnabled={widget.pointerEvents ? widget.pointerEvents : true}
+					frameVisible={widget.frameVisible ? widget.frameVisible : true}
 					zIndex={widget.zIndex ? widget.zIndex : 5}
 					initialPosition={{ x: widget.posX, y: widget.posY }}
 					isActive={activeWidgetId === widget.id}
