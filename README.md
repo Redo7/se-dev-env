@@ -88,7 +88,7 @@ npm install
     -   [x] Layer above
     -   [x] Layer below
     -   [ ] Accent color
-    -   [ ] Show frame
+    -   [x] Show frame
     -   [x] Delete
 -   [ ] Animations
 -   [ ] Run script
