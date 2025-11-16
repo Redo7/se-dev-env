@@ -67,8 +67,6 @@ function copyFiles(srcDir, destDir, files) {
 // Create overlay
 
 app.post("/api/create-overlay/", async (req, res) => {
-    if (!req.body.name) return res.status(400).json({ error: 'Overlay name is required' });
-
     const { name } = req.body;
     const instanceId = uuidv4();
     const id = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-') + '-' + instanceId;
@@ -131,8 +129,6 @@ app.get('/api/get-templates', async (req, res) => {
 // In the future overlay-data will also store deletion data in the form of a UNIX timestamp. This should check the current time and delete any references earlier than Date.now()
 
 app.get('/api/get-overlay-data/:overlayID', async (req, res) => {
-    if (!req.params.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
-
     const { overlayID } = req.params;
     let currWidgetsArray = await fetchOverlayData(overlayID);
 
@@ -142,10 +138,6 @@ app.get('/api/get-overlay-data/:overlayID', async (req, res) => {
 // Create Widget
 
 app.post("/api/create-widget/", async (req, res) => {
-    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
-    if (!req.body.template) return res.status(400).json({ error: "Template name is required" });
-    if (!req.body.name) return res.status(400).json({ error: "Widget name is required" });
-
     const { name, template, overlayID } = req.body;
     const normalizedName = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-') + '-' + uuidv4();
     const widgetData = {
@@ -188,11 +180,6 @@ app.post("/api/create-widget/", async (req, res) => {
 // Duplicate Widget
 
 app.post("/api/duplicate-widget/", async (req, res) => {
-    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
-    if (!req.body.widgetID) return res.status(400).json({ error: "Widget id is required" });
-    if (!req.body.name) return res.status(400).json({ error: "Widget name is required" });
-    if (!req.body.template) return res.status(400).json({ error: "Template name is required" });
-
     const { overlayID, widgetID, name, template } = req.body;
     
     const normalizedName = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-') + '-' + uuidv4();
@@ -234,9 +221,6 @@ app.post("/api/duplicate-widget/", async (req, res) => {
 // Soft delete overlay / widget
 
 app.put('/api/soft-delete/', async (req, res) => {
-    if (!req.body.overlayName) return res.status(400).json({ error: 'Overlay Name is required' });
-    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
-
     const { overlayName, overlayID, widgetName, widgetID } = req.body;
 
     const deletionDataPath = join(__dirname, "data", "deletion-data.json");
@@ -274,8 +258,6 @@ app.put('/api/soft-delete/', async (req, res) => {
 // Delete overlay / widget
 
 app.delete('/api/delete/', async (req, res) => {
-    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
-
     const { overlayID, widgetID } = req.body;
 
     const deletionDataPath = join(__dirname, "data", "deletion-data.json");
@@ -311,8 +293,6 @@ app.delete('/api/delete/', async (req, res) => {
 // Restore overlay / widget
 
 app.put('/api/restore/', async (req, res) => {
-    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay ID is required' });
-
     const { overlayID, widgetID } = req.body;
 
     const deletionDataPath = join(__dirname, "data", "deletion-data.json");
@@ -364,10 +344,6 @@ app.get('/overlays/:overlayID/:template-:id/iframe.html', async (req, res) => {
 // Update widget settings
 
 app.put('/api/update-widget-settings', async (req, res) => {
-    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
-    if (!req.body.widgetID) return res.status(400).json({ error: 'Widget id is required' });
-    if (!req.body.updates) return res.status(400).json({ error: 'Updated values object is required' });
-
     const { overlayID, widgetID, updates } = req.body;
 
     const instancePath = join(__dirname, "overlays", overlayID, "overlay-data.json");
@@ -389,7 +365,6 @@ app.put('/api/update-widget-settings', async (req, res) => {
 // Fetch files from /data/
 
 app.get('/api/data/:file', async (req, res) => {
-    if (!req.params.file) return res.status(400).json({ error: 'File is required' });
     const dataObject = await fetchDataFile(`${req.params.file}.json`); // this returns [object Object] I think?
     res.json(dataObject)
 })
@@ -397,9 +372,6 @@ app.get('/api/data/:file', async (req, res) => {
 // Fetch fields.json
 
 app.get('/api/fields/:overlay/:widget', async (req, res) => {
-    if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
-    if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
-
     const dataFile = join(__dirname, "overlays", req.params.overlay, req.params.widget, 'src', 'fields.json');
     const fieldData = await fs.readFile(dataFile, 'utf-8');
 
@@ -409,9 +381,6 @@ app.get('/api/fields/:overlay/:widget', async (req, res) => {
 // Fetch data.json
 
 app.post('/api/field-data/:overlay/:widget', async (req, res) => {
-    if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
-    if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
-
     const overlayName = req.params.overlay;
     const widgetName = req.params.widget;
 
@@ -468,10 +437,6 @@ app.post('/api/field-data/:overlay/:widget', async (req, res) => {
 // Update the value of a specific field in data.json
 
 app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
-    if (!req.params.overlay) return res.status(400).json({ error: 'Overlay is required' });
-    if (!req.params.widget) return res.status(400).json({ error: 'Widget is required' });
-    if (!req.params.field) return res.status(400).json({ error: 'Field is required' });
-
     const { overlay, widget, field } = req.params;
     const { newValue } = req.body;
 
@@ -492,9 +457,6 @@ app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
 })
 
 app.put('/api/update-iframe-files/', async (req, res) => {
-    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay is required' });
-    if (!req.body.widgetID) return res.status(400).json({ error: 'Widget is required' });
-
     const { overlayID, widgetID } = req.body;
     const iframeTemplate = join(__dirname, "templates", "iframe");
     const widgetPath = join(__dirname, "overlays", overlayID, widgetID);
@@ -642,9 +604,6 @@ app.post("/api/widget-io-import/:overlayID", upload.single("file"), async (req, 
 });
 
 app.post("/api/rename/", async (req, res) => {
-    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
-    if (!req.body.name) return res.status(400).json({ error: "New name is required" });
-
     const { overlayID, widgetID, name } = req.body;
     const newID = name.toLowerCase().replaceAll(' - ', '-').replaceAll(' ', '-') + '-' + uuidv4();
     const dir = join(__dirname, "overlays", overlayID);
@@ -691,10 +650,6 @@ app.post("/api/rename/", async (req, res) => {
 })
 
 app.put('/api/make-template/', async (req, res) => {
-    if (!req.body.overlayID) return res.status(400).json({ error: 'Overlay id is required' });
-    if (!req.body.widgetID) return res.status(400).json({ error: 'Widget id is required' });
-    if (!req.body.templateName) return res.status(400).json({ error: 'Template name is required' });
-
     try {
         const { overlayID, widgetID, templateName } = req.body;
         const normalizedName = templateName.replaceAll(' - ', '-').replaceAll(' ', '-');
