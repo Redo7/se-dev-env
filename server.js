@@ -151,7 +151,8 @@ app.post("/api/create-widget/", async (req, res) => {
         posX: 0,
         posY: 0,
         blur: true,
-        pointerEvents: true,
+        pointerEvents: false,
+        frameVisible: true,
         zIndex: 5
     };
 
