@@ -88,7 +88,7 @@ const Widgetio = ({ overlay, widgets, onWidgetImport }: Props) => {
 										<ChevronsUpDown className="opacity-50" />
 									</Button>
 								</PopoverTrigger>
-								<PopoverContent align="start" className="w-[15.875rem] p-0 z-100">
+								<PopoverContent align="start" className="w-[15.875rem] p-0 z-101">
 									<Command>
 										<CommandInput placeholder="Search widgets..." className="h-9" />
 										<CommandList>
