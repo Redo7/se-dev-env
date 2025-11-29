@@ -351,7 +351,7 @@ p.overlay-last-opened {
 
 .OverlayButtonContainer {
     bottom: 3.125rem;
-    z-index: 100;
+    z-index: 1000;
     transition: left 750ms var(--redo-easing);
     left: 3.125rem;
 }
@@ -644,7 +644,7 @@ iframe {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 10000;
+    z-index: 101;
 }
 
 .dark .overlay-navbar {
