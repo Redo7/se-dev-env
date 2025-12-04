@@ -174,6 +174,7 @@ const Overlay = () => {
 				icon: <Trash size={16} />,
 				action: (
 					<Button
+						className='ml-auto'
 						onClick={async () => {
 							await useTrashRestore(overlay, widget);
 							getOverlayData();
