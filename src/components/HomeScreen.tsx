@@ -1,5 +1,6 @@
 import '../App.css';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SubtleButton from './Buttons/SubtleButton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from './ui/input';
@@ -20,13 +21,17 @@ import {
 	DropdownMenuRadioGroup,
 } from '@/components/ui/dropdown-menu';
 import { BookA, ClockFading } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from './ui/button';
 
 const HomeScreen = () => {
 	const [overlays, setOverlays] = useState<OverlayInstance[]>([]);
 	const [filterInput, setFilterInput] = useState('');
 	const [sortOrder, setSortOrder] = useState('A-Z');
+	const [createPopoverOpen, setCreatePopoverOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const nameRef = useRef<HTMLInputElement>(null);
+	const navigate = useNavigate();
 
 	document.body.setAttribute('clean-bg', 'true');
 	document.title = "se-dev-env"
@@ -39,6 +44,7 @@ const HomeScreen = () => {
 		});
 		const data = await res.json();
 		if (data) getOverlays();
+		return data;
 	};
 
 	const getOverlays = async () => {
@@ -123,8 +129,8 @@ const HomeScreen = () => {
 				<div className="recent-overlays flex flex-col gap-1.5 w-100 box-content">
 					<div className="home-screen-heading w-100 min-h-10 flex justify-between items-center">
 						<h1>Overlays</h1>
-						<Popover>
-							<PopoverTrigger className="home-screen-create p-4 py-2 rounded-sm bg-tr-100">
+						<Popover open={createPopoverOpen}>
+							<PopoverTrigger className="home-screen-create p-4 py-2 rounded-sm bg-tr-100" onClick={() => setCreatePopoverOpen(true)}>
 								<i className="bi bi-file-earmark-plus-fill"></i> Create New
 							</PopoverTrigger>
 							<PopoverContent className="flex flex-col gap-4">
@@ -133,9 +139,19 @@ const HomeScreen = () => {
 									<Input ref={nameRef} id="name" placeholder="Overlay name" />
 								</div>
 								<SubtleButton
-									onClick={() => {
+									onClick={async () => {
 										if (nameRef.current) {
-											createOverlay(nameRef.current.value);
+											const newOverlay = await createOverlay(nameRef.current.value);
+											setCreatePopoverOpen(false)
+											toast.success(`${nameRef.current.value} overlay created`, {
+												action: (
+													<Button
+														onClick={() => navigate(`/${newOverlay.id}`)}
+														className='ml-auto'>
+														Open
+													</Button>
+												),
+											});
 										}
 									}}
 									width="100%"
