@@ -508,8 +508,8 @@ const Widget = ({
 		...style,
 	};
 
-	const handleNameInput = async (name: string) => {
-		rename(overlay, { name, id }, name, true);
+	const handleNameInput = async (widgetName: string, name: string) => {
+		rename(overlay, { name: widgetName, id }, name, true);
 	};
 
 	const handleTemplateCreation = async () => {
@@ -727,7 +727,7 @@ const Widget = ({
 						</div>
 						<DialogFooter className="sm:justify-start">
 							<Button
-								onClick={() => handleNameInput(widgetName)}
+								onClick={() => handleNameInput(name, widgetName)}
 								className="ml-auto"
 								type="button"
 								variant="default">
