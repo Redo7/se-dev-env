@@ -1,7 +1,8 @@
 <div align="center">
   
 # se-dev-env
-  
+![](https://img.shields.io/github/downloads/redo7/se-dev-env/total) ![](https://img.shields.io/github/v/release/redo7/se-dev-env)
+
 </div>
 This app aims to bridge the gap between efficient development and StreamElements. Create an overlay, add a widget, and start coding right in your preferred editor.
 
