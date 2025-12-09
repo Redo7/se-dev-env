@@ -588,6 +588,10 @@ app.post("/api/widget-io-import/:overlayID", upload.single("file"), async (req, 
             height: 500,
             posX: 0,
             posY: 0,
+            blur: true,
+            pointerEvents: false,
+            frameVisible: true,
+            zIndex: 5
         };
 
         // Update overlay-data.json
