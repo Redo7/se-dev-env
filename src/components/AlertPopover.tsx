@@ -67,7 +67,7 @@ const AlertPopover = ({ listener, icon, onPopoverToggle }: Props) => {
                 <Button variant="ghost" size="sm" onClick={() => dispatchAlert('random')} onMouseEnter={() => handleMouseEnter()} onMouseLeave={() => handleMouseLeave()}> {icon} </Button>
             </PopoverTrigger>
             <PopoverContent onMouseEnter={() => handleMouseEnter()} onMouseLeave={() => handleMouseLeave()} className={`flex flex-col gap-2 z-101 ${listener === 'cheer-latest' ? 'w-90' : listener === 'raid-latest' ? 'w-80' : ''}`}>
-                <Input onChange={(event) => setUsername(event.target.value)} onKeyDown={handleCustomInput} type='text' placeholder='Username' value={username} autoComplete='off'/>
+                <Input onChange={(event) => setUsername(event.target.value)} onKeyDown={handleCustomInput} type='text' placeholder='Name' value={username} autoComplete='off'/>
                 <Textarea onChange={(event) => setMessage(event.target.value)} onKeyDown={handleCustomInput} placeholder='Message' value={message}/>
                 {listener === 'subscriber-latest' && 
                 <div className='flex justify-between'>
