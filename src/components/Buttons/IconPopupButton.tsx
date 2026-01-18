@@ -84,7 +84,13 @@ const IconPopupButton = ({ children, icon, popupItems, popupPosition }: Props) =
 						position: 'absolute',
 						...getPopupPosition(),
 					}}>
-					{popupItems.map((item, index) => (
+					{popupItems.sort((a, b) => {
+                        const nameA = a.label[0].toLowerCase();
+                        const nameB = b.label[0].toLowerCase();
+                        if (nameA < nameB) return -1;
+                        if (nameA > nameB) return 1;
+                        return 0;
+                    }).map((item, index) => (
 						<Popover key={index}>
 							<PopoverTrigger asChild>
 								<div className="popup-item">
