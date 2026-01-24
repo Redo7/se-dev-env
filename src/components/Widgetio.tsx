@@ -51,7 +51,7 @@ const Widgetio = ({ overlay, widgets, onWidgetImport }: Props) => {
 					<CodeXml size={18} strokeWidth={1.25} />
 				</IconButton>
 			</PopoverTrigger>
-			<PopoverContent align="start" className='z-101'>
+			<PopoverContent align="start" className='z-105'>
 				<h1 className="font-[800] text-xl">Widget.io</h1>
 				<Accordion type="single" collapsible defaultValue="export">
 					<AccordionItem value="import">

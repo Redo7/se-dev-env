@@ -6,7 +6,7 @@ interface Props {
 
 const HiddenField = ({ name, label }: Props) => {
 	// Implement max length that matches SE then truncate
-	if (label.length >= 34) {
+	if (label && label.length >= 34) {
 		label = label.substring(0, 33) + '...';
 	}
 	return (
