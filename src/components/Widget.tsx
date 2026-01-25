@@ -585,7 +585,7 @@ const Widget = ({
 			style={combinedStyle}
 			onClick={onClick}
 			onMouseDown={handleMouseDown}>
-			{currentScriptVersion == 1.3 ? (
+			{currentScriptVersion == 1.4 ? (
 				<iframe
 					ref={iframeRef}
 					id={id}
