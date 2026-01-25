@@ -1,4 +1,4 @@
-// Script version: 1.3
+// Script version: 1.4
 
 function detectType(arg) {
     if (arg === null) return "null";
@@ -191,8 +191,8 @@ window.addEventListener("message", async (obj) => {
                     },
                     counters: { get: (c) => { if (!__mockCounters[c]) __mockCounters[c] = { counter: c, value: 0 }; return Promise.resolve(JSON.parse(JSON.stringify(__mockCounters[c]))); } },
                     sanitize: ({ message }) => Promise.resolve({ result: { message: message.replace(/Vulgar/gi, "Kreygasm") }, skip: false }),
-                    cheerFilter: (m) => Promise.resolve(m.replace(/\b\d+\s*(cheer|bits)\b/gi, "").trim()),
-                    setField: (k, v) => { __mockFieldData[k] = v; },
+                    cheerFilter: (message) => Promise.resolve(message.replace(/\b\d+\s*(cheer|bits)\b/gi, "").trim()),
+                    setField: (field, value) => window.parent.postMessage({ type: "setField", widgetId: IFRAME_ID, field, value }, "*"),
                     getOverlayStatus: () => ({ isEditorMode: true, muted: false })
                 };
                 await loadWidgetContentAll("./src/html.html", "./src/css.css?raw", "./src/js.js", __mockFieldData, new CustomEvent("onWidgetLoad", obj.data));

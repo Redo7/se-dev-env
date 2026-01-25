@@ -45,6 +45,7 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import useRename from '@/hooks/useRename';
 import useTemplateCreation from '@/hooks/useTemplateCreation';
+import useFieldChange from '@/hooks/useFieldChange';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -289,6 +290,10 @@ const Widget = ({
 
 				case 'widgetLoadError':
 					console.error(`[Parent App] Widget load error for ${widgetIdRef.current}:`, event.data.error);
+					break;
+				case 'setField':
+                    const {widgetId, field, value} = event.data;
+                    useFieldChange(overlay.id, widgetId, field, value);
 					break;
 
 				default:
