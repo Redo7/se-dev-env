@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useFieldChange from '../../hooks/useFieldChange';
 import TextField from './TextField';
+import useFieldUpdates from '@/hooks/useFieldUpdates';
 interface Props {
 	overlay: string;
 	widget: string;
@@ -16,8 +17,8 @@ const SoundInputField = ({ overlay, widget, name, label, value, timestampClassNa
 	const [currentTime, setCurrentTime] = useState<number>(0);
 	const [duration, setDuration] = useState<number>(0);
 	const [isLoaded, setIsLoaded] = useState<boolean>(false);
-	
 	const [selectedFile, setSelectedFile] = useState(value);
+    useFieldUpdates({ overlay, widget, name, setInputValue: setSelectedFile });
 
 	const handleFileChange = (newValue: string) => {
         setSelectedFile(newValue);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import './fields.css';
 import useFieldChange from '../../hooks/useFieldChange';
+import useFieldUpdates from '@/hooks/useFieldUpdates';
 
 interface Props {
 	overlay: string;
@@ -13,6 +14,7 @@ interface Props {
 
 const TextField = ({ overlay, widget, name, label, value = '', onChange }: Props) => {
 	const [inputValue, setInputValue] = useState(value);
+    useFieldUpdates({ overlay, widget, name, setInputValue });
 	
 	useEffect(() => {
 		setInputValue(value);

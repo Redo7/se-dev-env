@@ -1,7 +1,7 @@
-const useFieldChange = async (overlay: string, widget: string, field: string, newValue: string | number | boolean) => {
+const useFieldChange = async (overlay: string, widget: string, field: string, newValue: string | number | boolean, origin: string = "useFieldChange") => {
 	try {
 		const res = await fetch(
-			`/api/update-field-data/${encodeURIComponent(overlay)}/${encodeURIComponent(widget)}/${encodeURIComponent(field)}`,
+			`/api/update-field-data/${encodeURIComponent(overlay)}/${encodeURIComponent(widget)}/${encodeURIComponent(field)}?origin=${origin}`,
 			{
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },

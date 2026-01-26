@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useFieldChange from '../../hooks/useFieldChange';
+import useFieldUpdates from '@/hooks/useFieldUpdates';
 
 interface Props {
 	overlay: string;
@@ -11,6 +12,8 @@ interface Props {
 
 const CheckboxField = ({ overlay, widget, name, label, value }: Props) => {
 	const [isChecked, setIsChecked] = useState(value);
+    useFieldUpdates({ overlay, widget, name, setInputValue: setIsChecked });
+
 	const handleCheckboxClick = () => {
 		setIsChecked(!isChecked);
 		useFieldChange(overlay, widget, name, !isChecked);

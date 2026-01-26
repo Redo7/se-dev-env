@@ -250,7 +250,7 @@ const Widget = ({
 	}, [getOnWidgetLoadData]);
 
 	useEffect(() => {
-		const handleIncomingMessage = (event: MessageEvent) => {
+		const handleIncomingMessage = async (event: MessageEvent) => {
 			// More permissive origin check for development
 			const allowedOrigins = ['http://localhost:5173', 'null', window.location.origin];
 			if (!allowedOrigins.includes(event.origin)) {
@@ -293,11 +293,10 @@ const Widget = ({
 					break;
 				case 'setField':
                     const {widgetId, field, value} = event.data;
-                    useFieldChange(overlay.id, widgetId, field, value);
+                    await useFieldChange(overlay.id, widgetId, field, value, "setField");
 					break;
 
 				default:
-				// Uncomment for debugging
 				// console.log('[Parent App] Unknown message type from iframe:', event.data);
 			}
 		};

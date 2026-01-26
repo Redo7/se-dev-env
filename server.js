@@ -450,6 +450,12 @@ app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
         const newFieldData = JSON.stringify(fieldDataJson, null, 2);
 
         await fs.writeFile(dataFilePath, newFieldData, 'utf-8');
+        await fetch("http://localhost:5173/__setBySetField", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ file: dataFilePath, origin: req.query.origin }),
+        });
+        
         res.send();
     } catch (error) {
         console.error(`Error updating ${dataFilePath}:`, error);

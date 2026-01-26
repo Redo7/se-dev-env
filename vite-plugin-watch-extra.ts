@@ -1,4 +1,3 @@
-// vite-plugin-watch-extra.ts
 import type { Plugin } from 'vite';
 import { normalizePath } from 'vite';
 
@@ -6,6 +5,28 @@ export function watchExtraFilesPlugin(): Plugin {
 	return {
 		name: 'watch-extra-files',
 		configureServer(server) {
+
+        const recentlyWritten = new Map<string, string>();
+        server.middlewares.use('/__setBySetField', async (req, res, next) => {
+        if (req.method === 'POST') {
+            try {
+            let body = '';
+            req.on('data', chunk => (body += chunk.toString()));
+            req.on('end', () => {
+                const { file, origin } = JSON.parse(body);
+                if (file) {
+                    recentlyWritten.set(normalizePath(file), origin || "unknown");
+                }
+                res.statusCode = 200;
+                res.end('ok');
+            });
+            } catch (err) {
+            res.statusCode = 400;
+            res.end('bad request');
+            }
+        } else next();
+
+        });
 			const filesToWatch = [
 				'overlays/**/*.html',
 				'overlays/**/*.css',
@@ -15,8 +36,17 @@ export function watchExtraFilesPlugin(): Plugin {
 			console.log('[Vite Plugin] Adding files to watcher:', filesToWatch);
 			server.watcher.add(filesToWatch);
 
-			server.watcher.on('change', (rawPath) => {
-				const path = normalizePath(rawPath);
+			server.watcher.on('change', async (rawPath) => {
+				const path = normalizePath(rawPath); 
+                const origin = recentlyWritten.get(path);
+                if (origin === 'useFieldChange') {
+                    console.log('[Vite Plugin] Skipping field-data-updated for useFieldChange');
+                    recentlyWritten.delete(path);
+                    return;
+                    // Still send iframe-content-update, just not field-data-updated
+                } else {
+                    recentlyWritten.delete(path);
+                }
 
 				console.log(`[Vite Plugin] === WATCHER DETECTED ANY CHANGE: ${path} ===`);
 
@@ -24,18 +54,13 @@ export function watchExtraFilesPlugin(): Plugin {
 				const isCssChange = path.includes('/css.css');
 				const isJsonChange = path.includes('/src/data.json') || path.includes('/src/fields.json');
 
-				// === NEW: Extract Widget ID from path ===
-				const pathParts = path.split('/');
-				// Assuming your path structure is: overlays/OVERLAY_ID/WIDGET_ID/src/data.json
-				// So, WIDGET_ID should be the part before 'src'.
-				// Need to be careful here if your ID contains slashes, but generally, IDs are flat strings.
-				const srcIndex = pathParts.indexOf('src');
+				const pathSplit = path.split('/');
+				const srcIndex = pathSplit.indexOf('src');
 				let widgetId: string | undefined;
-				if (srcIndex > 1) { // Ensure 'src' is not the first or second element (e.g., /src/data.json)
-					widgetId = pathParts[srcIndex - 1]; // Get the part just before 'src'
+				if (srcIndex > 1) {
+					widgetId = pathSplit[srcIndex - 1];
 				}
 				console.log(`  - Detected widget ID: ${widgetId}`);
-				// ===================================
 
 				if (isHtmlChange || isCssChange || isJsonChange) {
 					console.log(`[Vite Plugin] Sending custom HMR event for iframe update: from ${path}`);
@@ -45,9 +70,25 @@ export function watchExtraFilesPlugin(): Plugin {
 						data: {
 							file: path,
 							type: isHtmlChange ? 'html' : isCssChange ? 'css' : 'json',
-							widgetId: widgetId, // === NEW: Include widget ID ===
+							widgetId: widgetId,
 						},
 					});
+                    if (isJsonChange) {
+                        console.log(`[Vite Plugin] Sending custom HMR event: field-data-updated`);
+                        const pathSplit = path.split('/');
+                        const srcIndex = pathSplit.indexOf('src');
+                        
+                        server.ws.send({
+                            type: 'custom',
+                            event: 'field-data-updated',
+                            data: {
+                                file: path,
+                                type: 'json',
+                                overlayId: pathSplit[srcIndex - 2],
+                                widgetId: widgetId,
+                            },
+                        });
+                    }
 				} else {
 					console.log(`[Vite Plugin] Change at ${path} did not match specific iframe criteria. Skipping custom HMR send.`);
 				}
@@ -63,10 +104,9 @@ export function watchExtraFilesPlugin(): Plugin {
 					req.on('data', chunk => { body += chunk.toString(); });
 					req.on('end', () => {
 						try {
-							const { file } = JSON.parse(body); // This 'file' should be the relative path
+							const { file } = JSON.parse(body);
 							if (file) {
                                 const path = normalizePath(file);
-                                // Re-extract widgetId for __trigger-hmr path too
                                 const pathParts = path.split('/');
                                 const srcIndex = pathParts.indexOf('src');
                                 let widgetId: string | undefined;
@@ -82,7 +122,7 @@ export function watchExtraFilesPlugin(): Plugin {
                                         type: path.includes('/src/data.json') || path.includes('/src/fields.json') ? 'json' :
                                               path.includes('/html.html') ? 'html' :
                                               path.includes('/css.css') ? 'css' : 'unknown',
-                                        widgetId: widgetId // === NEW: Include widget ID ===
+                                        widgetId: widgetId
                                     },
                                 });
 								res.statusCode = 200;

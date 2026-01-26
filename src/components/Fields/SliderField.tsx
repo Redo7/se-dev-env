@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './fields.css';
 import useFieldChange from '../../hooks/useFieldChange';
+import useFieldUpdates from '@/hooks/useFieldUpdates';
 
 interface Props {
 	overlay: string;
@@ -16,6 +17,7 @@ interface Props {
 const SliderField = ({ overlay, widget, name, label, value = 0, min, max, step = 1 }: Props) => {
 	const [inputValue, setInputValue] = useState<number | ''>(value);
 	const [currentValueVisible, setCurrentValueVisible] = useState<Boolean>(false)
+    useFieldUpdates({ overlay, widget, name, setInputValue });
 	return (
 		<div className="slider-field">
 			<label htmlFor={name}>{label}</label>

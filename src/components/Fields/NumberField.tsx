@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './fields.css';
 import useFieldChange from '../../hooks/useFieldChange';
+import useFieldUpdates from '@/hooks/useFieldUpdates';
 
 interface Props {
 	overlay: string;
@@ -15,6 +16,7 @@ interface Props {
 
 const NumberField = ({ overlay, widget, name, label, step = 1, value = 0 }: Props) => {
 	const [inputValue, setInputValue] = useState<number | ''>(value);
+    useFieldUpdates({ overlay, widget, name, setInputValue });
 	const labelChars = label
 		.replaceAll(' ', '\u00a0')
 		.split('')

@@ -7,6 +7,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
+import useFieldUpdates from '@/hooks/useFieldUpdates';
 
 interface Props {
 	overlay: string;
@@ -28,6 +29,8 @@ const DropdownField = ({ overlay, widget, name, label, value, options }: Props) 
 	convertedOptions.find((option) => option.label === value)?.value || value;
 
 	const [inputValue, setInputValue] = useState(initialKey);
+    useFieldUpdates({ overlay, widget, name, setInputValue });
+
 
 	const handleChange = (value: string) => {
 		setInputValue(value);

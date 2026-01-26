@@ -3,6 +3,7 @@ import 'react-color-palette/css';
 import TextField from './TextField';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import useFieldChange from '../../hooks/useFieldChange';
+import useFieldUpdates from '@/hooks/useFieldUpdates';
 
 interface Props {
 	overlay: string;
@@ -17,6 +18,7 @@ const ColorPickerField = ({ overlay, widget, name, label, value = '#ed1b53', onC
 	const [color, setColor] = useColor(value);
 	const [isVisible, setIsVisible] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
+    useFieldUpdates({ overlay, widget, name, setInputValue: setColor });
 
 	// Debounce state for text input
 	const [pendingHex, setPendingHex] = useState<string | null>(null);

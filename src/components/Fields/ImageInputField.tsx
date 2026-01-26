@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import TextField from './TextField';
 import useFieldChange from '../../hooks/useFieldChange';
+import useFieldUpdates from '@/hooks/useFieldUpdates';
 interface Props {
 	overlay: string;
 	widget: string;
@@ -11,6 +12,7 @@ interface Props {
 
 const ImageInputField = ({ overlay, widget, name, label, value = undefined }: Props) => {
 	const [selectedFile, setSelectedFile] = useState(value);
+    useFieldUpdates({ overlay, widget, name, setInputValue: setSelectedFile });
 
 	const handleFileChange = (newValue: string) => {
         setSelectedFile(newValue);
