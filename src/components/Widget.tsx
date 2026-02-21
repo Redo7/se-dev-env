@@ -142,8 +142,8 @@ const Widget = ({
 	const [isDragging, setIsDragging] = useState(false);
 	const [contextMenuOpen, setContextMenuOpen] = useState(false);
 	const [pointerEvents, setPointerEvents] = useState(pointerEventsEnabled);
-	const [bgBlur, setBgBlur] = useState(blur);
-	const [showFrame, setShowFrame] = useState(frameVisible);
+	const [bgBlur, setBgBlur] = useState(blur == undefined ? true : blur);
+	const [showFrame, setShowFrame] = useState(frameVisible == undefined ? true : frameVisible);
 	const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
 	const [position, setPosition] = useState(initialPosition);
 	const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
