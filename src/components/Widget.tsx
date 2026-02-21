@@ -672,7 +672,7 @@ const Widget = ({
 								mirror={true}
 								checked={pointerEvents}
 								onCheckedChange={handlePointerEvents}>
-								<Pointer /> Pointer events
+								<Pointer /> Mouse interaction
 							</CustomCheckboxItem>
 							<DropdownMenuItem
 								className={widgetZIndex === 9999 ? 'line-through' : ''}
