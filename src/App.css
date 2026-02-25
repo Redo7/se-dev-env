@@ -333,18 +333,33 @@ p.overlay-last-opened {
 
 .overlay {
     display: block;
-    height: 100vh;
     color: var(--foreground);
-    padding: 3.125rem;
+    /* padding: 3.125rem; */
     box-sizing: border-box;
     transition: padding-top 300ms var(--redo-easing);
     transition-delay: 2000ms;
 }
 
-.overlay:has(.overlay-navbar-container:hover),
-.overlay:has(.overlay-navbar.true),
-.overlay:has(.overlay-navbar.true:hover),
-.overlay:has(.overlay-navbar[data-popover-visible="true"]) {
+.widgets::after {
+    content: '';
+    display: block;
+    height: 100%;
+  }
+
+.ui-container{
+    transition: padding-top 300ms var(--redo-easing);
+    transition-delay: 2000ms;
+    pointer-events: none;
+}
+
+.ui-container > *{
+    pointer-events: auto;
+}
+
+.ui-container:has(.overlay-navbar-container:hover),
+.ui-container:has(.overlay-navbar.true),
+.ui-container:has(.overlay-navbar.true:hover),
+.ui-container:has(.overlay-navbar[data-popover-visible="true"]) {
     padding-top: 6.25rem;
     transition-delay: 0ms;
 }
@@ -612,6 +627,7 @@ iframe {
     position: absolute;
     top: 0;
     left: 0;
+    /* pointer-events: none; */
 }
 
 .overlay-navbar.true {
@@ -849,4 +865,10 @@ iframe {
     to {
         opacity: 0;
     }
+}
+
+/* radix popover fix */
+
+div[data-radix-popper-content-wrapper]{
+    z-index: 1000 !important;
 }

@@ -265,105 +265,104 @@ const Overlay = () => {
 	};
 
 	return (
-		<div className="overlay">
-			{/* Sidebar Button */}
-			<div
-				className="sidebar-button absolute"
-				data-sidebar-visible={isSidebarVisible}
-				data-navbar-visible={isNavbarOver}>
-				<IconButton onClick={() => handleSidebarToggle()}>
-					<SidebarExpand />
-				</IconButton>
-			</div>
-			{/* Navbar */}
-			<div
-				className={`overlay-navbar ${isNavbarOver}`}
-				data-popover-visible={isPopoverVisible}
-				onMouseEnter={() => setIsNavbarOver(true)}
-				onMouseLeave={() => setIsNavbarOver(false)}>
-				<div className="flex items-center">
-					<Link to="/" className="sidebar-back opacity-50 hover:opacity-100">
-						<ArrowLeft size={20} strokeWidth={1.5} />
-					</Link>
-					<Input
-						value={overlayName}
-						size={overlayName.length || 1}
-						onChange={(e) => handleNameInput(e.target.value)}
-						className="ml-[1rem] mr-2 tracking-wide dark:bg-transparent! dark:border-0 text-sm! dark:hover:bg-tr-50! transition-colors rounded-sm h-6 focus-visible:ring-[0px] dark:focus-visible:bg-tr-50! w-fit! -translate-x-1 px-2!"
-					/>
-					{/* <p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p> */}
-					<Badge
-						variant="outline"
-						className="opacity-50 hover:bg-zinc-50/10 hover:opacity-65 transition-colors transition-opacity cursor-pointer select-none"
-						onClick={handleFolderOpen}>
-						{overlayData.id}
-					</Badge>
-				</div>
-				<div className="flex">
-					<Button variant="ghost" size="sm">
-						{' '}
-						<ClipboardClock size={16} />{' '}
-					</Button>
-					<Button variant="ghost" size="sm">
-						{' '}
-						<Shuffle size={16} />{' '}
-					</Button>
-					<div className="test-alert-container px-2 mx-2 flex items-center">
-						<Button variant="ghost" size="sm" onClick={() => useAlert('follower-latest')}>
-							{' '}
-							<Heart size={16} />{' '}
-						</Button>
-						{/* <span className='border-x-1 h-[50%] mx-2'></span> */}
-						{/* <span className='h-1 w-1 rounded-full bg-zinc-700 mx-2'></span> */}
-						<AlertPopover
-							listener="subscriber-latest"
-							icon={<Star size={16} />}
-							onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
-						/>
-						<AlertPopover
-							listener="tip-latest"
-							icon={<CircleDollarSign size={16} />}
-							onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
-						/>
-						<AlertPopover
-							listener="cheer-latest"
-							icon={<Diamond size={16} />}
-							onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
-						/>
-						<AlertPopover
-							listener="raid-latest"
-							icon={<FlagTriangleRight size={16} />}
-							onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
-						/>
-					</div>
-					<Button variant="ghost" size="sm">
-						{' '}
-						<Cog size={16} />{' '}
-					</Button>
-				</div>
-			</div>
-			<div
-				className="overlay-navbar-container"
-				onMouseEnter={() => setIsNavbarOver(true)}
-				onMouseLeave={() => setIsNavbarOver(false)}></div>
-			{/* Sidebar */}
-			<Sidebar
-				isVisible={isSidebarVisible}
-				overlay={overlayData}
-				widget={activeWidget}
-				onToggle={() => handleSidebarToggle()}
-			/>
-			{/* Add new button */}
-			<div className="flex gap-4 absolute OverlayButtonContainer" data-sidebar-visible={isSidebarVisible}>
-				<IconPopupButton icon={<IconPlus />} popupItems={templates} popupPosition="top" />
-				<Widgetio overlay={overlayData} widgets={overlayData.widgets} onWidgetImport={getOverlayData} />
-			</div>
-			{/* Chat */}
-			<div className="chat-button absolute">
-				<IconPopupButton icon={<MessageCircle size={16} />}>
-					{(closePopup) => <Chat closePopup={closePopup} />}
-				</IconPopupButton>
-			</div>
+		<div className="overlay min-h-screen h-full">
+            {/* UI Container */}
+			<div className="ui-container z-200 sticky w-full h-screen !top-0 left-0 p-10">
+                {/* Sidebar Button */}
+                <div
+                    className="sidebar-button absolute"
+                    data-sidebar-visible={isSidebarVisible}
+                    data-navbar-visible={isNavbarOver}>
+                    <IconButton onClick={() => handleSidebarToggle()}>
+                        <SidebarExpand />
+                    </IconButton>
+                </div>
+                {/* Navbar */}
+                <div
+                    className={`overlay-navbar ${isNavbarOver}`}
+                    data-popover-visible={isPopoverVisible}
+                    onMouseEnter={() => setIsNavbarOver(true)}
+                    onMouseLeave={() => setIsNavbarOver(false)}>
+                    <div className="flex items-center">
+                        <Link to="/" className="sidebar-back opacity-50 hover:opacity-100">
+                            <ArrowLeft size={20} strokeWidth={1.5} />
+                        </Link>
+                        <Input
+                            value={overlayName}
+                            size={overlayName.length || 1}
+                            onChange={(e) => handleNameInput(e.target.value)}
+                            className="ml-[1rem] mr-2 tracking-wide dark:bg-transparent! dark:border-0 text-sm! dark:hover:bg-tr-50! transition-colors rounded-sm h-6 focus-visible:ring-[0px] dark:focus-visible:bg-tr-50! w-fit! -translate-x-1 px-2!"
+                        />
+                        {/* <p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p> */}
+                        <Badge
+                            variant="outline"
+                            className="opacity-50 hover:bg-zinc-50/10 hover:opacity-65 transition-colors transition-opacity cursor-pointer select-none"
+                            onClick={handleFolderOpen}>
+                            {overlayData.id}
+                        </Badge>
+                    </div>
+                    <div className="flex">
+                        <Button variant="ghost" size="sm">
+                            {' '}
+                            <ClipboardClock size={16} />{' '}
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                            {' '}
+                            <Shuffle size={16} />{' '}
+                        </Button>
+                        <div className="test-alert-container px-2 mx-2 flex items-center">
+                            <Button variant="ghost" size="sm" onClick={() => useAlert('follower-latest')}>
+                                {' '}
+                                <Heart size={16} />{' '}
+                            </Button>
+                            {/* <span className='border-x-1 h-[50%] mx-2'></span> */}
+                            {/* <span className='h-1 w-1 rounded-full bg-zinc-700 mx-2'></span> */}
+                            <AlertPopover
+                                listener="subscriber-latest"
+                                icon={<Star size={16} />}
+                                onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+                            />
+                            <AlertPopover
+                                listener="tip-latest"
+                                icon={<CircleDollarSign size={16} />}
+                                onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+                            />
+                            <AlertPopover
+                                listener="cheer-latest"
+                                icon={<Diamond size={16} />}
+                                onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+                            />
+                            <AlertPopover
+                                listener="raid-latest"
+                                icon={<FlagTriangleRight size={16} />}
+                                onPopoverToggle={() => setIsPopoverVisible(!isPopoverVisible)}
+                            />
+                        </div>
+                        <Button variant="ghost" size="sm">
+                            {' '}
+                            <Cog size={16} />{' '}
+                        </Button>
+                    </div>
+                </div>
+                {/* Sidebar */}
+                <Sidebar
+                    isVisible={isSidebarVisible}
+                    overlay={overlayData}
+                    widget={activeWidget}
+                    onToggle={() => handleSidebarToggle()}
+                />
+                {/* Add new button */}
+                <div className="flex gap-4 absolute OverlayButtonContainer" data-sidebar-visible={isSidebarVisible}>
+                    <IconPopupButton icon={<IconPlus />} popupItems={templates} popupPosition="top" />
+                    <Widgetio overlay={overlayData} widgets={overlayData.widgets} onWidgetImport={getOverlayData} />
+                </div>
+                {/* Chat */}
+                <div className="chat-button absolute">
+                    <IconPopupButton icon={<MessageCircle size={16} />}>
+                        {(closePopup) => <Chat closePopup={closePopup} />}
+                    </IconPopupButton>
+                </div>
+            </div>
 			{/* Notifications */}
 			<div className="notification-area absolute flex flex-col-reverse justify-end p-10 gap-4 z-106!">
 				{notifications.map((notification) => {
@@ -371,32 +370,37 @@ const Overlay = () => {
 				})}
 			</div>
 			{/* Widgets */}
-			{overlayData.widgets.map((widget) => (
-				<Widget
-					key={widget.id}
-					overlay={overlayData}
-					name={widget.name}
-					id={widget.id}
-					src={widget.src}
-					scriptVersion={widget.scriptVersion}
-					template={widget.template}
-					width={widget.width}
-					height={widget.height}
-					blur={widget.blur}
-					pointerEventsEnabled={widget.pointerEvents}
-					frameVisible={widget.frameVisible}
-					zIndex={widget.zIndex ? widget.zIndex : 5}
-					initialPosition={{ x: widget.posX, y: widget.posY }}
-					isActive={activeWidgetId === widget.id}
-					resizable={true}
-					onClick={() => handleWidgetClick(widget)}
-					onDelete={() => softRemoveWidget(overlayData, widget)}
-					onWidgetDuplicate={() => handleDuplicate(widget.id, widget.name, widget.template)}
-					onSettingsChange={(id, widgetID, updates) => {
-						updateWidgetSettings(id, widgetID, updates);
-					}}
-				/>
-			))}
+			<div className="widgets absolute top-0 left-0 min-w-full min-h-fit">
+                {overlayData.widgets.map((widget) => (
+                    <Widget
+                        key={widget.id}
+                        overlay={overlayData}
+                        name={widget.name}
+                        id={widget.id}
+                        src={widget.src}
+                        scriptVersion={widget.scriptVersion}
+                        template={widget.template}
+                        width={widget.width}
+                        height={widget.height}
+                        blur={widget.blur}
+                        pointerEventsEnabled={widget.pointerEvents}
+                        frameVisible={widget.frameVisible}
+                        zIndex={widget.zIndex ? widget.zIndex : 5}
+                        initialPosition={{ x: widget.posX, y: widget.posY }}
+                        isActive={activeWidgetId === widget.id}
+                        resizable={true}
+                        onClick={() => handleWidgetClick(widget)}
+                        onDelete={() => softRemoveWidget(overlayData, widget)}
+                        onWidgetDuplicate={() => handleDuplicate(widget.id, widget.name, widget.template)}
+                        onSettingsChange={(id, widgetID, updates) => {
+                            updateWidgetSettings(id, widgetID, updates);
+                        }}
+                    />
+                ))}
+            </div>
+            <div className="overlay-navbar-container"
+                    onMouseEnter={() => setIsNavbarOver(true)}
+                    onMouseLeave={() => setIsNavbarOver(false)}></div>
 			{/* Liquid ass SVG */}
 			<svg id="lens-map" style={{ display: 'none' }}>
 				<linearGradient id="red"></linearGradient>
