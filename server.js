@@ -24,6 +24,8 @@ const SCRIPT_VER = 1.4; // Latest version of the iframe. Used to track whether a
 const upload = multer({ dest: "uploads/" });
 const copyFilePromise = util.promisify(fs.copyFile);
 
+const writeQueues = new Map();
+
 // Helper functions
 
 function generateDataFromFields(fields) {
@@ -61,6 +63,21 @@ function copyFiles(srcDir, destDir, files) {
         return copyFilePromise(join(srcDir, f), join(destDir, f));
     }));
 }
+
+function queueWrite(key, writeOperation) {
+    if (!writeQueues.has(key)) {
+      writeQueues.set(key, Promise.resolve());
+    }
+    
+    const queue = writeQueues.get(key);
+    const newQueue = queue.then(writeOperation).catch(err => {
+      console.error(`Write error for ${key}:`, err);
+      throw err;
+    });
+    
+    writeQueues.set(key, newQueue);
+    return newQueue;
+  }
 
 // API
 
@@ -442,18 +459,22 @@ app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
     const { newValue } = req.body;
 
     const dataFilePath = join(__dirname, "overlays", overlay, widget, 'src', 'data.json');
+    const queueKey = `${overlay}/${widget}`;
+
     try {
-        const fieldData = await fs.readFile(dataFilePath, 'utf-8');
-        let fieldDataJson = JSON.parse(fieldData);
+        await queueWrite(queueKey, async () => {
+            const fieldData = await fs.readFile(dataFilePath, 'utf-8');
+            let fieldDataJson = JSON.parse(fieldData);
 
-        fieldDataJson[field] = newValue;
-        const newFieldData = JSON.stringify(fieldDataJson, null, 2);
+            fieldDataJson[field] = newValue;
+            const newFieldData = JSON.stringify(fieldDataJson, null, 2);
 
-        await fs.writeFile(dataFilePath, newFieldData, 'utf-8');
-        await fetch("http://localhost:5173/__setBySetField", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ file: dataFilePath, origin: req.query.origin }),
+            await fs.writeFile(dataFilePath, newFieldData, 'utf-8');
+            await fetch("http://localhost:5173/__setBySetField", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ file: dataFilePath, origin: req.query.origin }),
+            });
         });
         
         res.send();
@@ -461,7 +482,7 @@ app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
         console.error(`Error updating ${dataFilePath}:`, error);
         res.status(500).json({ error: 'Internal server error' });
     }
-})
+});
 
 app.put('/api/update-iframe-files/', async (req, res) => {
     const { overlayID, widgetID } = req.body;

@@ -39,57 +39,65 @@ export function watchExtraFilesPlugin(): Plugin {
 			server.watcher.on('change', async (rawPath) => {
 				const path = normalizePath(rawPath); 
                 const origin = recentlyWritten.get(path);
+
+                const isHtmlChange = path.includes('/html.html');
+                const isCssChange = path.includes('/css.css');
+                const isJsonChange = path.includes('/src/data.json') || path.includes('/src/fields.json');
+
+                const pathSplit = path.split('/');
+                const srcIndex = pathSplit.indexOf('src');
+                let widgetId: string | undefined;
+                if (srcIndex > 1) {
+                    widgetId = pathSplit[srcIndex - 1];
+                }
+
                 if (origin === 'useFieldChange') {
                     console.log('[Vite Plugin] Skipping field-data-updated for useFieldChange');
                     recentlyWritten.delete(path);
-                    return;
-                    // Still send iframe-content-update, just not field-data-updated
-                } else {
-                    recentlyWritten.delete(path);
-                }
-
-				console.log(`[Vite Plugin] === WATCHER DETECTED ANY CHANGE: ${path} ===`);
-
-				const isHtmlChange = path.includes('/html.html');
-				const isCssChange = path.includes('/css.css');
-				const isJsonChange = path.includes('/src/data.json') || path.includes('/src/fields.json');
-
-				const pathSplit = path.split('/');
-				const srcIndex = pathSplit.indexOf('src');
-				let widgetId: string | undefined;
-				if (srcIndex > 1) {
-					widgetId = pathSplit[srcIndex - 1];
-				}
-				console.log(`  - Detected widget ID: ${widgetId}`);
-
-				if (isHtmlChange || isCssChange || isJsonChange) {
-					console.log(`[Vite Plugin] Sending custom HMR event for iframe update: from ${path}`);
-					server.ws.send({
-						type: 'custom',
-						event: 'iframe-content-update',
-						data: {
-							file: path,
-							type: isHtmlChange ? 'html' : isCssChange ? 'css' : 'json',
-							widgetId: widgetId,
-						},
-					});
-                    if (isJsonChange) {
-                        console.log(`[Vite Plugin] Sending custom HMR event: field-data-updated`);
-                        const pathSplit = path.split('/');
-                        const srcIndex = pathSplit.indexOf('src');
-                        
+                    if (isHtmlChange || isCssChange || isJsonChange) {
                         server.ws.send({
                             type: 'custom',
-                            event: 'field-data-updated',
+                            event: 'iframe-content-update',
                             data: {
                                 file: path,
-                                type: 'json',
-                                overlayId: pathSplit[srcIndex - 2],
+                                type: isHtmlChange ? 'html' : isCssChange ? 'css' : 'json',
                                 widgetId: widgetId,
                             },
                         });
                     }
-				} else {
+                    return;
+                }
+                recentlyWritten.delete(path);
+
+				console.log(`[Vite Plugin] === WATCHER DETECTED ANY CHANGE: ${path} ===`);
+				console.log(`  - Detected widget ID: ${widgetId}`);
+
+                if (isJsonChange) {
+                    console.log(`[Vite Plugin] Sending custom HMR event: field-data-updated`);
+                    const pathSplit = path.split('/');
+                    const srcIndex = pathSplit.indexOf('src');
+                    
+                    server.ws.send({
+                        type: 'custom',
+                        event: 'field-data-updated',
+                        data: {
+                            file: path,
+                            type: 'json',
+                            overlayId: pathSplit[srcIndex - 2],
+                            widgetId: widgetId,
+                        },
+                    });
+				} if (isHtmlChange || isCssChange) {
+                    server.ws.send({
+                        type: 'custom',
+                        event: 'iframe-content-update',
+                        data: {
+                            file: path,
+                            type: isHtmlChange ? 'html' : isCssChange ? 'css' : 'json',
+                            widgetId: widgetId,
+                        },
+                    });
+                } else {
 					console.log(`[Vite Plugin] Change at ${path} did not match specific iframe criteria. Skipping custom HMR send.`);
 				}
 			});
