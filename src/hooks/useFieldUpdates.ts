@@ -6,15 +6,18 @@ interface Props{
     widget: string;
     name: string;
     setInputValue: (value: any) => void;
+    origin? : string;
 }
 
-export default function useHotFieldData({ overlay, widget, name, setInputValue }: Props) {
+export default function useHotFieldData({ overlay, widget, name, setInputValue, origin = "" }: Props) {
   useEffect(() => {
     if (!import.meta.hot) return;
 
     const handler = async (data: any) => {
-      if (data.widgetId === widget) {
+      if (data.widgetId === widget && origin === 'setField') {
         const fieldData = await useFieldData(overlay, widget);
+        console.log(name, fieldData[name]);
+        
         setInputValue(fieldData[name]);
       }
     };
