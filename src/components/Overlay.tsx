@@ -95,7 +95,7 @@ const Overlay = () => {
 					{
 						id: crypto.randomUUID(),
 						level: 'error',
-						title: `${iframeName} - Line ${error.lineno}:${error.colno}`,
+						title: `${iframeName} ${error.lineno && error.colno ? ` - Line ${error.lineno}:${error.colno}` : ''}`,
 						content: [{ message: error.message, messageType: 'string' }],
 						close: removeNotification,
 						duration: 5300,
