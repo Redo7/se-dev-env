@@ -473,7 +473,7 @@ app.put('/api/update-field-data/:overlay/:widget/:field', async (req, res) => {
             await fetch("http://localhost:5173/__setBySetField", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ file: dataFilePath, origin: req.query.origin }),
+                body: JSON.stringify({ file: dataFilePath, origin: req.query.origin, field, newValue }),
             });
         });
         

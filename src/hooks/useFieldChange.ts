@@ -13,11 +13,6 @@ const useFieldChange = async (overlay: string, widget: string, field: string, ne
 		// const data = await res.json();
 		// // console.log('[Parent App] Fetched field data:', data);
 		// return data;
-        window.postMessage({ 
-            type: 'fieldDataUpdated', 
-            widgetId: widget,
-            origin
-        }, '*');
 	} catch (error) {
 		console.error('[Parent App] Error fetching field data:', error);
 		// return undefined; // Return undefined on error

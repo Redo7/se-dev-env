@@ -294,7 +294,6 @@ const Widget = ({
 				case 'setField':
                     const {widgetId, field, value} = event.data;
                     await useFieldChange(overlay.id, widgetId, field, value, "setField");
-                    console.log("wdgt",field, value);
                     
 					break;
 

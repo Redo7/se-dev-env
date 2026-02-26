@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import useFieldData from './useFieldData';
 
 interface Props{
     overlay: any;
@@ -9,17 +8,14 @@ interface Props{
     origin? : string;
 }
 
-export default function useHotFieldData({ overlay, widget, name, setInputValue, origin = "" }: Props) {
+export default function useFieldUpdates({ overlay, widget, name, setInputValue }: Props) {
   useEffect(() => {
     if (!import.meta.hot) return;
-
+    
     const handler = async (data: any) => {
-      if (data.widgetId === widget && origin === 'setField') {
-        const fieldData = await useFieldData(overlay, widget);
-        console.log(name, fieldData[name]);
-        
-        setInputValue(fieldData[name]);
-      }
+        if (data.widgetId === widget && data.field === name && data.origin === "setField") {
+            setInputValue(data.newValue);
+        }
     };
 
     import.meta.hot.on('field-data-updated', handler);
