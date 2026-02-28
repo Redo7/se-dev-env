@@ -61,7 +61,7 @@ interface Props {
 	frameVisible: boolean;
 	zIndex: number;
 	isActive: boolean;
-	onClick: () => void;
+	onWidgetClick: () => void;
 	onDelete: () => void;
 	onSettingsChange: (overlay: string, widgetID: string, updates: Partial<WidgetInstance>) => void;
 	onWidgetDuplicate: (widgetID: string, name: string, template: string) => void;
@@ -125,7 +125,7 @@ const Widget = ({
 	frameVisible,
 	zIndex,
 	isActive,
-	onClick,
+	onWidgetClick,
 	onDelete,
 	onSettingsChange,
 	onWidgetDuplicate,
@@ -468,6 +468,7 @@ const Widget = ({
 				return;
 			}
 		}
+        onWidgetClick();
 
 		if (widgetRef.current) {
 			setIsDragging(true);
@@ -583,7 +584,7 @@ const Widget = ({
 			className={`widget-container relative depth-shadow ${bgBlur ? 'bgblur' : ''} ${showFrame ? '' : 'hide-bg'} `}
 			ref={widgetRef}
 			style={combinedStyle}
-			onClick={onClick}
+			// onClick={onWidgetClick}
 			onMouseDown={handleMouseDown}>
 			{currentScriptVersion == 1.4 ? (
 				<iframe

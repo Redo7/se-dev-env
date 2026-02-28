@@ -389,7 +389,7 @@ const Overlay = () => {
                         initialPosition={{ x: widget.posX, y: widget.posY }}
                         isActive={activeWidgetId === widget.id}
                         resizable={true}
-                        onClick={() => handleWidgetClick(widget)}
+                        onWidgetClick={() => handleWidgetClick(widget)}
                         onDelete={() => softRemoveWidget(overlayData, widget)}
                         onWidgetDuplicate={() => handleDuplicate(widget.id, widget.name, widget.template)}
                         onSettingsChange={(id, widgetID, updates) => {
