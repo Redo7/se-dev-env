@@ -3,16 +3,17 @@ import SubtleButton from '../Buttons/SubtleButton';
 interface Props {
 	name: string;
 	label: string;
+    value: string;
 }
 
-const ButtonField = ({ name, label }: Props) => {
+const ButtonField = ({ name, label, value }: Props) => {
 	const handleButtonClick = () => {
 		const iframes = document?.querySelectorAll('iframe') as NodeListOf<HTMLIFrameElement>;
 		iframes.forEach((iframe) => {
 			if (iframe?.contentWindow) {
 				const obj = {
 						listener: 'onEventReceived',
-						detail: { listener: 'event:test', event: { listener: 'widget-button', field: name, value: label, }, },
+						detail: { listener: 'event:test', event: { listener: 'widget-button', field: name, value: value, }, },
 					};
 				iframe.contentWindow.postMessage( obj, '*' );
 			}
