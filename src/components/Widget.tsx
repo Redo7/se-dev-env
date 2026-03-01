@@ -37,7 +37,6 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 } from '@/components/ui/dialog';
 import { CustomCheckboxItem } from './CustomCheckboxItem';
 import useWidgetExport from '@/hooks/useWidgetExport';
@@ -46,6 +45,8 @@ import { Input } from './ui/input';
 import useRename from '@/hooks/useRename';
 import useTemplateCreation from '@/hooks/useTemplateCreation';
 import useFieldChange from '@/hooks/useFieldChange';
+import { useNavigate } from 'react-router-dom';
+import HomeScreenOverlay from './HomeScreenOverlay';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -147,6 +148,8 @@ const Widget = ({
 	const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
 	const [position, setPosition] = useState(initialPosition);
 	const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
+	const [overlays, setOverlays] = useState<OverlayInstance[]>([]);
+    const navigate = useNavigate();
 
 	const offset = useRef({ x: 0, y: 0 });
 	const resizeStartData = useRef({
@@ -166,8 +169,10 @@ const Widget = ({
 
 	const pendingDataRef = useRef<OnWidgetLoadData | undefined>(undefined);
 	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const [dialogOpen, setDialogOpen] = useState(false);
+	const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+	const [copyToDialogOpen, setCopyToDialogOpen] = useState(false);
 	const [widgetName, setWidgetName] = useState(name);
+	const [copyToFilter, setCopyToFilter] = useState("");
 	const rename = useRename();
 	// Would be best to clamp it to just the nearest values of the other widgets in the overlay
 	// That way there won't be a need to click the button multiple times
@@ -238,6 +243,10 @@ const Widget = ({
 			console.error('[Parent App] Error sending message to iframe:', error);
 		}
 	}, []);
+
+	useEffect(() => {
+        getOverlays();
+    }, [])
 
 	useEffect(() => {
 		getOnWidgetLoadData();
@@ -513,9 +522,19 @@ const Widget = ({
 		zIndex: isActive ? 100 : widgetZIndex,
 		...style,
 	};
+    
+    const handleRenameDialogOpen = (open: boolean) => {
+        setRenameDialogOpen(open);
+        if (!open) {
+            setTimeout(() => {
+                document.body.style.pointerEvents = '';
+            }, 250);
+        }
+    }
 
 	const handleNameInput = async (widgetName: string, name: string) => {
 		rename(overlay, { name: widgetName, id }, name, true);
+        handleRenameDialogOpen(false);
 	};
 
 	const handleTemplateCreation = async () => {
@@ -579,6 +598,47 @@ const Widget = ({
 		setShowFrame(!showFrame);
 	}
 
+    const getOverlays = async () => {
+		const res = await fetch('/api/get-overlays');
+		const data: OverlayInstance[] = await res.json();
+		setOverlays(data);
+	};
+
+    const handleCopyTo = async (targetOverlay: string) => {
+        const res = await fetch(`/api/copy-to`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ overlayID: overlay.id, widgetID: id, targetOverlay}),
+		});
+        const data = await res.json();
+		if (res.ok) {
+            console.log(data);
+            
+			toast('Success', {
+				description: `${name} was copied to ${data.targetOverlayData.name}`,
+				action: (
+					<Button onClick={() => navigate(`/${targetOverlay}`)} className="ml-auto">
+						Open
+					</Button>
+				),
+			});
+            handleCopyToDialogOpen(false);
+			return;
+		}
+		toast.error(`Error copying widget`, {
+			description: `${data.error}`,
+		});
+    }
+
+    const handleCopyToDialogOpen = (open: boolean) => {
+        setCopyToDialogOpen(open);
+        if (!open) {
+            setTimeout(() => {
+                document.body.style.pointerEvents = '';
+            }, 250);
+        }
+    }
+
 	return (
 		<div
 			className={`widget-container relative depth-shadow ${bgBlur ? 'bgblur' : ''} ${showFrame ? '' : 'hide-bg'} `}
@@ -627,121 +687,76 @@ const Widget = ({
 				</div>
 			)}
 			<div className="widget-context-menu absolute top-0 right-0">
-				<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-					<DropdownMenu onOpenChange={setContextMenuOpen}>
-						<DropdownMenuTrigger asChild>
-							<SubtleButton
-								width="2rem"
-								height="2rem"
-								className={contextMenuOpen ? 'subtle open' : 'subtle'}>
-								<EllipsisVertical strokeWidth={1} />
-							</SubtleButton>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="z-100">
-							<DropdownMenuLabel className="text-[0.75rem] opacity-50">General</DropdownMenuLabel>
-							<DialogTrigger className="w-full" onClick={() => setDialogOpen(true)}>
-								<DropdownMenuItem>
-									<TextCursor /> Rename
-								</DropdownMenuItem>
-							</DialogTrigger>
-								<DropdownMenuItem onClick={() => onWidgetDuplicate(id, name, template)}>
-									<Copy /> Duplicate
-								</DropdownMenuItem>
-								<DropdownMenuItem className="line-through" disabled>
-									<FolderOutput /> Copy to...
-								</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>
-								<Download /> Export
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => handleTemplateCreation()}>
-								<FolderGit2 /> Make a template
-							</DropdownMenuItem>
-							<DropdownMenuItem disabled>
-								<FileDown /> Save current fields as default
-							</DropdownMenuItem>
-							<DropdownMenuItem disabled>
-								<FileInput /> Regenerate data.json
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={handleFolderOpen}>
-								<Folder /> Open folder
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={handleEditorOpen}>
-								<CodeXml /> Open in Editor
-							</DropdownMenuItem>
-							<DropdownMenuSeparator />
-							<DropdownMenuLabel className="text-[0.75rem] opacity-50">iframe control</DropdownMenuLabel>
-							<CustomCheckboxItem
-								mirror={true}
-								checked={pointerEvents}
-								onCheckedChange={handlePointerEvents}>
-								<Pointer /> Mouse interaction
-							</CustomCheckboxItem>
-							<DropdownMenuItem
-								className={widgetZIndex === 9999 ? 'line-through' : ''}
-								disabled={widgetZIndex === 9999 ? true : false}
-								onClick={() => handleZIndex(widgetZIndex + 1)}>
-								<ChevronUp /> Layer above
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								className={widgetZIndex === 1 ? 'line-through' : ''}
-								disabled={widgetZIndex === 1 ? true : false}
-								onClick={() => handleZIndex(widgetZIndex - 1)}>
-								<ChevronDown /> Layer below
-							</DropdownMenuItem>
-							<CustomCheckboxItem
-								mirror={true}
-								checked={showFrame}
-								onCheckedChange={handleBgToggle}>
-								<Palette /> Background
-							</CustomCheckboxItem>
-							<DropdownMenuItem className="line-through" disabled>
-								<Palette /> Background color
-							</DropdownMenuItem>
-							<CustomCheckboxItem
-								mirror={true}
-								checked={bgBlur}
-								onCheckedChange={handleBgBlurChange}>
-								<Palette /> Background blur
-							</CustomCheckboxItem>
-							<DropdownMenuSeparator />
-							<DropdownMenuItem
-								className="text-red-500 hover:bg-red-500/20! hover:text-red-500!"
-								onClick={onDelete}>
-								<Trash className="stroke-red-500" />
-								Delete
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
-					<DialogContent className="sm:max-w-md z-1000">
-						<DialogHeader>
-							<DialogTitle>Rename widget</DialogTitle>
-							<DialogDescription>
-								Thie action will rename it in both the app and the files.
-							</DialogDescription>
-						</DialogHeader>
-						<div className="flex items-center gap-2">
-							<div className="grid flex-1 gap-2">
-								<Label htmlFor="name" className="sr-only">
-									New name
-								</Label>
-								<Input
-									id="name"
-									onChange={(e) => setWidgetName(e.target.value)}
-									defaultValue={widgetName}
-								/>
-							</div>
-						</div>
-						<DialogFooter className="sm:justify-start">
-							<Button
-								onClick={() => handleNameInput(name, widgetName)}
-								className="ml-auto"
-								type="button"
-								variant="default">
-								Rename
-							</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
+				<DropdownMenu onOpenChange={setContextMenuOpen}>
+					<DropdownMenuTrigger asChild>
+						<SubtleButton width="2rem" height="2rem" className={contextMenuOpen ? 'subtle open' : 'subtle'}>
+							<EllipsisVertical strokeWidth={1} />
+						</SubtleButton>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent className="z-100">
+						<DropdownMenuLabel className="text-[0.75rem] opacity-50">General</DropdownMenuLabel>
+						<DropdownMenuItem onClick={() => setRenameDialogOpen(true)}>
+							<TextCursor /> Rename
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => onWidgetDuplicate(id, name, template)}>
+							<Copy /> Duplicate
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => setCopyToDialogOpen(true)}>
+							<FolderOutput /> Copy to...
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>
+							<Download /> Export
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => handleTemplateCreation()}>
+							<FolderGit2 /> Make a template
+						</DropdownMenuItem>
+						<DropdownMenuItem disabled>
+							<FileDown /> Save current fields as default
+						</DropdownMenuItem>
+						<DropdownMenuItem disabled>
+							<FileInput /> Regenerate data.json
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={handleFolderOpen}>
+							<Folder /> Open folder
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={handleEditorOpen}>
+							<CodeXml /> Open in Editor
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuLabel className="text-[0.75rem] opacity-50">iframe control</DropdownMenuLabel>
+						<CustomCheckboxItem mirror={true} checked={pointerEvents} onCheckedChange={handlePointerEvents}>
+							<Pointer /> Mouse interaction
+						</CustomCheckboxItem>
+						<DropdownMenuItem
+							className={widgetZIndex === 9999 ? 'line-through' : ''}
+							disabled={widgetZIndex === 9999 ? true : false}
+							onClick={() => handleZIndex(widgetZIndex + 1)}>
+							<ChevronUp /> Layer above
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							className={widgetZIndex === 1 ? 'line-through' : ''}
+							disabled={widgetZIndex === 1 ? true : false}
+							onClick={() => handleZIndex(widgetZIndex - 1)}>
+							<ChevronDown /> Layer below
+						</DropdownMenuItem>
+						<CustomCheckboxItem mirror={true} checked={showFrame} onCheckedChange={handleBgToggle}>
+							<Palette /> Background
+						</CustomCheckboxItem>
+						<DropdownMenuItem className="line-through" disabled>
+							<Palette /> Background color
+						</DropdownMenuItem>
+						<CustomCheckboxItem mirror={true} checked={bgBlur} onCheckedChange={handleBgBlurChange}>
+							<Palette /> Background blur
+						</CustomCheckboxItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem
+							className="text-red-500 hover:bg-red-500/20! hover:text-red-500!"
+							onClick={onDelete}>
+							<Trash className="stroke-red-500" />
+							Delete
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 			{resizable && (
 				<>
@@ -767,6 +782,64 @@ const Widget = ({
 					/>
 				</>
 			)}
+			{/* Rename dialog */}
+			<Dialog
+				modal={true}
+				open={renameDialogOpen}
+				onOpenChange={(open) => { handleRenameDialogOpen(open) }}>
+				<DialogContent className="sm:max-w-md z-1000">
+					<DialogHeader>
+						<DialogTitle>Rename widget</DialogTitle>
+						<DialogDescription>Thie action will rename it in both the app and the files.</DialogDescription>
+					</DialogHeader>
+					<div className="grid flex-1 gap-2">
+						<Label htmlFor="name" className="sr-only">
+							New name
+						</Label>
+						<Input id="name" onChange={(e) => setWidgetName(e.target.value)} defaultValue={widgetName} />
+					</div>
+					<DialogFooter className="sm:justify-start">
+						<Button
+							onClick={() => handleNameInput(name, widgetName)}
+							className="ml-auto"
+							type="button"
+							variant="default">
+							Rename
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+			{/* Copy to dialog */}
+			<Dialog
+				modal={true}
+				open={copyToDialogOpen}
+				onOpenChange={(open) => handleCopyToDialogOpen(open)}>
+				<DialogContent className="sm:max-w-md z-1000">
+					<DialogHeader>
+						<DialogTitle>Copy to</DialogTitle>
+						<DialogDescription>Select the overlay to copy this widget to</DialogDescription>
+					</DialogHeader>
+					<div className="flex flex-col items-center gap-2">
+						<Input id="search" placeholder="Search..." onChange={(e) => setCopyToFilter(e.target.value)} />
+						<div className="flex flex-col max-h-75 gap-2 w-full overflow-scroll">
+							{overlays
+								.filter((overlay) => overlay.name.toLowerCase().includes(copyToFilter.toLowerCase()))
+								.map((overlay) => {
+									return (
+                                        <div key={overlay.id} onClick={() => {handleCopyTo(overlay.id)}}>
+                                            <HomeScreenOverlay
+                                                overlay={overlay}
+                                                onOverlayDelete={() => {}}
+                                                showButtons={false}
+                                                redirect={false}
+                                                />
+                                        </div>
+									);
+								})}
+						</div>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 };

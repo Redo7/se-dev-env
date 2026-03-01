@@ -103,7 +103,7 @@ const Overlay = () => {
 				]);
 			}
 		});
-	}, []);
+	}, [id]);
 
 	useEffect(() => {
 		// Change page title to Overlay name

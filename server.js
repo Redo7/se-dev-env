@@ -742,6 +742,31 @@ app.get('/api/open-editor/:overlayID/:widgetID', async (req, res) => {
     res.send()
 })
 
+app.put('/api/copy-to/', async (req, res) => {
+    try {
+        const { overlayID, widgetID, targetOverlay } = req.body;
+        const instancePath = join(__dirname, "overlays", overlayID, widgetID);
+        const nameSplit = widgetID.split('-');
+        const newID = nameSplit.slice(0, nameSplit.length - 5).join('-') + "-" + uuidv4();
+        const destinationPath = join(__dirname, "overlays", targetOverlay, newID);
+        await fs.promises.cp(instancePath, destinationPath, { recursive: true });
+
+        let overlayData = await fetchOverlayData(overlayID);
+        const thisWidget = overlayData.widgets.filter((widget) => widget.id === widgetID);
+        const targetInstancePath = join(__dirname, "overlays", targetOverlay, "overlay-data.json");
+        let targetOverlayData = await fetchOverlayData(targetOverlay);
+        targetOverlayData.widgets.push(thisWidget[0]);
+        targetOverlayData.widgets = targetOverlayData.widgets.map((widget) => widget.id === widgetID ? {...widget, id: newID, src: widget.src.replace(overlayID, targetOverlay).replace(widgetID, newID)} : widget);
+        
+        await fs.writeFile(targetInstancePath, JSON.stringify(targetOverlayData, null, 2), "utf8");
+
+        res.json({targetOverlayData});
+    } catch (error) {
+        res.json({ error })
+        console.log(error);
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);
 })

@@ -18,8 +18,10 @@ import { useState } from 'react';
 interface Props {
 	overlay: OverlayInstance;
 	onOverlayDelete: (name: string, id: string) => void;
+    showButtons? : boolean;
+    redirect? : boolean;
 }
-const HomeScreenOverlay = ({ overlay, onOverlayDelete }: Props) => {
+const HomeScreenOverlay = ({ overlay, onOverlayDelete, showButtons = true, redirect = true }: Props) => {
 	const [overlayName, setOverlayName] = useState(overlay.name);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const rename = useRename();
@@ -30,17 +32,17 @@ const HomeScreenOverlay = ({ overlay, onOverlayDelete }: Props) => {
 		<div
 			className="home-screen-overlay snap-start py-3 pr-4 pl-0 rounded-md hover:bg-background dark:hover:bg-tr-50 w-100 flex items-center gap-6"
 			key={overlay.id}>
-			<Link className="flex items-center gap-6 flex-grow" to={`/${overlay.id}`}>
+			<Link className="flex items-center gap-6 flex-grow" to={redirect ? `/${overlay.id}` : ''}>
 				<i className="bi bi-folder-fill tx text-xl"></i>
 				<div className="tx flex flex-col gap-1">
-					<p className="max-w-[24ch] truncate">{overlay.name}</p>
+					<p className={`${showButtons && "max-w-[24ch]"} truncate`}>{overlay.name}</p>
 					<p className="overlay-last-opened">
 						{overlay.lastUpdate ? useRelativeTime(overlay.lastUpdate) : 'Never opened'}
 					</p>
 				</div>
 			</Link>
 
-			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+			{showButtons && <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 				<div className="overlay-action-buttons flex gap-2 p-1.5 px-2 rounded-sm">
 					<DialogTrigger className="w-full" onClick={() => setDialogOpen(true)} asChild>
 						<button type="button">
@@ -79,7 +81,7 @@ const HomeScreenOverlay = ({ overlay, onOverlayDelete }: Props) => {
 						</Button>
 					</DialogFooter>
 				</DialogContent>
-			</Dialog>
+			</Dialog>}
 		</div>
 	);
 };
