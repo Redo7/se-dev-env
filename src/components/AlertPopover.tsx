@@ -47,65 +47,165 @@ const AlertPopover = ({ listener, icon, onPopoverToggle }: Props) => {
     }
 
     // Debounce popover closing onMouseLeave so it doesn't flicker
+    // This should close other open popovers too
+	const handlePopoverOpen = () => {
+        setIsPopoverOpen(true);
+        handleMouseLeave(1000);
+    };
 	const handleMouseEnter = () => {
-    if (closeTimeoutRef.current) {
-        clearTimeout(closeTimeoutRef.current);
-        closeTimeoutRef.current = null;
-    }
-    setIsPopoverOpen(true);
+        if (closeTimeoutRef.current) {
+            clearTimeout(closeTimeoutRef.current);
+            closeTimeoutRef.current = null;
+        }
+        setIsPopoverOpen(true);
     };
 
-    const handleMouseLeave = () => {
+    const handleMouseLeave = (timeout: number = 200) => {
     closeTimeoutRef.current = setTimeout(() => {
         setIsPopoverOpen(false);
-    }, 200);
+    }, timeout);
     };
 
     return (
-        <Popover open={isPopoverOpen} onOpenChange={onPopoverToggle}>
-            <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" onClick={() => dispatchAlert('random')} onMouseEnter={() => handleMouseEnter()} onMouseLeave={() => handleMouseLeave()}> {icon} </Button>
-            </PopoverTrigger>
-            <PopoverContent onMouseEnter={() => handleMouseEnter()} onMouseLeave={() => handleMouseLeave()} className={`flex flex-col gap-2 z-101 ${listener === 'cheer-latest' ? 'w-90' : listener === 'raid-latest' ? 'w-80' : ''}`}>
-                <Input onChange={(event) => setUsername(event.target.value)} onKeyDown={handleCustomInput} type='text' placeholder='Name' value={username} autoComplete='off'/>
-                <Textarea onChange={(event) => setMessage(event.target.value)} onKeyDown={handleCustomInput} placeholder='Message' value={message}/>
-                {listener === 'subscriber-latest' && 
-                <div className='flex justify-between'>
-                    <div className="flex items-center gap-2">
-                        <Checkbox checked={gifted} onClick={() => setGifted(!gifted)} />
-                        <p className='text-xs tracking-wide select-none' onClick={() => setGifted(!gifted)}>{gifted === true ? "Community Gift!" : "Community Gift?"}</p>
-                    </div>
-                    <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                            <Button variant="outline" role="combobox" aria-expanded={open} className="w-[50%] justify-between" > {tierValue.label} <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" /> </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-0">
-                            <Command>
-                                <CommandList>
-                                    <CommandGroup>
-                                        <CommandItem value="tier-1" onSelect={() => { handleTierChange('1000') }}>Tier 1</CommandItem>
-                                        <CommandItem value="tier-2" onSelect={() => { handleTierChange('2000') }}>Tier 2</CommandItem>
-                                        <CommandItem value="tier-3" onSelect={() => { handleTierChange('3000') }}>Tier 3</CommandItem>
-                                        <CommandItem value="prime" onSelect={() => { handleTierChange('prime') }}>Prime</CommandItem>
-                                    </CommandGroup>
-                                </CommandList>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
-                </div>
-                }
-                <Separator className='my-2' />
-                <div className="flex items-center">
-                    <Button variant="ghost" size="sm" className='text-xs font-[900]' onClick={() => dispatchAlert('random')}> <Dices /> </Button>
-                    <Button variant="ghost" size="sm" className='text-xs font-[900]' onClick={() => dispatchAlert(buttonLabels[0])}> {buttonSymbol}{buttonLabels[0]} </Button>
-                    <Button variant="ghost" size="sm" className='text-xs font-[900]' onClick={() => dispatchAlert(buttonLabels[1])}> {buttonSymbol}{buttonLabels[1]} </Button>
-                    <Button variant="ghost" size="sm" className='text-xs font-[900]' onClick={() => dispatchAlert(buttonLabels[2])}> {buttonSymbol}{buttonLabels[2]} </Button>
-                    {/* Swap the + for appropriate symbols */}
-                    <Input className='ml-2' type='number' placeholder='Custom' onChange={(event) => setCustomInputValue(event.target.value)} onKeyDown={handleCustomInput} />
-                </div>
-            </PopoverContent>
-        </Popover>
-    )
+		<Popover open={isPopoverOpen} onOpenChange={onPopoverToggle}>
+			<PopoverTrigger asChild>
+				<Button
+					variant="ghost"
+					size="sm"
+					onContextMenu={(event) => {
+						event.preventDefault();
+						handlePopoverOpen();
+					}}
+					onClick={() => { dispatchAlert('random'); }}>
+					{icon}
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent
+				onMouseEnter={() => handleMouseEnter()}
+				onMouseLeave={() => handleMouseLeave()}
+				className={`flex flex-col gap-2 z-101 ${listener === 'cheer-latest' ? 'w-90' : listener === 'raid-latest' ? 'w-80' : ''}`}>
+				<Input
+					onChange={(event) => setUsername(event.target.value)}
+					onKeyDown={handleCustomInput}
+					type="text"
+					placeholder="Name"
+					value={username}
+					autoComplete="off"
+				/>
+				<Textarea
+					onChange={(event) => setMessage(event.target.value)}
+					onKeyDown={handleCustomInput}
+					placeholder="Message"
+					value={message}
+				/>
+				{listener === 'subscriber-latest' && (
+					<div className="flex justify-between">
+						<div className="flex items-center gap-2">
+							<Checkbox checked={gifted} onClick={() => setGifted(!gifted)} />
+							<p className="text-xs tracking-wide select-none" onClick={() => setGifted(!gifted)}>
+								{gifted === true ? 'Community Gift!' : 'Community Gift?'}
+							</p>
+						</div>
+						<Popover open={open} onOpenChange={setOpen}>
+							<PopoverTrigger asChild>
+								<Button
+									variant="outline"
+									role="combobox"
+									aria-expanded={open}
+									className="w-[50%] justify-between">
+									{' '}
+									{tierValue.label}{' '}
+									<ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />{' '}
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="w-[200px] p-0">
+								<Command>
+									<CommandList>
+										<CommandGroup>
+											<CommandItem
+												value="tier-1"
+												onSelect={() => {
+													handleTierChange('1000');
+												}}>
+												Tier 1
+											</CommandItem>
+											<CommandItem
+												value="tier-2"
+												onSelect={() => {
+													handleTierChange('2000');
+												}}>
+												Tier 2
+											</CommandItem>
+											<CommandItem
+												value="tier-3"
+												onSelect={() => {
+													handleTierChange('3000');
+												}}>
+												Tier 3
+											</CommandItem>
+											<CommandItem
+												value="prime"
+												onSelect={() => {
+													handleTierChange('prime');
+												}}>
+												Prime
+											</CommandItem>
+										</CommandGroup>
+									</CommandList>
+								</Command>
+							</PopoverContent>
+						</Popover>
+					</div>
+				)}
+				<Separator className="my-2" />
+				<div className="flex items-center">
+					<Button
+						variant="ghost"
+						size="sm"
+						className="text-xs font-[900]"
+						onClick={() => dispatchAlert('random')}>
+						{' '}
+						<Dices />{' '}
+					</Button>
+					<Button
+						variant="ghost"
+						size="sm"
+						className="text-xs font-[900]"
+						onClick={() => dispatchAlert(buttonLabels[0])}>
+						{' '}
+						{buttonSymbol}
+						{buttonLabels[0]}{' '}
+					</Button>
+					<Button
+						variant="ghost"
+						size="sm"
+						className="text-xs font-[900]"
+						onClick={() => dispatchAlert(buttonLabels[1])}>
+						{' '}
+						{buttonSymbol}
+						{buttonLabels[1]}{' '}
+					</Button>
+					<Button
+						variant="ghost"
+						size="sm"
+						className="text-xs font-[900]"
+						onClick={() => dispatchAlert(buttonLabels[2])}>
+						{' '}
+						{buttonSymbol}
+						{buttonLabels[2]}{' '}
+					</Button>
+					{/* Swap the + for appropriate symbols */}
+					<Input
+						className="ml-2"
+						type="number"
+						placeholder="Custom"
+						onChange={(event) => setCustomInputValue(event.target.value)}
+						onKeyDown={handleCustomInput}
+					/>
+				</div>
+			</PopoverContent>
+		</Popover>
+	);
 }
 
 export default AlertPopover
