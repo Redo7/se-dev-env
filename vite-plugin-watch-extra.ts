@@ -7,6 +7,12 @@ interface FieldUpdate {
 	newValue: string;
 }
 
+// This needs to keep a set of backups of data.json for each widget which was changed
+// Figure out first time load. May not be as big of a deal. Can just flag a widget as used from any change tbh
+// If an external change happens to data.json, fetch the fields from api and compare, then send the changed field if it exists
+//      Figure out if there is any reason to extend this to fields.json (that kinda gets picked up already, just doesn't refresh sidebar with new fields)
+
+
 export function watchExtraFilesPlugin(): Plugin {
 	return {
 		name: 'watch-extra-files',
@@ -19,12 +25,13 @@ export function watchExtraFilesPlugin(): Plugin {
 						let body = '';
 						req.on('data', (chunk) => (body += chunk.toString()));
 						req.on('end', () => {
-							const { file, origin, field, newValue } = JSON.parse(body);
+                            const { file, origin, field, newValue } = JSON.parse(body);
 							if (file) {
 								const normalizedPath = normalizePath(file);
 								const existing = recentlyWritten.get(normalizedPath) || [];
 								existing.push({ origin, field, newValue });
 								recentlyWritten.set(normalizedPath, existing);
+                                
 
 								setTimeout(() => {
 									const current = recentlyWritten.get(normalizedPath);
@@ -96,10 +103,10 @@ export function watchExtraFilesPlugin(): Plugin {
 
 				console.log(`[Vite Plugin] === WATCHER DETECTED CHANGE: ${widgetId} ===`);
 
-				if (isJsonChange) {
-					// Send an event for each field update from setField
-					const setFieldUpdates = updates.filter((u) => u.origin === 'setField');
-
+                const setFieldUpdates = updates.filter((u) => u.origin === 'setField');
+                
+                // Send an event for each field update from setField
+				if (isJsonChange && setFieldUpdates.length > 0) {
 					if (setFieldUpdates.length > 0) {
 						setFieldUpdates.forEach((update) => {
 							console.log(`[Vite Plugin] Sending field-data-updated for: ${update.field}`);
@@ -122,12 +129,13 @@ export function watchExtraFilesPlugin(): Plugin {
 					recentlyWritten.delete(path);
 				}
 
-				if (isHtmlChange || isCssChange) {
+				if (isHtmlChange || isCssChange || isJsonChange && setFieldUpdates.length === 0) {
 					server.ws.send({
 						type: 'custom',
 						event: 'iframe-content-update',
 						data: {
 							file: path,
+                            origin: 'external',
 							type: isHtmlChange ? 'html' : isCssChange ? 'css' : 'json',
 							widgetId: widgetId,
 						},
