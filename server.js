@@ -81,6 +81,10 @@ function queueWrite(key, writeOperation) {
 
 // API
 
+app.get("/api/get-script-version", async (req, res) => {
+    res.json({SCRIPT_VER});
+});
+
 // Create overlay
 
 app.post("/api/create-overlay/", async (req, res) => {

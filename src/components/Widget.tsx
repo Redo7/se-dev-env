@@ -164,7 +164,8 @@ const Widget = ({
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const hasIframeInitialized = useRef(false);
 	const [onWidgetLoadData, setOnWidgetLoadData] = useState<OnWidgetLoadData | undefined>(undefined);
-	const [currentScriptVersion, setCurrentScriptVersion] = useState(scriptVersion);
+	const [widgetScriptVersion, setWidgetScriptVersion] = useState(scriptVersion);
+	const [latestScriptVersion, setLatestScriptVersion] = useState(scriptVersion);
 	const widgetIdRef = useRef(id);
 
 	const pendingDataRef = useRef<OnWidgetLoadData | undefined>(undefined);
@@ -193,7 +194,7 @@ const Widget = ({
 			scriptVersion: data.scriptVersion,
 		});
 		toast.success(`Successfully updated iframe files for ${name}`);
-		setCurrentScriptVersion(data.scriptVersion);
+		setWidgetScriptVersion(data.scriptVersion);
 	};
 
 	const getOnWidgetLoadData = useCallback(async () => {
@@ -244,7 +245,19 @@ const Widget = ({
 		}
 	}, []);
 
+    const fetchLatestScriptVersion = async () => {
+        const res = await fetch(`/api/get-script-version`, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+		});
+        const data = await res.json();
+        console.log(data);
+        
+        setLatestScriptVersion(data.SCRIPT_VER);
+    }
+
 	useEffect(() => {
+        fetchLatestScriptVersion();
         getOverlays();
     }, [])
 
@@ -646,7 +659,7 @@ const Widget = ({
 			style={combinedStyle}
 			// onClick={onWidgetClick}
 			onMouseDown={handleMouseDown}>
-			{currentScriptVersion == 1.4 ? (
+			{widgetScriptVersion == latestScriptVersion ? (
 				<iframe
 					ref={iframeRef}
 					id={id}
