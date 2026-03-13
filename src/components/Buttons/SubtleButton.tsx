@@ -9,12 +9,12 @@ export interface SubtleButtonProps extends React.ButtonHTMLAttributes<HTMLButton
 }
 
 const SubtleButton = React.forwardRef<HTMLButtonElement, SubtleButtonProps>(
-	({ children, width = '1.25rem', height = '1.25rem', padding, cssClass = 'subtle', style, ...props }, ref) => {
+	({ children, width = '1.25rem', height = '1.25rem', padding, cssClass, style, ...props }, ref) => {
 		return (
 			<button
 				ref={ref}
 				type="button"
-				className={cn(cssClass)}
+				className={cn("subtle", cssClass)}
 				style={{ width, height, padding, ...style }}
 				{...props}>
 				{children}
