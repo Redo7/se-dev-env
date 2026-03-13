@@ -771,6 +771,37 @@ app.put('/api/copy-to/', async (req, res) => {
     }
 })
 
+app.post("/api/widget-asset-upload", upload.single("file"), async (req, res) => {
+    const {overlayID, widgetID, fieldName} = req.body;
+    
+    const data = JSON.parse(req.body.data);
+    if (!req.file) {
+        return res.status(400).json({ error: "No file received" });
+    }
+
+    try {
+        const tempPath = req.file.path;
+        const assetsPath = join(__dirname, "overlays", data.overlayID, data.widgetID, "src", "assets");
+        const fileNameSplit = req.file.originalname.split(".");
+        const fileExtension = fileNameSplit[fileNameSplit.length - 1];
+        const newPath = join(assetsPath, data.fieldName + "." + fileExtension);
+        await fs.ensureDir(assetsPath);
+        await fs.copyFile(tempPath, newPath);
+
+        res.json({ 
+            success: true, 
+            fieldName: data.fieldName,
+            filename: req.file.originalname,
+            path: newPath 
+        });
+    } catch (err) {
+        console.error("Error uploading file:", err);
+        res.status(500).json({ error: String(err) });
+    } finally {
+        if (req.file?.path) await fs.remove(req.file.path);
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);
 })
