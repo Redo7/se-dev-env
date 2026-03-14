@@ -42,6 +42,7 @@ interface Template {
 }
 
 const Overlay = () => {
+    const rename = useRename();
 	const { id } = useParams<{ id: string }>();
 	if (!id) return <>Incorrect Overlay ID: {id}</>;
 	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -58,7 +59,8 @@ const Overlay = () => {
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [overlayName, setOverlayName] = useState(overlayData.name);
 	const renameTimeout = useRef<NodeJS.Timeout | null>(null);
-	const rename = useRename();
+    const [latestScriptVersion, setLatestScriptVersion] = useState(1.0);
+    
 
 	document.body.setAttribute('clean-bg', 'false');
 
@@ -70,9 +72,18 @@ const Overlay = () => {
 		setOverlayName(filteredData.name);
 	};
 
+    const fetchLatestScriptVersion = async () => {
+        const res = await fetch(`/api/get-script-version`, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+		});
+        const data = await res.json();
+        setLatestScriptVersion(data.SCRIPT_VER);
+    }
+
 	useEffect(() => {
-		// Fetch overlay data
 		getOverlayData();
+        fetchLatestScriptVersion();
 		// Listen for iframe console logs and send notifications
 		window.addEventListener('message', (event) => {
 			if (event.data?.type === 'iframeConsole') {
@@ -386,6 +397,7 @@ const Overlay = () => {
                         id={widget.id}
                         src={widget.src}
                         scriptVersion={widget.scriptVersion}
+                        latestScriptVersion={latestScriptVersion}
                         template={widget.template}
                         width={widget.width}
                         height={widget.height}

@@ -55,6 +55,7 @@ interface Props {
 	src: string;
 	template: string;
 	scriptVersion: number;
+	latestScriptVersion: number;
 	width: number;
 	height: number;
 	blur: boolean;
@@ -119,6 +120,7 @@ const Widget = ({
 	id,
 	src,
 	scriptVersion,
+	latestScriptVersion,
 	width: initialWidth,
 	height: initialHeight,
 	blur,
@@ -165,7 +167,6 @@ const Widget = ({
 	const hasIframeInitialized = useRef(false);
 	const [onWidgetLoadData, setOnWidgetLoadData] = useState<OnWidgetLoadData | undefined>(undefined);
 	const [widgetScriptVersion, setWidgetScriptVersion] = useState(scriptVersion);
-	const [latestScriptVersion, setLatestScriptVersion] = useState(scriptVersion);
 	const widgetIdRef = useRef(id);
 
 	const pendingDataRef = useRef<OnWidgetLoadData | undefined>(undefined);
@@ -245,17 +246,7 @@ const Widget = ({
 		}
 	}, []);
 
-    const fetchLatestScriptVersion = async () => {
-        const res = await fetch(`/api/get-script-version`, {
-			method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
-		});
-        const data = await res.json();
-        setLatestScriptVersion(data.SCRIPT_VER);
-    }
-
 	useEffect(() => {
-        fetchLatestScriptVersion();
         getOverlays();
     }, [])
 
