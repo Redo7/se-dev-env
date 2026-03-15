@@ -503,15 +503,19 @@ app.put('/api/update-iframe-files/', async (req, res) => {
 
 app.put('/api/SE_API/set', async (req, res) => {
     const { key, value } = req.body
-    let data = await fetchDataFile('SE_API.json');
-    if (Array.isArray(value)) {
-        data[key] = [...value];
-    } else {
-        data[key] = value;
-    }
+    
+    await queueWrite('SE_API.json', async () => {
+        let data = await fetchDataFile('SE_API.json');
+        if (Array.isArray(value)) {
+            data[key] = [...value];
+        } else {
+            data[key] = value;
+        }
+    
+        const dataFilePath = join(__dirname, "data", 'SE_API.json');
+        await fs.writeFile(dataFilePath, JSON.stringify(data, null, "\t"), 'utf-8');
+    });
 
-    const dataFilePath = join(__dirname, "data", 'SE_API.json');
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, "\t"), 'utf-8');
     res.status(200).json({ message: `${key} updated successfully` });
 })
 
