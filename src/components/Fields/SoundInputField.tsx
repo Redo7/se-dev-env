@@ -88,7 +88,7 @@ const SoundInputField = ({ overlay, widget, name, label, value, timestampClassNa
 	return (
 		<div className="audio-input-field">
             <label htmlFor={name}>{label}</label>
-            <div className="grid place-items-center group py-5">
+            <div className="grid place-items-center group py-5 relative">
 				<SubtleButton
 					width="fit-content"
 					padding="0 .5rem"

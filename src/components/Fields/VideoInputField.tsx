@@ -25,7 +25,7 @@ const VideoInputField = ({ overlay, widget, name, label, value }: Props) => {
 	return (
 		<div className="video-input-field">
             <label htmlFor={name}>{label}</label>
-			<div className="grid place-items-center group">
+			<div className="grid place-items-center group relative">
 				<SubtleButton
 					width="fit-content"
 					padding="0 .5rem"
@@ -42,7 +42,7 @@ const VideoInputField = ({ overlay, widget, name, label, value }: Props) => {
 						onChange={async (e) => await useWidgetFileUpload(e, fileInputRef, overlay, widget, name, handleFileChange)}
 					/>
 				</form>
-                <video className="field-asset-preview" src={value} id={name} autoPlay loop muted />
+                <video className="field-asset-preview" src={selectedFile} id={name} autoPlay loop muted />
 			</div>
 			<TextField
 					name={name}

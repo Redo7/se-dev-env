@@ -4,8 +4,6 @@ import useFieldChange from '../../hooks/useFieldChange';
 import useFieldUpdates from '@/hooks/useFieldUpdates';
 import SubtleButton from '../Buttons/SubtleButton';
 import { Input } from '../ui/input';
-import axios from 'axios';
-import { toast } from 'sonner';
 import useWidgetFileUpload from '@/hooks/useWidgetFileUpload';
 
 interface Props {
@@ -29,7 +27,7 @@ const ImageInputField = ({ overlay, widget, name, label, value = undefined }: Pr
 	return (
 		<div className="image-input-field">
 			<label htmlFor={name}>{label}</label>
-			<div className="grid place-items-center group">
+			<div className="grid place-items-center group relative">
 				<SubtleButton
 					width="fit-content"
 					padding="0 .5rem"
