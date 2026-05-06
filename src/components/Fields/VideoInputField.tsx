@@ -47,7 +47,7 @@ const VideoInputField = ({ overlay, widget, name, label, value }: Props) => {
 			<TextField
 					name={name}
 					label={`"${label}" link`}
-					value={value}
+					value={selectedFile}
 					onChange={handleFileChange}
 					overlay={overlay}
 					widget={widget}

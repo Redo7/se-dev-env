@@ -49,7 +49,7 @@ const ImageInputField = ({ overlay, widget, name, label, value = undefined }: Pr
 			<TextField
 				name={name}
 				label={`"${label}" link`}
-				value={value}
+				value={selectedFile}
 				onChange={handleFileChange}
 				overlay={overlay}
 				widget={widget}

@@ -1,4 +1,4 @@
-// Script version: 1.4
+// Script version: 1.5
 
 function detectType(arg) {
     if (arg === null) return "null";
@@ -127,21 +127,36 @@ async function loadWidgetContentAll(htmlPath, cssPath, jsPath, variables, onComp
         }
 
         if (cssPath) {
-            let css = await (await fetch(cssPath)).text();
-            css = replaceVariables(css, variables);
-            const styleEl = document.createElement("style");
-            styleEl.setAttribute('data-dynamic-content', 'true');
-            styleEl.textContent = css;
-            document.head.prepend(styleEl);
+            const modules = import.meta.glob('./src/**/*.css', {
+                query: '?raw',
+                import: 'default',
+                eager: true,
+            });
+            for (const path in modules) {
+                let css = modules[path];
+                css = replaceVariables(css, variables);
+                const styleEl = document.createElement("style");
+                styleEl.setAttribute('data-dynamic-content', 'true');
+                styleEl.textContent = css;
+                document.head.prepend(styleEl);
+            }
         }
 
         if (jsPath) {
-            let js = await (await fetch(jsPath)).text();
-            js = replaceVariables(js, variables);
-            const scriptEl = document.createElement("script");
-            scriptEl.setAttribute('data-dynamic-content', 'true');
-            scriptEl.textContent = js;
-            document.body.appendChild(scriptEl);
+            const modules = import.meta.glob('./src/**/*.js', {
+                query: '?raw',
+                import: 'default',
+                eager: true,
+            });
+
+            for (const path in modules) {
+                let js = modules[path];
+                js = replaceVariables(js, variables);
+                const scriptEl = document.createElement("script");
+                scriptEl.setAttribute('data-dynamic-content', 'true');
+                scriptEl.textContent = js;
+                document.body.appendChild(scriptEl);
+            }
         }
 
         if (onCompleteEvent) { dispatchEvent(onCompleteEvent); }
