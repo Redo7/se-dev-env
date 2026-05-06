@@ -18,8 +18,8 @@ import { useState } from 'react';
 interface Props {
 	overlay: OverlayInstance;
 	onOverlayDelete: (name: string, id: string) => void;
-    showButtons? : boolean;
-    redirect? : boolean;
+	showButtons?: boolean;
+	redirect?: boolean;
 }
 const HomeScreenOverlay = ({ overlay, onOverlayDelete, showButtons = true, redirect = true }: Props) => {
 	const [overlayName, setOverlayName] = useState(overlay.name);
@@ -35,53 +35,59 @@ const HomeScreenOverlay = ({ overlay, onOverlayDelete, showButtons = true, redir
 			<Link className="flex items-center gap-6 flex-grow" to={redirect ? `/${overlay.id}` : ''}>
 				<i className="bi bi-folder-fill tx text-xl"></i>
 				<div className="tx flex flex-col gap-1">
-					<p className={`${showButtons && "max-w-[24ch]"} truncate`}>{overlay.name}</p>
+					<p className={`${showButtons && 'max-w-[24ch]'} truncate`}>{overlay.name}</p>
 					<p className="overlay-last-opened">
-						{overlay.lastUpdate ? useRelativeTime(overlay.lastUpdate) : 'Never opened'}
+						{overlay.lastUpdate && overlay.lastUpdate < Date.now() - 5000
+							? useRelativeTime(overlay.lastUpdate)
+							: 'Just now'}
 					</p>
 				</div>
 			</Link>
 
-			{showButtons && <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-				<div className="overlay-action-buttons flex gap-2 p-1.5 px-2 rounded-sm">
-					<DialogTrigger className="w-full" onClick={() => setDialogOpen(true)} asChild>
-						<button type="button">
-							<i className="bi bi-pencil-square"></i>
+			{showButtons && (
+				<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+					<div className="overlay-action-buttons flex gap-2 p-1.5 px-2 rounded-sm">
+						<DialogTrigger className="w-full" onClick={() => setDialogOpen(true)} asChild>
+							<button type="button">
+								<i className="bi bi-pencil-square"></i>
+							</button>
+						</DialogTrigger>
+						<span className="overlay-action-buttons-divider"></span>
+						<button type="button" onClick={() => onOverlayDelete(overlay.name, overlay.id)}>
+							<i className="bi bi-trash3"></i>
 						</button>
-					</DialogTrigger>
-					<span className="overlay-action-buttons-divider"></span>
-					<button type="button" onClick={() => onOverlayDelete(overlay.name, overlay.id)}>
-						<i className="bi bi-trash3"></i>
-					</button>
-				</div>
-				<DialogContent className="sm:max-w-md">
-					<DialogHeader>
-						<DialogTitle>Rename widget</DialogTitle>
-						<DialogDescription>Thie action will rename it in both the app and the files.</DialogDescription>
-					</DialogHeader>
-					<div className="flex items-center gap-2">
-						<div className="grid flex-1 gap-2">
-							<Label htmlFor="name" className="sr-only">
-								New name
-							</Label>
-							<Input
-								id="name"
-								onChange={(e) => setOverlayName(e.target.value)}
-								defaultValue={overlayName}
-							/>
-						</div>
 					</div>
-					<DialogFooter className="sm:justify-start">
-						<Button
-							onClick={() => handleNameInput(overlayName)}
-							className="ml-auto"
-							type="button"
-							variant="default">
-							Rename
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>}
+					<DialogContent className="sm:max-w-md">
+						<DialogHeader>
+							<DialogTitle>Rename widget</DialogTitle>
+							<DialogDescription>
+								Thie action will rename it in both the app and the files.
+							</DialogDescription>
+						</DialogHeader>
+						<div className="flex items-center gap-2">
+							<div className="grid flex-1 gap-2">
+								<Label htmlFor="name" className="sr-only">
+									New name
+								</Label>
+								<Input
+									id="name"
+									onChange={(e) => setOverlayName(e.target.value)}
+									defaultValue={overlayName}
+								/>
+							</div>
+						</div>
+						<DialogFooter className="sm:justify-start">
+							<Button
+								onClick={() => handleNameInput(overlayName)}
+								className="ml-auto"
+								type="button"
+								variant="default">
+								Rename
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			)}
 		</div>
 	);
 };

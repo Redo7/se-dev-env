@@ -96,6 +96,7 @@ app.post('/api/create-overlay/', async (req, res) => {
 		name: name,
 		id: id,
 		widgets: [],
+		lastUpdate: Date.now(),
 	};
 
 	const destinationPath = join(__dirname, 'overlays', id);
