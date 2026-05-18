@@ -543,6 +543,7 @@ app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName', async (req, re
 	const to_zip = fs.readdirSync(filePath);
 
 	const zip = new AdmZip();
+	if(to_zip.includes("assets")) zip.addLocalFolder(join(filePath, 'assets'), 'assets');
 	zip.addLocalFile(join(filePath, 'html.html'), '', 'html.txt');
 	zip.addLocalFile(join(filePath, 'css.css'), '', 'css.txt');
 	zip.addLocalFile(join(filePath, 'js.js'), '', 'js.txt');
