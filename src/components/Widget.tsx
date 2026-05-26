@@ -68,6 +68,7 @@ interface Props {
 	onSettingsChange: (overlay: string, widgetID: string, updates: Partial<WidgetInstance>) => void;
 	onWidgetDuplicate: (widgetID: string, name: string, template: string) => void;
 
+	onOutOfBounds: (x: number, y: number, width: number, height: number) => void;
 	onDragStart?: (event: React.MouseEvent<HTMLDivElement>) => void;
 	onDragEnd?: (event: React.MouseEvent<HTMLDivElement>, newPosition: { x: number; y: number }) => void;
 	onDragging?: (event: React.MouseEvent<HTMLDivElement>, currentPosition: { x: number; y: number }) => void;
@@ -132,6 +133,7 @@ const Widget = ({
 	onDelete,
 	onSettingsChange,
 	onWidgetDuplicate,
+    onOutOfBounds,
 	onDragStart,
 	onDragEnd,
 	onDragging,
@@ -170,7 +172,7 @@ const Widget = ({
 	const widgetIdRef = useRef(id);
 
 	const pendingDataRef = useRef<OnWidgetLoadData | undefined>(undefined);
-	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const retryTimeoutRef = useRef<number | null>(null);
 	const [renameDialogOpen, setRenameDialogOpen] = useState(false);
 	const [copyToDialogOpen, setCopyToDialogOpen] = useState(false);
 	const [widgetName, setWidgetName] = useState(name);
@@ -373,8 +375,8 @@ const Widget = ({
 	const handleGlobalMouseMove = useCallback(
 		(e: MouseEvent) => {
 			if (isDragging) {
-				const newX = e.clientX - offset.current.x;
-				const newY = e.clientY - offset.current.y;
+				const newX = e.pageX - offset.current.x;
+				const newY = e.pageY - offset.current.y;
 				setPosition({ x: newX, y: newY });
 				onDragging?.(e as unknown as React.MouseEvent<HTMLDivElement>, { x: newX, y: newY });
 			} else if (isResizing) {
@@ -426,7 +428,10 @@ const Widget = ({
 	const handleGlobalMouseUp = useCallback(
 		(e: MouseEvent) => {
 			if (isDragging) {
+				const newX = e.pageX - offset.current.x;
+				const newY = e.pageY - offset.current.y;
 				setIsDragging(false);
+				onOutOfBounds(newX, newY, dimensions.width, dimensions.height);
 				onDragEnd?.(e as unknown as React.MouseEvent<HTMLDivElement>, position);
 			} else if (isResizing) {
 				const currentDims = {
@@ -513,7 +518,6 @@ const Widget = ({
 	}, [initialWidth, initialHeight]);
 
 	const combinedStyle: CSSProperties = {
-		position: 'absolute',
 		left: position.x,
 		top: position.y,
 		width: dimensions.width,
@@ -643,7 +647,7 @@ const Widget = ({
 
 	return (
 		<div
-			className={`widget-container relative depth-shadow ${bgBlur ? 'bgblur' : ''} ${showFrame ? '' : 'hide-bg'} `}
+			className={`widget-container depth-shadow absolute ${bgBlur ? 'bgblur' : ''} ${showFrame ? '' : 'hide-bg'} `}
 			ref={widgetRef}
 			style={combinedStyle}
 			// onClick={onWidgetClick}

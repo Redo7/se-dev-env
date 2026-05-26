@@ -9,6 +9,31 @@ html {
     line-height: 1;
 }
 
+html {
+    background-color: #000;
+    line-height: 1;
+    scrollbar-gutter: stable;
+}
+
+html::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    position: absolute;
+}
+
+html::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+    background: var(--tr-100);
+    border-radius: 4px;
+}
+
+html::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
 /* Utility */
 
 :root {
@@ -189,23 +214,28 @@ svg {
 }
 
 body {
+    width: fit-content;
+    height: fit-content;
+    min-width: 100vw;
+    min-height: 100vh;
     font-family: Inter, sans-serif;
     background-color: var(--chart-1);
     color: var(--foreground);
+
     transition: background-color 0.3s ease, color 0.3s ease;
-    background: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23D9D9D933'/%3E%3C/svg%3E%0A"), radial-gradient(31.64% 56.25% at 100% 0%, #ffffff 0%, transparent 100%), radial-gradient(32.21% 57.27% at 42% 100%, #ffffff 0%, transparent 100%), var(--color-redo-100);
+    background: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23D9D9D933'/%3E%3C/svg%3E%0A"), radial-gradient(40rem at 100% 0%, #ffffff 0%, transparent 100%), radial-gradient(40rem at 40rem 70rem, #ffffff 0%, transparent 100%), var(--color-redo-100);
 }
 
 .dark body {
-    background: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23D9D9D933'/%3E%3C/svg%3E%0A"), radial-gradient(31.64% 56.25% at 100% 0%, var(--secondary) 0%, transparent 100%), radial-gradient(32.21% 57.27% at 42% 100%, var(--secondary) 0%, transparent 100%), var(--background);
+    background: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23D9D9D933'/%3E%3C/svg%3E%0A"), radial-gradient(40rem at 100% 0%, var(--secondary) 0%, transparent 100%), radial-gradient(40rem at 40rem 70rem, var(--secondary) 0%, transparent 100%), var(--background);
 }
 
 body[clean-bg="true"] {
-    background: radial-gradient(31.64% 56.25% at 100% 0%, #ffffff 0%, transparent 100%), radial-gradient(32.21% 57.27% at 42% 100%, #ffffff 0%, transparent 100%), var(--color-redo-100);
+    background: radial-gradient(40rem at 100% 0%, #ffffff 0%, transparent 100%), radial-gradient(40rem at 40rem 70rem, #ffffff 0%, transparent 100%), var(--color-redo-100);
 }
 
 .dark body[clean-bg="true"] {
-    background: radial-gradient(31.64% 56.25% at 100% 0%, var(--secondary) 0%, transparent 100%), radial-gradient(32.21% 57.27% at 42% 100%, var(--secondary) 0%, transparent 100%), var(--background);
+    background: radial-gradient(40rem at 100% 0%, var(--secondary) 0%, transparent 100%), radial-gradient(40rem at 40rem 70rem, var(--secondary) 0%, transparent 100%), var(--background);
 }
 
 /* Home Screen */
@@ -336,9 +366,10 @@ p.overlay-last-opened {
     color: var(--foreground);
     /* padding: 3.125rem; */
     box-sizing: border-box;
-    transition: padding-top 300ms var(--redo-easing);
-    transition-delay: 2000ms;
+    transition: padding-top 300ms var(--redo-easing) 2000ms, width 300ms ease, height 300ms ease;
 }
+
+
 
 .widgets::after {
     content: '';

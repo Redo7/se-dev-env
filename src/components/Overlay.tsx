@@ -45,6 +45,7 @@ const Overlay = () => {
     const rename = useRename();
 	const { id } = useParams<{ id: string }>();
 	if (!id) return <>Incorrect Overlay ID: {id}</>;
+    const [overlaySize, setOverlaySize] = useState({width: window.innerWidth, height: window.innerHeight})
 	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 	const [isNavbarOver, setIsNavbarOver] = useState(false);
 	const [isPopoverVisible, setIsPopoverVisible] = useState(false);
@@ -58,7 +59,7 @@ const Overlay = () => {
 	const [activeWidgetId, setActiveWidgetId] = useState('');
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [overlayName, setOverlayName] = useState(overlayData.name);
-	const renameTimeout = useRef<NodeJS.Timeout | null>(null);
+	const renameTimeout = useRef<number | null>(null);
     const [latestScriptVersion, setLatestScriptVersion] = useState(1.0);
     
 
@@ -70,6 +71,11 @@ const Overlay = () => {
 		const filteredData = { ...data, widgets: data.widgets.filter((widget: WidgetInstance) => !widget.deleteAfter) };
 		setOverlayData(filteredData);
 		setOverlayName(filteredData.name);
+
+		const largestX = Math.max( ...filteredData.widgets.map( (widget: WidgetInstance) => widget.posX + widget.width ) );
+		const largestY = Math.max( ...filteredData.widgets.map( (widget: WidgetInstance) => widget.posY + widget.height ) );
+		setOverlaySize({width: window.innerWidth > largestX ? window.innerWidth : largestX + 50, height: window.innerHeight > largestY ? window.innerHeight : largestY + 50})
+
 	};
 
     const fetchLatestScriptVersion = async () => {
@@ -280,12 +286,32 @@ const Overlay = () => {
 		});
 	};
 
+    const handleWidgetOutOfBounds = async (x: number, y: number, width: number, height: number, isDragging: boolean = false) => {
+		const windowHeight = window.innerHeight;
+		const windowWidth = window.innerWidth;
+		const padding = 50;
+		const requiredWidth = x + width + padding;
+		const requiredHeight = y + height + padding;
+		
+		if (isDragging) {
+			setOverlaySize(prev => ({
+				width: Math.max(prev.width, requiredWidth),
+				height: Math.max(prev.height, requiredHeight)
+			}));
+		} else {
+			const newWidth = Math.max(windowWidth, requiredWidth);
+			const newHeight = Math.max(windowHeight, requiredHeight);
+			setOverlaySize({ width: newWidth, height: newHeight });
+		}
+	}
+
 	return (
-		<div className="overlay min-h-screen h-full"
+		<div className={`overlay min-h-screen min-w-screen`}
         onMouseMove={handleMouseMove}
+        style={{width: `${overlaySize.width}px`, height: `${overlaySize.height}px`}}
         >
             {/* UI Container */}
-			<div className="ui-container z-200 sticky w-full h-screen !top-0 left-0 p-10">
+			<div className="ui-container w-screen h-screen z-200 fixed p-10">
                 {/* Sidebar Button */}
                 <div
                     className="sidebar-button absolute"
@@ -314,7 +340,7 @@ const Overlay = () => {
                         {/* <p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p> */}
                         <Badge
                             variant="outline"
-                            className="opacity-50 hover:bg-zinc-50/10 hover:opacity-65 transition-colors transition-opacity cursor-pointer select-none"
+                            className="opacity-50 hover:bg-zinc-50/10 hover:opacity-65 transition-opacity cursor-pointer select-none"
                             onClick={handleFolderOpen}>
                             {overlayData.id}
                         </Badge>
@@ -380,13 +406,13 @@ const Overlay = () => {
                         {(closePopup) => <Chat closePopup={closePopup} />}
                     </IconPopupButton>
                 </div>
+                {/* Notifications */}
+                <div className="notification-area absolute flex flex-col-reverse justify-end p-10 gap-4 z-106!">
+                    {notifications.map((notification) => {
+                        return <ConsoleNotification key={notification.id} notification={{ ...notification }} />;
+                    })}
+                </div>
             </div>
-			{/* Notifications */}
-			<div className="notification-area absolute flex flex-col-reverse justify-end p-10 gap-4 z-106!">
-				{notifications.map((notification) => {
-					return <ConsoleNotification key={notification.id} notification={{ ...notification }} />;
-				})}
-			</div>
 			{/* Widgets */}
 			<div className="widgets absolute top-0 left-0 min-w-full min-h-fit">
                 {overlayData.widgets.map((widget) => (
@@ -414,6 +440,7 @@ const Overlay = () => {
                         onSettingsChange={(id, widgetID, updates) => {
                             updateWidgetSettings(id, widgetID, updates);
                         }}
+                        onOutOfBounds={(x: number, y: number, width: number, height: number) => handleWidgetOutOfBounds(x, y, width, height)}
                     />
                 ))}
             </div>
