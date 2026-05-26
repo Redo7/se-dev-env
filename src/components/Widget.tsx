@@ -700,7 +700,7 @@ const Widget = ({
 						</SubtleButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="z-100">
-						<DropdownMenuLabel className="text-[0.75rem] opacity-50">General</DropdownMenuLabel>
+						<DropdownMenuLabel className="opacity-50">General</DropdownMenuLabel>
 						<DropdownMenuItem onClick={() => setRenameDialogOpen(true)}>
 							<TextCursor /> Rename
 						</DropdownMenuItem>
@@ -729,13 +729,13 @@ const Widget = ({
 							<CodeXml /> Open in Editor
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuLabel className="text-[0.75rem] opacity-50">iframe control</DropdownMenuLabel>
+						<DropdownMenuLabel className="opacity-50">iframe control</DropdownMenuLabel>
 						<CustomCheckboxItem mirror={true} checked={pointerEvents} onCheckedChange={handlePointerEvents}>
 							<Pointer /> Mouse interaction
 						</CustomCheckboxItem>
 						<DropdownMenuItem
-							className={widgetZIndex === 9999 ? 'line-through' : ''}
-							disabled={widgetZIndex === 9999 ? true : false}
+							className={widgetZIndex === 100 ? 'line-through' : ''}
+							disabled={widgetZIndex === 100 ? true : false}
 							onClick={() => handleZIndex(widgetZIndex + 1)}>
 							<ChevronUp /> Layer above
 						</DropdownMenuItem>
