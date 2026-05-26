@@ -56,7 +56,6 @@ const Overlay = () => {
 		widgets: [],
 	});
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
-	const [activeWidgetId, setActiveWidgetId] = useState('');
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [overlayName, setOverlayName] = useState(overlayData.name);
 	const renameTimeout = useRef<number | null>(null);
@@ -240,7 +239,6 @@ const Overlay = () => {
 			return;
 		}
 		setActiveWidget(widget);
-		setActiveWidgetId(widget.id);
 		// Change page title to Overlay name | Widget name
 		document.title = `${overlayData.name} | ${widget.name}`;
 	};
@@ -432,7 +430,7 @@ const Overlay = () => {
                         frameVisible={widget.frameVisible}
                         zIndex={widget.zIndex ? widget.zIndex : 5}
                         initialPosition={{ x: widget.posX, y: widget.posY }}
-                        isActive={activeWidgetId === widget.id}
+                        isActive={activeWidget?.id === widget.id}
                         resizable={true}
                         onWidgetClick={() => handleWidgetClick(widget)}
                         onDelete={() => softRemoveWidget(overlayData, widget)}
