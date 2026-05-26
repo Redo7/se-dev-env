@@ -50,45 +50,24 @@ import HomeScreenOverlay from './HomeScreenOverlay';
 
 interface Props {
 	overlay: OverlayInstance;
-	id: string;
-	name: string;
-	src: string;
-	template: string;
-	scriptVersion: number;
+	widget: WidgetInstance;
 	latestScriptVersion: number;
-	width: number;
-	height: number;
-	blur: boolean;
-	pointerEventsEnabled: boolean;
-	frameVisible: boolean;
-	zIndex: number;
 	isActive: boolean;
 	onWidgetClick: () => void;
 	onDelete: () => void;
 	onSettingsChange: (overlay: string, widgetID: string, updates: Partial<WidgetInstance>) => void;
 	onWidgetDuplicate: (widgetID: string, name: string, template: string) => void;
-
 	onOutOfBounds: (x: number, y: number, width: number, height: number) => void;
 	onDragStart?: (event: React.MouseEvent<HTMLDivElement>) => void;
 	onDragEnd?: (event: React.MouseEvent<HTMLDivElement>, newPosition: { x: number; y: number }) => void;
 	onDragging?: (event: React.MouseEvent<HTMLDivElement>, currentPosition: { x: number; y: number }) => void;
-	initialPosition?: { x: number; y: number };
 	className?: string;
 	style?: CSSProperties;
-
 	resizable?: boolean;
 	onResizeStart?: (event: React.MouseEvent<HTMLDivElement>, handle: string) => void;
-	onResizeEnd?: (
-		event: React.MouseEvent<HTMLDivElement>,
-		newDimensions: { width: number; height: number },
-		newPosition: { x: number; y: number }
-	) => void;
-	onResizing?: (
-		event: React.MouseEvent<HTMLDivElement>,
-		currentDimensions: { width: number; height: number },
-		currentPosition: { x: number; y: number }
-	) => void;
-}
+	onResizeEnd?: (event: React.MouseEvent<HTMLDivElement>, newDimensions: { width: number; height: number }, newPosition: { x: number; y: number }) => void;
+	onResizing?: (event: React.MouseEvent<HTMLDivElement>, currentDimensions: { width: number; height: number }, currentPosition: { x: number; y: number }) => void;
+  }
 
 type ResizeHandle = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null;
 
@@ -116,41 +95,45 @@ const fetchOnWidgetLoad = async (): Promise<OnWidgetLoadData | undefined> => {
 
 const Widget = ({
 	overlay,
-	template,
-	name,
-	id,
-	src,
-	scriptVersion,
+	widget,
 	latestScriptVersion,
-	width: initialWidth,
-	height: initialHeight,
-	blur,
-	pointerEventsEnabled,
-	frameVisible,
-	zIndex,
 	isActive,
 	onWidgetClick,
 	onDelete,
 	onSettingsChange,
 	onWidgetDuplicate,
-    onOutOfBounds,
+	onOutOfBounds,
 	onDragStart,
 	onDragEnd,
 	onDragging,
-	initialPosition = { x: 0, y: 0 },
 	style,
 	resizable = false,
 	onResizeStart,
 	onResizeEnd,
 	onResizing,
 }: Props) => {
+	const {
+		id,
+		name,
+		src,
+		template,
+		scriptVersion,
+		width: initialWidth,
+		height: initialHeight,
+		posX,
+		posY,
+		blur,
+		pointerEvents: pointerEventsEnabled,
+		frameVisible,
+		zIndex,
+	} = widget;
 	const [isDragging, setIsDragging] = useState(false);
 	const [contextMenuOpen, setContextMenuOpen] = useState(false);
 	const [pointerEvents, setPointerEvents] = useState(pointerEventsEnabled);
 	const [bgBlur, setBgBlur] = useState(blur == undefined ? true : blur);
 	const [showFrame, setShowFrame] = useState(frameVisible == undefined ? true : frameVisible);
 	const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
-	const [position, setPosition] = useState(initialPosition);
+	const [position, setPosition] = useState({ x: posX, y: posY });
 	const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
 	const [overlays, setOverlays] = useState<OverlayInstance[]>([]);
     const navigate = useNavigate();

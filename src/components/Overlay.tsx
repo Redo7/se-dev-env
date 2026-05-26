@@ -415,31 +415,22 @@ const Overlay = () => {
 			<div className="widgets absolute top-0 left-0 min-w-full min-h-fit">
                 {overlayData.widgets.map((widget) => (
                     <Widget
-                        key={widget.id}
-                        overlay={overlayData}
-                        name={widget.name}
-                        id={widget.id}
-                        src={widget.src}
-                        scriptVersion={widget.scriptVersion}
-                        latestScriptVersion={latestScriptVersion}
-                        template={widget.template}
-                        width={widget.width}
-                        height={widget.height}
-                        blur={widget.blur}
-                        pointerEventsEnabled={widget.pointerEvents}
-                        frameVisible={widget.frameVisible}
-                        zIndex={widget.zIndex ? widget.zIndex : 5}
-                        initialPosition={{ x: widget.posX, y: widget.posY }}
-                        isActive={activeWidget?.id === widget.id}
-                        resizable={true}
-                        onWidgetClick={() => handleWidgetClick(widget)}
-                        onDelete={() => softRemoveWidget(overlayData, widget)}
-                        onWidgetDuplicate={() => handleDuplicate(widget.id, widget.name, widget.template)}
-                        onSettingsChange={(id, widgetID, updates) => {
-                            updateWidgetSettings(id, widgetID, updates);
-                        }}
-                        onOutOfBounds={(x: number, y: number, width: number, height: number) => handleWidgetOutOfBounds(x, y, width, height)}
-                    />
+						key={widget.id}
+						overlay={overlayData}
+						widget={widget}
+						latestScriptVersion={latestScriptVersion}
+						isActive={activeWidget?.id === widget.id}
+						resizable={true}
+						onWidgetClick={() => handleWidgetClick(widget)}
+						onDelete={() => softRemoveWidget(overlayData, widget)}
+						onWidgetDuplicate={() => handleDuplicate(widget.id, widget.name, widget.template)}
+						onSettingsChange={(id, widgetID, updates) => {
+						updateWidgetSettings(id, widgetID, updates);
+						}}
+						onOutOfBounds={(x: number, y: number, width: number, height: number) => 
+						handleWidgetOutOfBounds(x, y, width, height)
+						}
+					/>
                 ))}
             </div>
             {/* <div className="overlay-navbar-container"
