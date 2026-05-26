@@ -64,7 +64,7 @@ const Chat = ({ closePopup }: Props) => {
             iframe.contentWindow?.postMessage({ listener: 'onEventReceived', detail: detail }, '*');
         });
         let element = document.createElement('div');
-        element.innerHTML = `<span class='font-[700]'>${username}</span>: <span class='text-zinc-300'>${chatInput.current.value}</span></div>`
+        element.innerHTML = `<span class='font-[700]'>${username}</span>: <span class='text-zinc-300 break-all'>${chatInput.current.value}</span></div>`
         document.querySelector('.chat-container')?.prepend(element)
     }
   return (
