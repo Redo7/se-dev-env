@@ -80,6 +80,14 @@ const Chat = ({ closePopup }: Props) => {
         chatInput.current.value = chatInput.current.value + `${emote} `
         chatInput.current?.focus();
     }
+
+    const handleTextAreaKeybinds = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        e.currentTarget.form?.requestSubmit();
+      }
+    };
+    
   return (
     <div className="chat bg-zinc-900 rounded-lg border border-b-0 absolute w-70">
       <div className="flex justify-between items-center p-2 px-3">
@@ -98,6 +106,7 @@ const Chat = ({ closePopup }: Props) => {
             ref={chatInput}
             className="relative break-word min-h-fit py-1"
             placeholder="Type your message"
+            onKeyDown={handleTextAreaKeybinds}
           />
           <InputGroupAddon align="inline-end" className="pr-3 py-1 self-end">
             <EmotePicker onEmoteClick={handleEmoteClick} />
