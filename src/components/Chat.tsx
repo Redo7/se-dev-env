@@ -1,8 +1,14 @@
 import { useRef } from 'react';
 import { Button } from './ui/button'
-import { Input } from './ui/input';
 import { Separator } from './ui/separator'
 import { X } from 'lucide-react';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+  } from "@/components/ui/input-group"
+import EmotePicker from './EmotePicker';
+import useEmotes, { mapEmotes, replaceEmotes } from '@/hooks/useEmotes';
 
 interface Props{
     closePopup: () => void;
@@ -10,7 +16,8 @@ interface Props{
 
 const Chat = ({ closePopup }: Props) => {
     const username = "TestUser";
-    const chatInput = useRef<HTMLInputElement>(null)
+    const chatInput = useRef<HTMLInputElement>(null);
+	const { emotes } = useEmotes();
     const handleChatMessage = () => {
         if(!chatInput.current) return;
         let detail = {
@@ -53,10 +60,10 @@ const Chat = ({ closePopup }: Props) => {
                     channel: "se-dev-env",
                     text: chatInput.current.value,
                     isAction: false,
-                    emotes: [],
+                    emotes: mapEmotes(chatInput.current.value, emotes),
                     msgId: "d0bcf318-b8d2-431d-b49d-c69aaf4b1ef8"
                 },
-                renderedText: chatInput.current.value // Apply emotes here later
+                renderedText: replaceEmotes(chatInput.current.value, emotes)
             }
         }
         const iframes = document.querySelectorAll('iframe');
@@ -67,21 +74,37 @@ const Chat = ({ closePopup }: Props) => {
         element.innerHTML = `<span class='font-[700]'>${username}</span>: <span class='text-zinc-300 break-all'>${chatInput.current.value}</span></div>`
         document.querySelector('.chat-container')?.prepend(element)
     }
+    
+    const handleEmoteClick = (emote: string) => {        
+        if(!chatInput.current) return;
+        chatInput.current.value = chatInput.current.value + `${emote} `
+    }
   return (
     <div className="chat bg-zinc-900 rounded-lg border absolute w-70">
-        <div className="flex justify-between items-center p-2 px-3">
-            <p className='text-[.75rem] tracking-wide font-[500]'>Chat</p>
-            <Button variant="ghost" size="xs" onClick={closePopup}><X size={16}/></Button>
-        </div>
-        <Separator />
-        <div className="h-40 flex flex-col justify-end gap-1">
-            <div className="chat-container overflow-y-scroll p-2 w-full text-sm flex flex-col-reverse"></div>
-        </div>
-        <form action={handleChatMessage}>
-            <Input ref={chatInput} className='rounded-lg min-h-auto py-3' placeholder='Type your message' />
-        </form>
+      <div className="flex justify-between items-center p-2 px-3">
+        <p className="text-[.75rem] tracking-wide font-[500]">Chat</p>
+        <Button variant="ghost" size="xs" onClick={closePopup}>
+          <X size={16} />
+        </Button>
+      </div>
+      <Separator />
+      <div className="h-60 flex flex-col justify-end gap-1">
+        <div className="chat-container overflow-y-scroll p-2 w-full text-sm flex flex-col-reverse"></div>
+      </div>
+      <form action={handleChatMessage}>
+        <InputGroup className="overflow-hidden">
+          <InputGroupInput
+            ref={chatInput}
+            className="relative"
+            placeholder="Type your message"
+          />
+          <InputGroupAddon align="inline-end" className="pr-2.5">
+            <EmotePicker onEmoteClick={handleEmoteClick} />
+          </InputGroupAddon>
+        </InputGroup>
+      </form>
     </div>
-  )
+  );
 }
 
 export default Chat

@@ -6,6 +6,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { useEffect } from 'react';
 import Trash from './components/Trash';
 import { Toaster } from './components/ui/sonner';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const App = () => {
 	// const [isDarkMode, setIsDarkMode] = useState(true);
@@ -38,6 +39,8 @@ const App = () => {
 		deletionExpiryCheck();
 	}, []);
 
+	const queryClient = new QueryClient();
+
 	const removeWidget = async (overlayID: string, widgetID: string | undefined) => {
 		console.log('deleting', overlayID, widgetID);
 		try {
@@ -57,26 +60,28 @@ const App = () => {
 	};
 
 	return (
-		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-			<Toaster
-				position="top-center"
-				duration={5000}
-				richColors
-				closeButton
-				toastOptions={{
-					classNames: {
-						description: 'opacity-75 text-[12px]',
-					},
-				}}
-			/>
-			<Router>
-				<Routes>
-					<Route path="/" element={<HomeScreen />} />
-					<Route path="/:id" element={<Overlay />} />
-					<Route path="/trash" element={<Trash />} />
-				</Routes>
-			</Router>
-		</ThemeProvider>
+		<QueryClientProvider client={queryClient}>
+			<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+				<Toaster
+					position="top-center"
+					duration={5000}
+					richColors
+					closeButton
+					toastOptions={{
+						classNames: {
+							description: 'opacity-75 text-[12px]',
+						},
+					}}
+				/>
+				<Router>
+					<Routes>
+						<Route path="/" element={<HomeScreen />} />
+						<Route path="/:id" element={<Overlay />} />
+						<Route path="/trash" element={<Trash />} />
+					</Routes>
+				</Router>
+			</ThemeProvider>
+		</QueryClientProvider>
 	);
 };
 
