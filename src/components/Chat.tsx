@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import {
     InputGroup,
     InputGroupAddon,
-    InputGroupInput,
+    InputGroupTextarea,
   } from "@/components/ui/input-group"
 import EmotePicker from './EmotePicker';
 import useEmotes, { mapEmotes, replaceEmotes } from '@/hooks/useEmotes';
@@ -16,7 +16,7 @@ interface Props{
 
 const Chat = ({ closePopup }: Props) => {
     const username = "TestUser";
-    const chatInput = useRef<HTMLInputElement>(null);
+    const chatInput = useRef<HTMLTextAreaElement>(null);
 	const { emotes } = useEmotes();
     const handleChatMessage = () => {
         if(!chatInput.current) return;
@@ -81,7 +81,7 @@ const Chat = ({ closePopup }: Props) => {
         chatInput.current?.focus();
     }
   return (
-    <div className="chat bg-zinc-900 rounded-lg border absolute w-70">
+    <div className="chat bg-zinc-900 rounded-lg border border-b-0 absolute w-70">
       <div className="flex justify-between items-center p-2 px-3">
         <p className="text-[.75rem] tracking-wide font-[500]">Chat</p>
         <Button variant="ghost" size="xs" onClick={closePopup}>
@@ -93,13 +93,13 @@ const Chat = ({ closePopup }: Props) => {
         <div className="chat-container overflow-y-scroll p-2 w-full text-sm flex flex-col-reverse"></div>
       </div>
       <form action={handleChatMessage}>
-        <InputGroup className="overflow-hidden">
-          <InputGroupInput
+        <InputGroup className="overflow-hidden h-fit break-word p-0!">
+          <InputGroupTextarea
             ref={chatInput}
-            className="relative"
+            className="relative break-word min-h-fit py-1"
             placeholder="Type your message"
           />
-          <InputGroupAddon align="inline-end" className="pr-2.5">
+          <InputGroupAddon align="inline-end" className="pr-3 py-1 self-end">
             <EmotePicker onEmoteClick={handleEmoteClick} />
           </InputGroupAddon>
         </InputGroup>
