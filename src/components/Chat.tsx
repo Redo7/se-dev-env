@@ -78,6 +78,7 @@ const Chat = ({ closePopup }: Props) => {
     const handleEmoteClick = (emote: string) => {        
         if(!chatInput.current) return;
         chatInput.current.value = chatInput.current.value + `${emote} `
+        chatInput.current?.focus();
     }
   return (
     <div className="chat bg-zinc-900 rounded-lg border absolute w-70">

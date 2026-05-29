@@ -18,11 +18,12 @@ const EmotePicker = ({ onEmoteClick }: Props) => {
 	return (
     <Popover open={open} onOpenChange={setOpen}>
 		<PopoverTrigger asChild>
-            <Button type="button" className="p-1.5! h-fit dark:hover:bg-white/10 rounded-sm" variant="ghost"><Smile /></Button>
+            <Button type="button" className="p-1.5! h-fit dark:hover:bg-white/10 rounded-sm" variant="ghost" onMouseDown={(e) => e.preventDefault()}><Smile /></Button>
 		</PopoverTrigger>
 		<PopoverContent align="end" className="w-67.5 h-57.5 mb-1.5 p-2 pb-0 overflow-hidden flex flex-col"
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}>
+            onFocusOutside={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}>
             <Input placeholder="Search" className="h-7 rounded-sm text-xs! w-full" 
                 onChange={(e) => setInputValue(e.target.value.toLowerCase())}/>
             <div className="mt-2 overflow-y-scroll pr-[2.5px] -mr-[6.5px] flex-1 pb-2 rounded-t-xs">
@@ -36,6 +37,10 @@ const EmotePicker = ({ onEmoteClick }: Props) => {
                                 className="aspect-square rounded-xs hover:bg-white/20 hover:brightness-125 transition-colors object-contain"
                                 src={emote.images[0].url}
                                 onClick={() => onEmoteClick(emote.defaultName)}
+                                onMouseDown={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                }}
                                 loading="lazy"
                                 decoding="async"
                             />)
