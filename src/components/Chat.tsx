@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
 import { X } from 'lucide-react';
@@ -18,6 +18,8 @@ const Chat = ({ closePopup }: Props) => {
   const username = "TestUser";
   const chatInput = useRef<HTMLTextAreaElement>(null);
 	const { emotes } = useEmotes();
+  const [currentHistoryState, setCurrentHistoryState] = useState<number>(-1);
+  const [chatHistory, setChatHistory] = useState<string[]>([]);
   const handleChatMessage = () => {
     if (!chatInput.current || !emotes) return;
     let detail = {
@@ -66,14 +68,16 @@ const Chat = ({ closePopup }: Props) => {
         renderedText: replaceEmotes(chatInput.current.value, emotes),
       },
     };
-      const iframes = document.querySelectorAll('iframe');
-      iframes.forEach((iframe) => {
-          iframe.contentWindow?.postMessage({ listener: 'onEventReceived', detail: detail }, '*');
-      });
-      let element = document.createElement('div');
-      element.innerHTML = `<span class='font-[700]'>${username}</span>: <span class='text-zinc-300 break-all'>${chatInput.current.value}</span></div>`
-      document.querySelector('.chat-container')?.prepend(element)
-    }
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach((iframe) => {
+        iframe.contentWindow?.postMessage({ listener: 'onEventReceived', detail: detail }, '*');
+    });
+    let element = document.createElement('div');
+    element.innerHTML = `<span class='font-[700]'>${username}</span>: <span class='text-zinc-300 break-all'>${chatInput.current.value}</span></div>`
+    document.querySelector('.chat-container')?.prepend(element);
+    setChatHistory([chatInput.current.value, ...chatHistory])
+    setCurrentHistoryState(-1);
+  }
     
     const handleEmoteClick = (emote: string) => {        
         if(!chatInput.current) return;
@@ -85,6 +89,14 @@ const Chat = ({ closePopup }: Props) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         e.currentTarget.form?.requestSubmit();
+      }
+      if(!chatInput.current) return;
+      if(e.key === 'ArrowUp' && chatHistory.length !== 0 && currentHistoryState + 1 < chatHistory.length){
+        setCurrentHistoryState(currentHistoryState + 1);
+        chatInput.current.value = chatHistory[currentHistoryState + 1];
+      } else if(e.key === 'ArrowDown' && chatHistory.length !== 0 && currentHistoryState !== -1 && currentHistoryState - 1 > -1){
+        setCurrentHistoryState(currentHistoryState - 1);
+        chatInput.current.value = chatHistory[currentHistoryState - 1];
       }
     };
     
