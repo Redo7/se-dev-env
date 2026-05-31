@@ -4906,12 +4906,11 @@ const useEmotes = () => {
 		// });
 	  
 		// const data = await response.json();
-		const emotes_1x = response.data.emotes.search.items.map((emote: Emote) => ({
-			...emote,
-			images: [
-				{url: emote.images.find((img: EmoteImage) => img.url.endsWith("1x.avif"))?.url}
-			]
-		}));
+		const emotes_1x = response.data.emotes.search.items.map((emote: Emote) => {
+        const url = emote.images.find((img: EmoteImage) => img.url.endsWith("1x.avif"), )?.url;
+        if (!url) return null;
+        return { ...emote, images: [{ url }], };
+    }).filter((emote): emote is Emote => emote !== null);
 		return {emotes: response.data.emotes.search.items, emotes_1x};
 	};
 	const { data } = useQuery({
