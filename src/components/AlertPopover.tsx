@@ -17,7 +17,7 @@ interface Props{
 
 const AlertPopover = ({ listener, icon, onPopoverToggle }: Props) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const closeTimeoutRef = useRef<number | null>(null);
     const [open, setOpen] = useState(false);
     const [gifted, setGifted] = useState(false);
     const [username, setUsername] = useState("");

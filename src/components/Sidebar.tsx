@@ -38,7 +38,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	const [currWidgetFields, setCurrWidgetFields] = useState<StreamElementsConfig>();
 	const [currWidgetFieldData, setCurrWidgetFieldData] = useState<StreamElementsConfig>();
 	const [widgetName, setWidgetName] = useState(widget ? widget.name : 'No widget selected');
-	const renameTimeout = useRef<NodeJS.Timeout | null>(null);
+	const renameTimeout = useRef<number | null>(null);
 	const rename = useRename();
 	useEffect(() => {
 		if (!widget) return;
