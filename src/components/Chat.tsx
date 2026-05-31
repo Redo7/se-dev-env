@@ -15,64 +15,64 @@ interface Props{
 }
 
 const Chat = ({ closePopup }: Props) => {
-    const username = "TestUser";
-    const chatInput = useRef<HTMLTextAreaElement>(null);
+  const username = "TestUser";
+  const chatInput = useRef<HTMLTextAreaElement>(null);
 	const { emotes } = useEmotes();
-    const handleChatMessage = () => {
-        if(!chatInput.current) return;
-        let detail = {
-            listener: "message",
-            event: {
-                service: "twitch",
-                data: {
-                    time: 1755989190104,
-                    tags: {
-                        "badge-info": "subscriber/39",
-                        badges: "broadcaster/1,subscriber/0",
-                        "client-nonce": "9a9d56228aa6396516a6366abffeff39",
-                        color: "#ED1B53",
-                        "display-name": username,
-                        emotes: "emotesv2_ec4b3c3f8f2342dc87a6b3be0fc84510:10-18",
-                        "first-msg": "0",
-                        flags: "",
-                        id: "d0bcf318-b8d2-431d-b49d-c69aaf4b1ef8",
-                        mod: "0",
-                        "returning-chatter": "0",
-                        "room-id": "146575108",
-                        subscriber: "1",
-                        "tmi-sent-ts": "1755989189957",
-                        turbo: "0",
-                        "user-id": "146575108",
-                        "user-type": ""
-                    },
-                    nick: username.toLowerCase(),
-                    userId: "146575108",
-                    displayName: username,
-                    displayColor: "#ED1B53",
-                    badges: [
-                        {
-                            type: "broadcaster",
-                            version: "1",
-                            url: "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3",
-                            description: "Broadcaster"
-                        }
-                    ],
-                    channel: "se-dev-env",
-                    text: chatInput.current.value,
-                    isAction: false,
-                    emotes: mapEmotes(chatInput.current.value, emotes),
-                    msgId: "d0bcf318-b8d2-431d-b49d-c69aaf4b1ef8"
-                },
-                renderedText: replaceEmotes(chatInput.current.value, emotes)
-            }
-        }
-        const iframes = document.querySelectorAll('iframe');
-        iframes.forEach((iframe) => {
-            iframe.contentWindow?.postMessage({ listener: 'onEventReceived', detail: detail }, '*');
-        });
-        let element = document.createElement('div');
-        element.innerHTML = `<span class='font-[700]'>${username}</span>: <span class='text-zinc-300 break-all'>${chatInput.current.value}</span></div>`
-        document.querySelector('.chat-container')?.prepend(element)
+  const handleChatMessage = () => {
+    if (!chatInput.current || !emotes) return;
+    let detail = {
+      listener: "message",
+      event: {
+        service: "twitch",
+        data: {
+          time: 1755989190104,
+          tags: {
+            "badge-info": "subscriber/39",
+            badges: "broadcaster/1,subscriber/0",
+            "client-nonce": "9a9d56228aa6396516a6366abffeff39",
+            color: "#ED1B53",
+            "display-name": username,
+            emotes: "emotesv2_ec4b3c3f8f2342dc87a6b3be0fc84510:10-18",
+            "first-msg": "0",
+            flags: "",
+            id: "d0bcf318-b8d2-431d-b49d-c69aaf4b1ef8",
+            mod: "0",
+            "returning-chatter": "0",
+            "room-id": "146575108",
+            subscriber: "1",
+            "tmi-sent-ts": "1755989189957",
+            turbo: "0",
+            "user-id": "146575108",
+            "user-type": "",
+          },
+          nick: username.toLowerCase(),
+          userId: "146575108",
+          displayName: username,
+          displayColor: "#ED1B53",
+          badges: [
+            {
+              type: "broadcaster",
+              version: "1",
+              url: "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3",
+              description: "Broadcaster",
+            },
+          ],
+          channel: "se-dev-env",
+          text: chatInput.current.value,
+          isAction: false,
+          emotes: mapEmotes(chatInput.current.value, emotes),
+          msgId: "d0bcf318-b8d2-431d-b49d-c69aaf4b1ef8",
+        },
+        renderedText: replaceEmotes(chatInput.current.value, emotes),
+      },
+    };
+      const iframes = document.querySelectorAll('iframe');
+      iframes.forEach((iframe) => {
+          iframe.contentWindow?.postMessage({ listener: 'onEventReceived', detail: detail }, '*');
+      });
+      let element = document.createElement('div');
+      element.innerHTML = `<span class='font-[700]'>${username}</span>: <span class='text-zinc-300 break-all'>${chatInput.current.value}</span></div>`
+      document.querySelector('.chat-container')?.prepend(element)
     }
     
     const handleEmoteClick = (emote: string) => {        
