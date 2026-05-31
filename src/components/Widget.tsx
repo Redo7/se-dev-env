@@ -411,10 +411,7 @@ const Widget = ({
 	const handleGlobalMouseUp = useCallback(
 		(e: MouseEvent) => {
 			if (isDragging) {
-				const newX = e.pageX - offset.current.x;
-				const newY = e.pageY - offset.current.y;
 				setIsDragging(false);
-				onOutOfBounds(newX, newY, dimensions.width, dimensions.height);
 				onDragEnd?.(e as unknown as React.MouseEvent<HTMLDivElement>, position);
 			} else if (isResizing) {
 				const currentDims = {
@@ -424,6 +421,9 @@ const Widget = ({
 				setIsResizing(null);
 				onResizeEnd?.(e as unknown as React.MouseEvent<HTMLDivElement>, currentDims, position);
 			}
+			const newX = isDragging ? e.pageX - offset.current.x : position.x;
+			const newY = isDragging ? e.pageY - offset.current.y : position.y;
+			onOutOfBounds(newX, newY, dimensions.width, dimensions.height);
 			onSettingsChange(overlay.id, id, {
 				width: Math.max(dimensions.width, 50),
 				height: Math.max(dimensions.height, 50),
