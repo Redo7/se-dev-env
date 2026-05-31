@@ -88,6 +88,7 @@ const Chat = ({ closePopup }: Props) => {
     const handleTextAreaKeybinds = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        if(chatInput.current?.value === "") return;
         e.currentTarget.form?.requestSubmit();
       }
       if(!chatInput.current) return;
