@@ -71,10 +71,10 @@ const Overlay = () => {
 		setOverlayData(filteredData);
 		setOverlayName(filteredData.name);
 
+		const padding = 50;
 		const largestX = Math.max( ...filteredData.widgets.map( (widget: WidgetInstance) => widget.posX + widget.width ) );
 		const largestY = Math.max( ...filteredData.widgets.map( (widget: WidgetInstance) => widget.posY + widget.height ) );
-		setOverlaySize({width: window.innerWidth > largestX ? window.innerWidth : largestX + 50, height: window.innerHeight > largestY ? window.innerHeight : largestY + 50})
-
+		setOverlaySize({width: window.innerWidth > largestX ? window.innerWidth : largestX + padding, height: window.innerHeight > largestY ? window.innerHeight : largestY + padding})
 	};
 
     const fetchLatestScriptVersion = async () => {
@@ -227,6 +227,9 @@ const Overlay = () => {
 			}
 			// console.log(`Settings applied successfully.`);
 		});
+		const newOverlayData: OverlayInstance = {...overlayData, widgets: overlayData.widgets.map((widget: WidgetInstance) => widget.id === widgetID ? {...widget, ...updates} : widget)};
+		setOverlayData({...overlayData, widgets: overlayData.widgets.map((widget: WidgetInstance) => widget.id === widgetID ? {...widget, ...updates} : widget)})
+		handleWidgetOutOfBounds(newOverlayData);
 	};
 
 	const handleSidebarToggle = () => {
@@ -284,23 +287,14 @@ const Overlay = () => {
 		});
 	};
 
-    const handleWidgetOutOfBounds = async (x: number, y: number, width: number, height: number, isDragging: boolean = false) => {
-		const windowHeight = window.innerHeight;
-		const windowWidth = window.innerWidth;
+    const handleWidgetOutOfBounds = async (data: OverlayInstance) => {
 		const padding = 50;
-		const requiredWidth = x + width + padding;
-		const requiredHeight = y + height + padding;
-		
-		if (isDragging) {
-			setOverlaySize(prev => ({
-				width: Math.max(prev.width, requiredWidth),
-				height: Math.max(prev.height, requiredHeight)
-			}));
-		} else {
-			const newWidth = Math.max(windowWidth, requiredWidth);
-			const newHeight = Math.max(windowHeight, requiredHeight);
-			setOverlaySize({ width: newWidth, height: newHeight });
-		}
+		const widgets = data.widgets.filter((widget: WidgetInstance) => !widget.deleteAfter);
+		const largestX = Math.max(...widgets.map((widget: WidgetInstance) => widget.posX + widget.width));
+		const largestY = Math.max(...widgets.map((widget: WidgetInstance) => widget.posY + widget.height));
+		const newWidth = Math.max(window.innerWidth, largestX + padding);
+		const newHeight = Math.max(window.innerHeight, largestY + padding);
+		setOverlaySize({ width: newWidth, height: newHeight });
 	}
 
 	return (
@@ -424,12 +418,7 @@ const Overlay = () => {
 						onWidgetClick={() => handleWidgetClick(widget)}
 						onDelete={() => softRemoveWidget(overlayData, widget)}
 						onWidgetDuplicate={() => handleDuplicate(widget.id, widget.name, widget.template)}
-						onSettingsChange={(id, widgetID, updates) => {
-						updateWidgetSettings(id, widgetID, updates);
-						}}
-						onOutOfBounds={(x: number, y: number, width: number, height: number) => 
-						handleWidgetOutOfBounds(x, y, width, height)
-						}
+						onSettingsChange={(id, widgetID, updates) => { updateWidgetSettings(id, widgetID, updates); }}
 					/>
                 ))}
             </div>

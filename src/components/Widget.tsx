@@ -57,7 +57,6 @@ interface Props {
 	onDelete: () => void;
 	onSettingsChange: (overlay: string, widgetID: string, updates: Partial<WidgetInstance>) => void;
 	onWidgetDuplicate: (widgetID: string, name: string, template: string) => void;
-	onOutOfBounds: (x: number, y: number, width: number, height: number) => void;
 	onDragStart?: (event: React.MouseEvent<HTMLDivElement>) => void;
 	onDragEnd?: (event: React.MouseEvent<HTMLDivElement>, newPosition: { x: number; y: number }) => void;
 	onDragging?: (event: React.MouseEvent<HTMLDivElement>, currentPosition: { x: number; y: number }) => void;
@@ -102,7 +101,6 @@ const Widget = ({
 	onDelete,
 	onSettingsChange,
 	onWidgetDuplicate,
-	onOutOfBounds,
 	onDragStart,
 	onDragEnd,
 	onDragging,
@@ -421,9 +419,6 @@ const Widget = ({
 				setIsResizing(null);
 				onResizeEnd?.(e as unknown as React.MouseEvent<HTMLDivElement>, currentDims, position);
 			}
-			const newX = isDragging ? e.pageX - offset.current.x : position.x;
-			const newY = isDragging ? e.pageY - offset.current.y : position.y;
-			onOutOfBounds(newX, newY, dimensions.width, dimensions.height);
 			onSettingsChange(overlay.id, id, {
 				width: Math.max(dimensions.width, 50),
 				height: Math.max(dimensions.height, 50),
