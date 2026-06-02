@@ -695,7 +695,7 @@ const Widget = ({
 							<FolderGit2 /> Make a template
 						</DropdownMenuItem>
 						<DropdownMenuItem disabled>
-							<FileDown /> Save current fields as default
+							<FileDown /> Override field defaults
 						</DropdownMenuItem>
 						<DropdownMenuItem disabled>
 							<FileInput /> Regenerate data.json
