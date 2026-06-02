@@ -38,14 +38,20 @@ const NumberField = ({ overlay, widget, name, label, step = 1, value = 0 }: Prop
 				onChange={(event) => {
 					const rawValue = event.target.value;
 					if (rawValue === '') {
-						setInputValue(0);
-						useFieldChange(overlay, widget, name, 0); // Or 0, depending on your default
+						setInputValue('');
+						useFieldChange(overlay, widget, name, '');
 						return;
 					}
 					const parsedValue = parseFloat(rawValue);
 					if (isNaN(parsedValue)) { return; }
 					setInputValue(parsedValue);
 					useFieldChange(overlay, widget, name, parsedValue);
+				}}
+				onBlur={() => {
+					if (inputValue === '') {
+					  setInputValue(value);
+					  useFieldChange(overlay, widget, name, value);
+					}
 				}}
 			/>
 			<span className="bar"></span>
