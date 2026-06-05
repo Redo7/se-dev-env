@@ -1,14 +1,14 @@
-import '../App.css';
-import SubtleButton from './Buttons/SubtleButton';
+import type { OverlayInstance, WidgetInstance } from '../types/';
 import SidebarCollapse from '../assets/Icons/SidebarCollapse';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import FieldGroup from './Fields/FieldGroup';
-import type { OverlayInstance, WidgetInstance } from '../types/';
-import useFields from '../hooks/useFields';
+import SubtleButton from './Buttons/SubtleButton';
 import componentMap from '../utils/componentMap';
 import useFieldData from '../hooks/useFieldData';
-import { Input } from './ui/input';
+import FieldGroup from './Fields/FieldGroup';
+import useFields from '../hooks/useFields';
 import useRename from '@/hooks/useRename';
+import { Input } from './ui/input';
+import '../App.css';
 
 interface StreamElementsField {
 	type: string;
@@ -50,6 +50,19 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 		};
 		fetchFields();
 		setWidgetName(widget.name);
+
+		if (import.meta.hot) {
+			import.meta.hot.on('iframe-content-update', (data: any) => {
+					if (data.widgetId === widget.id && data.origin === 'external' && data.type === 'json') {
+						fetchFields();
+					}
+			});
+		}
+		return () => {
+			if (import.meta.hot) {
+				import.meta.hot.off('iframe-content-update', () => {});
+			}
+		};
 	}, [widget]);
 
 	const groupedFields = useMemo(() => {
