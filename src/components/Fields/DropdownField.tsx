@@ -25,8 +25,7 @@ const DropdownField = ({ overlay, widget, name, label, value, options }: Props) 
 		label: val.toString(),
 	}));
 
-	const initialKey =
-	convertedOptions.find((option) => option.label === value)?.value || value;
+	const initialKey = convertedOptions.find((option) => option.label === value)?.value || value;
 
 	const [inputValue, setInputValue] = useState(initialKey);
     useFieldUpdates({ overlay, widget, name, setInputValue });
@@ -60,10 +59,10 @@ const DropdownField = ({ overlay, widget, name, label, value, options }: Props) 
 								{convertedOptions.map((option) => (
 									<CommandItem
 										key={option.value}
-										value={option.value}
-										onSelect={(currentValue) => {
+										value={option.label}
+										onSelect={() => {
 											setOpen(false);
-											handleChange(currentValue);
+											handleChange(option.value);
 										}}>
 										{option.label}
 										<Check
