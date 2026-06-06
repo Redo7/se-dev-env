@@ -8,6 +8,7 @@ const useSoftDelete = async (overlayName: string, overlayID: string, widgetName:
         const element = widgetID ? widgetID : overlayID
         throw new Error(`Something went wrong while soft deleting ${element}`);
     }
+	if(widgetID) window.postMessage({type: "widget:soft-delete", overlayID, widgetID}, window.location.origin)
     return response.ok
 }
 

@@ -27,6 +27,7 @@ interface GroupedFields {
 		fieldConfig: StreamElementsField;
 	}[];
 }
+
 interface Props {
 	isVisible: boolean;
 	overlay: OverlayInstance;
@@ -35,25 +36,29 @@ interface Props {
 }
 
 const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
-	const [currWidgetFields, setCurrWidgetFields] = useState<StreamElementsConfig>();
-	const [currWidgetFieldData, setCurrWidgetFieldData] = useState<StreamElementsConfig>();
-	const [widgetName, setWidgetName] = useState(widget ? widget.name : 'No widget selected');
+	const [currWidget, setCurrWidget] = useState<WidgetInstance | undefined>(widget);
+	const [currWidgetFields, setCurrWidgetFields] = useState<StreamElementsConfig | undefined>();
+	const [currWidgetFieldData, setCurrWidgetFieldData] = useState<StreamElementsConfig | undefined>();
+	const [widgetName, setWidgetName] = useState(currWidget ? currWidget.name : 'No widget selected');
 	const renameTimeout = useRef<number | null>(null);
 	const rename = useRename();
+
+	useEffect(() => {setCurrWidget(widget)}, [widget])
+
 	useEffect(() => {
-		if (!widget) return;
+		if (!currWidget) return;
 		const fetchFields = async () => {
-			const fieldData = await useFieldData(overlay.id, widget.id);
+			const fieldData = await useFieldData(overlay.id, currWidget.id);
 			setCurrWidgetFieldData(fieldData);
-			const fields = await useFields(overlay.id, widget.id);
+			const fields = await useFields(overlay.id, currWidget.id);
 			setCurrWidgetFields(fields);
 		};
 		fetchFields();
-		setWidgetName(widget.name);
+		setWidgetName(currWidget.name);
 
 		if (import.meta.hot) {
 			import.meta.hot.on('iframe-content-update', (data: any) => {
-					if (data.widgetId === widget.id && data.origin === 'external' && data.type === 'json') {
+					if (data.widgetId === currWidget.id && data.origin === 'external' && data.type === 'json') {
 						fetchFields();
 					}
 			});
@@ -63,8 +68,17 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 				import.meta.hot.off('iframe-content-update', () => {});
 			}
 		};
-	}, [widget]);
+	}, [currWidget]);
 
+	window.addEventListener("message", (event) => {
+		if (event.origin !== window.location.origin) return;
+		if (event.data.type === "widget:soft-delete") {
+			setCurrWidget(undefined);
+			setCurrWidgetFieldData(undefined);
+			setCurrWidgetFields(undefined);
+			setWidgetName('No widget selected');
+		}
+	});
 	const groupedFields = useMemo(() => {
 		const groups: GroupedFields = {};
 		const DEFAULT_GROUP_NAME = 'Fields';
