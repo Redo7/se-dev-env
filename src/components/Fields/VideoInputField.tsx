@@ -42,7 +42,7 @@ const VideoInputField = ({ overlay, widget, name, label, value }: Props) => {
 						onChange={async (e) => await useWidgetFileUpload(e, fileInputRef, overlay, widget, name, handleFileChange)}
 					/>
 				</form>
-                <video className="field-asset-preview" src={selectedFile} id={name} autoPlay loop muted />
+                <video className="field-asset-preview" src={selectedFile ? selectedFile : undefined} id={name} autoPlay loop muted />
 			</div>
 			<TextField
 					name={name}

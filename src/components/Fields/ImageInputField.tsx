@@ -44,7 +44,7 @@ const ImageInputField = ({ overlay, widget, name, label, value = undefined }: Pr
 						onChange={async (e) => await useWidgetFileUpload(e, fileInputRef, overlay, widget, name, handleFileChange)}
 					/>
 				</form>
-				<img className="field-asset-preview" src={selectedFile} alt={label} id={name} />
+				<img className="field-asset-preview" src={selectedFile ? selectedFile : undefined} alt={label} id={name} />
 			</div>
 			<TextField
 				name={name}

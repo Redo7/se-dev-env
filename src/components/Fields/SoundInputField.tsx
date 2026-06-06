@@ -106,7 +106,7 @@ const SoundInputField = ({ overlay, widget, name, label, value, timestampClassNa
 					/>
 				</form>
 				<div className="audio-controls w-full">
-                    <audio ref={audioRef} src={selectedFile} preload="metadata" />
+                    <audio ref={audioRef} src={selectedFile ? selectedFile : undefined} preload="metadata" />
                     <button onClick={togglePlayPause} disabled={!isLoaded} className="play-pause-button">
                         {isPlaying ? '❚❚' : '▶'}
                     </button>
