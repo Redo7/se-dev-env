@@ -49,7 +49,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 		if (!currWidget) return;
 		const fetchFields = async () => {
 			const fieldData = await useFieldData(overlay.id, currWidget.id);
-			setCurrWidgetFieldData(fieldData);
+			setCurrWidgetFieldData((prev) => ({ ...fieldData, ...prev }));
 			const fields = await useFields(overlay.id, currWidget.id);
 			setCurrWidgetFields(fields);
 		};

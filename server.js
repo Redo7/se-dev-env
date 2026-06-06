@@ -424,19 +424,18 @@ app.post('/api/field-data/:overlay/:widget', async (req, res) => {
 		const dataFile = fs.readFileSync(dataFilePath, 'utf-8');
 		const data = JSON.parse(dataFile);
 
-		let content,
-			regenerate = false;
+		let content, hasNewFields = false;
 		Object.keys(fields).forEach((key) => {
-			if (data[key] === undefined) regenerate = true;
+			if (data[key] === undefined){
+				hasNewFields = true;
+				data[key] = fields[key];
+			}
 		});
 
-		const defaultDataContent = JSON.stringify(fields, null, 2);
-		if (regenerate) {
-			content = defaultDataContent;
-			await fs.writeFile(dataFilePath, defaultDataContent, 'utf-8');
+		content = data;
+		if (hasNewFields) {
+			await fs.writeFile(dataFilePath, JSON.stringify(content, null, 2), 'utf-8');
 			console.log(`Fields data for ${dataFilePath} regenerated successfully`);
-		} else {
-			content = data;
 		}
 
 		res.type('application/json').send(content);
