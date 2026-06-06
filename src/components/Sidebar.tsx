@@ -139,7 +139,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 								}
 								return (
 									<Component
-										key={fieldName}
+										key={`${fieldName}-${assignedValue}`}
 										overlay={overlay.id}
 										widget={widget?.id}
 										name={fieldName}
