@@ -462,6 +462,10 @@ audio.field-asset-preview{
 
 /* Hidden */
 
+.hidden-field{
+    margin-bottom: -1rem;
+}
+
 .hidden-field label{
     opacity: .5;
     margin-bottom: 0;
