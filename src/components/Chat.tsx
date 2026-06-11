@@ -47,7 +47,7 @@ const Chat = ({ closePopup }: Props) => {
   };
 
   return (
-    <div className="chat bg-zinc-900 rounded-lg border border-b-0 absolute w-70 overflow-hidden">
+    <div className="chat bg-zinc-900 rounded-lg border absolute w-70 overflow-hidden">
       <div className="flex justify-between items-center p-2 px-3">
         <p className="text-[.75rem] tracking-wide font-[500]">Chat</p>
         <Button variant="ghost" size="xs" onClick={closePopup}>
@@ -81,7 +81,13 @@ const Chat = ({ closePopup }: Props) => {
             </InputGroupAddon>
           </InputGroup>
         </form>
-        <Button size="sm" variant="secondary" className="h-7 mt-1 text-xs"><CircleArrowOutUpRight className='size-3' />∞</Button>
+        <div className="flex justify-between items-center mt-1.5">
+          <Button size="sm" variant="secondary" className="h-7 text-xs"><CircleArrowOutUpRight className='size-3' />∞</Button>
+          <span className='flex items-center gap-1 transition-colors hover:bg-white/10 p-1 rounded-md'>
+            <img className="rounded-full size-5 border-2 box-border border-white/50" src="https://a.ppy.sh/2460045?1365236350.jpg" alt="Avatar" />
+            <p className="text-xs font-medium tracking-wide select-none">{username}</p>
+          </span>
+        </div>
       </div>
     </div>
   );
