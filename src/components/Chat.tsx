@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
-import { X } from 'lucide-react';
+import { CircleArrowOutUpRight, X } from 'lucide-react';
 import {
     InputGroup,
     InputGroupAddon,
@@ -47,7 +47,7 @@ const Chat = ({ closePopup }: Props) => {
   };
 
   return (
-    <div className="chat bg-zinc-900 rounded-lg border border-b-0 absolute w-70">
+    <div className="chat bg-zinc-900 rounded-lg border border-b-0 absolute w-70 overflow-hidden">
       <div className="flex justify-between items-center p-2 px-3">
         <p className="text-[.75rem] tracking-wide font-[500]">Chat</p>
         <Button variant="ghost" size="xs" onClick={closePopup}>
@@ -67,19 +67,22 @@ const Chat = ({ closePopup }: Props) => {
           })}
         </div>
       </div>
-      <form action={handleChatMessage}>
-        <InputGroup className="overflow-hidden h-fit break-word p-0!">
-          <InputGroupTextarea
-            ref={chatInput}
-            className="relative break-word min-h-fit py-1"
-            placeholder="Type your message"
-            onKeyDown={handleTextAreaKeybinds}
-          />
-          <InputGroupAddon align="inline-end" className="pr-3 py-1 self-end">
-            <EmotePicker onEmoteClick={handleEmoteClick} />
-          </InputGroupAddon>
-        </InputGroup>
-      </form>
+      <div className="bg-[#18181b] p-2 border-t">
+        <form action={handleChatMessage}>
+          <InputGroup className="overflow-hidden h-fit break-word p-0!">
+            <InputGroupTextarea
+              ref={chatInput}
+              className="relative break-word min-h-fit py-1"
+              placeholder="Type your message"
+              onKeyDown={handleTextAreaKeybinds}
+            />
+            <InputGroupAddon align="inline-end" className="pr-3 py-1 self-end">
+              <EmotePicker onEmoteClick={handleEmoteClick} />
+            </InputGroupAddon>
+          </InputGroup>
+        </form>
+        <Button size="sm" variant="secondary" className="h-7 mt-1 text-xs"><CircleArrowOutUpRight className='size-3' />∞</Button>
+      </div>
     </div>
   );
 }
