@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
-import { CircleArrowOutUpRight, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import {
     InputGroup,
     InputGroupAddon,
@@ -9,19 +9,21 @@ import {
   } from "@/components/ui/input-group"
 import EmotePicker from './EmotePicker';
 import useChatMessages from '@/hooks/useChatMessages';
+import ChannelPointRewards from './ChannelPointRewards';
+import useUser from '@/hooks/useUser';
 
 interface Props{
     closePopup: () => void;
 }
 
 const Chat = ({ closePopup }: Props) => {
-  const username = "TestUser";
+  const { user } = useUser();
   const chatInput = useRef<HTMLTextAreaElement>(null);
   const { currentHistoryState, setCurrentHistoryState, chatHistory, sendChatMessage } = useChatMessages();
 
   const handleChatMessage = () => {
     if(!chatInput.current?.value) return;
-    sendChatMessage(username, chatInput.current.value);
+    sendChatMessage(user.name, chatInput.current.value);
   }
     
   const handleEmoteClick = (emote: string) => {        
@@ -54,7 +56,7 @@ const Chat = ({ closePopup }: Props) => {
           <p className="opacity-25 font-extralight ml-1">•</p>
           <span className='flex items-center gap-1 py-1 px-2 pl-1 rounded-full transition-colors hover:bg-white/10'>
             <img className="rounded-full size-4 border-2 box-border border-white/50" src="https://a.ppy.sh/2460045?1365236350.jpg" alt="Avatar" />
-            <p className="select-none">{username}</p>
+            <p className="select-none">{user.name}</p>
           </span>
         </div>
         <Button variant="ghost" size="xs" onClick={closePopup}>
@@ -67,7 +69,7 @@ const Chat = ({ closePopup }: Props) => {
           {chatHistory.map((message: string, index: number) => {
             return (
               <div key={index}>
-                <span className="font-[700]">{username}</span>:
+                <span className="font-[700]">{user.name}</span>:
                 <span className="text-zinc-300 break-all">{message}</span>
               </div>
             );
@@ -75,7 +77,7 @@ const Chat = ({ closePopup }: Props) => {
         </div>
       </div>
       <div className="bg-[#18181b] p-2 border-t flex gap-1 w-full items-center">
-        <Button variant="secondary"><CircleArrowOutUpRight className='size-3' /></Button>
+        <ChannelPointRewards />
         <form action={handleChatMessage} className='w-full'>
           <InputGroup className="overflow-hidden h-fit break-word p-0!">
             <InputGroupTextarea
