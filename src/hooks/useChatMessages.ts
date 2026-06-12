@@ -1,4 +1,5 @@
 import useEmotes, { mapEmotes, replaceEmotes } from "@/hooks/useEmotes";
+import { sendMessageToWidgets } from "@/utils/sendMessageToWidgets";
 import { useState } from "react";
 
 function useChatMessages() {
@@ -54,13 +55,7 @@ function useChatMessages() {
         renderedText: replaceEmotes(message, emotes),
       },
     };
-    const iframes = document.querySelectorAll("iframe");
-    iframes.forEach((iframe) => {
-      iframe.contentWindow?.postMessage(
-        { listener: "onEventReceived", detail: detail },
-        "*",
-      );
-    });
+    sendMessageToWidgets(detail);
     setChatHistory([message, ...chatHistory]);
     setCurrentHistoryState(-1);
   }
