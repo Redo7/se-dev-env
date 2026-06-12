@@ -8,8 +8,8 @@ This app aims to bridge the gap between efficient development and StreamElements
 
 ---
 
-<img width="3840" height="2486" alt="image" src="https://github.com/user-attachments/assets/9c581933-35e3-413a-9b57-5e1422cea2a6" />
-<img width="3840" height="2486" alt="image" src="https://github.com/user-attachments/assets/c020b829-6771-44bb-bcb6-d19e56747254" />
+![home-screen](https://i.ibb.co/YTk121z7/image.png)
+![overlay](https://i.ibb.co/twJ0rYJs/image.png)
 
 ---
 
@@ -86,7 +86,7 @@ npm i
     -   [x] Rename
     -   [x] Export
     -   [x] Duplicate
-    -   [ ] Move to
+    -   [x] Move to
     -   [x] Make a template
     -   [x] Open folder
     -   [x] Open in Editor
@@ -101,6 +101,6 @@ npm i
     -   [x] Toggle blur
     -   [x] Delete
 -   [ ] Animations
--   [ ] Run script
+-   [x] Run script
 -   [x] Automatic widget layering onClick
 -   [x] Add toasts to the app
