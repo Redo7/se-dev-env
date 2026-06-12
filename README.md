@@ -14,21 +14,29 @@ This app aims to bridge the gap between efficient development and StreamElements
 ---
 
 # Installation and launching
-
 1. Run this command in the terminal
-
 ```bash
 git clone https://github.com/Redo7/se-dev-env
 cd se-dev-env
-npm install
+npm i
 ```
-2. Create a `.env` file in the root directory with these values:
-  -   `VITE_GOOGLE_FONTS_API_KEY = your-api-key-here`
+2. Rename the `.env.example` file to `.env` and replace the placeholder values:
 3. To run the app, choose one of the options below
-  - Terminal: `npm run dev`
-  - VSCode: Run `code .` in the terminal to open the app's folder in the editor. Then just run `npm run dev` in its integrated terminal
-    - Not a lot of difference, but at least you can close the other terminal window
+- Terminal: cd into the app's directory and run `npm run dev`
+- Raycast:
+    - Open raycast and search for `Create Script Command`
+    - Fill the fields, make sure the `Mode` is set to `Compact`, and save it wherever if fits you
+    - Copy the commands in `raycast-run.sh to the file raycast made for you`
+    - Run it from the app
+- VSCode: 
+    - cd into the app's directory
+    - Run `code .` in the terminal to open the app's folder in the editor.
+    - Press `Ctrl + J` / `Cmd + J` to open the integrated terminal, and run `npm run dev`
 4. Open [http://localhost:5173/](http://localhost:5173/)
+> [!CAUTION]
+> VSCode Intellisense tends to break often (for me at least) when running `npm run dev` in the app's root folder via its integrated terminal.
+> This is most likely related to VSCode loading all the app files, overlays, and widgets, which results in the language server having trouble keeping up with all the references
+> It's best to run npm run dev in a dedicated terminal/raycast, and then open the widget you're working on in VSCode via the `Open in Editor` option in the context menu
 
 # Configuration
 
