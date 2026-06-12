@@ -20,7 +20,7 @@ const EmotePicker = ({ onEmoteClick }: Props) => {
 		<PopoverTrigger asChild>
             <Button type="button" className="p-1.5! h-fit dark:hover:bg-white/10 rounded-sm" variant="ghost" onMouseDown={(e) => e.preventDefault()}><Smile /></Button>
 		</PopoverTrigger>
-		<PopoverContent align="end" className="w-67.5 h-57.5 mb-1.5 p-2 pb-0 overflow-hidden flex flex-col"
+		<PopoverContent align="end" className="w-67.5 h-57.5 mb-4 p-2 pb-0 overflow-hidden flex flex-col"
             onPointerDown={(e) => e.stopPropagation()}
             onFocusOutside={(e) => e.preventDefault()}
             onOpenAutoFocus={(e) => e.preventDefault()}>
