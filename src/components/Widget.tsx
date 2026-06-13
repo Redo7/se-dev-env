@@ -680,7 +680,7 @@ const Widget = ({
 					<DropdownMenuContent className="z-100">
 						<DropdownMenuLabel className="opacity-50">General</DropdownMenuLabel>
 						<DropdownMenuItem onClick={() => setRenameDialogOpen(true)}>
-							<TextCursor /> Rename
+							<TextCursor className="text-muted-foreground/75" /> Rename
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => onWidgetDuplicate(id, name, template)}>
 							<Copy /> Duplicate

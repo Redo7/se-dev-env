@@ -11,7 +11,7 @@ const CustomCheckboxItem = React.forwardRef<React.ElementRef<typeof DropdownMenu
 		return (
 			<DropdownMenuCheckboxItem
 				ref={ref}
-				className={cn(mirror && 'pl-2! pr-8! [&>span]:left-[unset] [&>span]:right-2', className)}
+				className={cn(mirror && "pl-2! pr-8! [&>span]:left-[unset] [&>span]:right-2 [&_svg:not([class*='text-'])]:text-muted-foreground/50", className)}
 				{...props}>
 				{children}
 			</DropdownMenuCheckboxItem>
