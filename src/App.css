@@ -741,6 +741,16 @@ iframe {
     overflow: hidden;
 }
 
+.notification-area[data-navbar-visible="false"]{
+    top: 0;
+    transition: top 300ms var(--redo-easing) 2000ms;
+}
+
+.notification-area[data-navbar-visible="true"]{
+    top: 3.125rem;
+    transition: top 300ms var(--redo-easing) 0ms;
+}
+
 .console-notification {
     position: relative;
 }
