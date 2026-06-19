@@ -49,7 +49,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 		if (!currWidget) return;
 		const fetchFields = async () => {
 			const fieldData = await useFieldData(overlay.id, currWidget.id);
-			setCurrWidgetFieldData((prev) => ({ ...fieldData, ...prev }));
+			setCurrWidgetFieldData(fieldData);
 			const fields = await useFields(overlay.id, currWidget.id);
 			setCurrWidgetFields(fields);
 		};
@@ -73,6 +73,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	window.addEventListener("message", (event) => {
 		if (event.origin !== window.location.origin) return;
 		if (event.data.type === "widget:soft-delete") {
+			// move this out to overlay
 			setCurrWidget(undefined);
 			setCurrWidgetFieldData(undefined);
 			setCurrWidgetFields(undefined);
