@@ -14,6 +14,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
+	Camera,
 	ChevronDown,
 	ChevronUp,
 	CodeXml,
@@ -47,6 +48,7 @@ import useTemplateCreation from '@/hooks/useTemplateCreation';
 import useFieldChange from '@/hooks/useFieldChange';
 import { useNavigate } from 'react-router-dom';
 import HomeScreenOverlay from './HomeScreenOverlay';
+import domtoimage from "dom-to-image-more";
 
 interface Props {
 	overlay: OverlayInstance;
@@ -623,6 +625,32 @@ const Widget = ({
         }
     }
 
+	const handleScreenshot = async () => {
+		const iframeDoc = iframeRef.current?.contentDocument;
+		if (!iframeDoc) throw new Error("Cannot access iframe document");
+
+		const body = iframeDoc.body;
+		const { offsetWidth: width, offsetHeight: height } = body;
+		await iframeDoc.fonts.ready;
+		
+		domtoimage.toPng(body, {
+			width,
+			height,
+			bgcolor: undefined, 
+			style: {
+				transform: "none",
+			},
+			cacheBust: true,
+			loadExternalStyleSheet: true,
+		})
+		.then((dataUrl) => {
+			const link = document.createElement("a");
+			link.download = name;
+			link.href = dataUrl;
+			link.click();
+		});
+    }
+
 	return (
 		<div
 			className={`widget-container depth-shadow absolute ${bgBlur ? 'bgblur' : ''} ${showFrame ? '' : 'hide-bg'} `}
@@ -690,6 +718,9 @@ const Widget = ({
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>
 							<Download /> Export
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => handleScreenshot()}>
+							<Camera /> Screenshot
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => handleTemplateCreation()}>
 							<FolderGit2 /> Make a template
