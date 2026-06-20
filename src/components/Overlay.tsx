@@ -327,7 +327,7 @@ const Overlay = () => {
                             value={overlayName}
                             size={overlayName.length || 1}
                             onChange={(e) => handleNameInput(e.target.value)}
-                            className="ml-[1rem] mr-2 tracking-wide dark:bg-transparent! dark:border-0 text-sm! dark:hover:bg-tr-50! transition-colors rounded-sm h-6 focus-visible:ring-[0px] dark:focus-visible:bg-tr-50! w-fit! -translate-x-1 px-2!"
+                            className="ml-4 mr-2 tracking-wide dark:bg-transparent! dark:border-0 text-sm! dark:hover:bg-tr-50! transition-colors rounded-sm h-6 focus-visible:ring-0 dark:focus-visible:bg-tr-50! w-fit! -translate-x-1 px-2!"
                         />
                         {/* <p className="text-sm tracking-wide ml-[1rem] mr-2">{overlayData.name}</p> */}
                         <Badge
