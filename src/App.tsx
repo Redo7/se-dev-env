@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import Trash from './components/Trash';
 import { Toaster } from './components/ui/sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import FullSizeWidget from './components/FullSizeWidget';
 
 const App = () => {
 	// const [isDarkMode, setIsDarkMode] = useState(true);
@@ -78,6 +79,7 @@ const App = () => {
 						<Route path="/" element={<HomeScreen />} />
 						<Route path="/:id" element={<Overlay />} />
 						<Route path="/trash" element={<Trash />} />
+						<Route path="/:overlayID/:widgetID" element={<FullSizeWidget />} />
 					</Routes>
 				</Router>
 			</ThemeProvider>

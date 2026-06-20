@@ -1,9 +1,7 @@
 import { useRef, useState, type CSSProperties, useEffect, useCallback } from 'react';
 import SubtleButton from './Buttons/SubtleButton';
-import useFields from '../hooks/useFieldData';
 import type { OverlayInstance, WidgetInstance } from '../types/';
 import { Button } from './ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { toast } from 'sonner';
 import {
 	DropdownMenu,
@@ -21,6 +19,7 @@ import {
 	Copy,
 	Download,
 	EllipsisVertical,
+	ExternalLink,
 	FileDown,
 	FileInput,
 	Folder,
@@ -49,6 +48,8 @@ import useFieldChange from '@/hooks/useFieldChange';
 import { useNavigate } from 'react-router-dom';
 import HomeScreenOverlay from './HomeScreenOverlay';
 import domtoimage from "dom-to-image-more";
+import OutdatedWidget from './OutdatedWidget';
+import { getOnWidgetLoadObject, type OnWidgetLoadData } from '@/utils/getOnWidgetLoad';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -71,28 +72,6 @@ interface Props {
   }
 
 type ResizeHandle = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null;
-
-interface OnWidgetLoadData {
-	[key: string]: any;
-}
-
-const fetchOnWidgetLoad = async (): Promise<OnWidgetLoadData | undefined> => {
-	try {
-		const res = await fetch(`/api/data/onWidgetLoad`, {
-			method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
-		});
-		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-		const data = await res.json();
-		return data;
-	} catch (error) {
-		console.error('[Parent App] Error fetching onWidgetLoad data:', error);
-		toast.error(`Error fetching onWidgetLoad data:`, {
-			description: `${error}`,
-		});
-		return undefined;
-	}
-};
 
 const Widget = ({
 	overlay,
@@ -165,44 +144,10 @@ const Widget = ({
 	// That way there won't be a need to click the button multiple times
 	const [widgetZIndex, setWidgetZIndex] = useState(zIndex);
 
-	const updateIframeScript = async () => {
-		const res = await fetch(`/api/update-iframe-files`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ overlayID: overlay.id, widgetID: id }),
-		});
-		const data = await res.json();
-		if (!res.ok) {
-			toast.error(`Something went wrong while updating iframe files for ${id}`);
-			throw new Error(`Something went wrong while updating iframe files for ${id}`);
-		}
-		onSettingsChange(overlay.id, id, {
-			scriptVersion: data.scriptVersion,
-		});
-		toast.success(`Successfully updated iframe files for ${name}`);
-		setWidgetScriptVersion(data.scriptVersion);
-	};
-
 	const getOnWidgetLoadData = useCallback(async () => {
-		try {
-			const [data, fieldData] = await Promise.all([
-				fetchOnWidgetLoad(),
-				useFields(overlay.id, widgetIdRef.current),
-			]);
-
-			if (data && fieldData) {
-				const combinedData = {
-					...data,
-					fieldData: { ...fieldData },
-					widgetId: widgetIdRef.current,
-				};
-				setOnWidgetLoadData(combinedData);
-				return combinedData;
-			}
-		} catch (error) {
-			console.error('[Parent App] Error getting widget load data:', error);
-		}
-		return undefined;
+		const onWidgetLoadObject = await getOnWidgetLoadObject(overlay.id, widgetIdRef.current);
+		setOnWidgetLoadData(onWidgetLoadObject);
+		return onWidgetLoadObject;
 	}, [overlay]);
 
 	// Send data to iframe with retry mechanism
@@ -667,37 +612,7 @@ const Widget = ({
 					sandbox="allow-scripts allow-same-origin"
 					className={pointerEvents ? 'pointer-events-auto' : 'pointer-events-none'}
 				/>
-			) : (
-				<div className="script-notice flex gap-4 p-4 py-3 bg-zinc-50 dark:bg-zinc-900">
-					<i className="bi bi-exclamation-diamond-fill text-md text-rose-500 opacity-50"></i>
-					<div className="flex flex-col gap-1 justify-center">
-						<span className="text-[0.75rem] flex items-center gap-1">
-							<p className="opacity-50">Script is outdated</p>
-							<Tooltip>
-								<TooltipTrigger>
-									<i className="bi bi-question-circle-fill opacity-50 hover:opacity-75"></i>
-								</TooltipTrigger>
-								<TooltipContent className="bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200 depth-shadow">
-									{' '}
-									<p className="text-center">
-										This widget was created on an older version of the app,
-										<br />
-										and requires the iframe files to be updated in order to work properly.
-									</p>{' '}
-								</TooltipContent>
-							</Tooltip>
-						</span>
-						<p className="text-[0.875rem] text-zinc-900 dark:text-zinc-300">Click the button to update</p>
-					</div>
-					<Button
-						variant="secondary"
-						className="bg-zinc-900 hover:bg-zinc-700 text-zinc-300 dark:bg-zinc-50 dark:hover:bg-zinc-300 dark:text-zinc-900 h-8"
-						onClick={() => updateIframeScript()}>
-						{' '}
-						Update{' '}
-					</Button>
-				</div>
-			)}
+			) : <OutdatedWidget overlay={overlay} widget={widget} onSettingsChange={onSettingsChange} setWidgetScriptVersion={setWidgetScriptVersion}/>}
 			<div className="widget-context-menu absolute top-0 right-0">
 				<DropdownMenu onOpenChange={setContextMenuOpen}>
 					<DropdownMenuTrigger asChild>
@@ -707,6 +622,9 @@ const Widget = ({
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="z-100">
 						<DropdownMenuLabel className="opacity-50">General</DropdownMenuLabel>
+						<DropdownMenuItem onClick={() => navigate(widget.id)}>
+							<ExternalLink /> Open in new tab
+						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => setRenameDialogOpen(true)}>
 							<TextCursor className="text-muted-foreground/75" /> Rename
 						</DropdownMenuItem>

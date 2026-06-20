@@ -238,6 +238,11 @@ body[clean-bg="true"] {
     background: radial-gradient(40rem at 130rem 0, var(--secondary) 0%, transparent 100%), radial-gradient(40rem at 40rem 70rem, var(--secondary) 0%, transparent 100%), var(--background);
 }
 
+body[transparent="true"], html[transparent="true"] {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
 /* Home Screen */
 
 .home-screen-sidebar {
