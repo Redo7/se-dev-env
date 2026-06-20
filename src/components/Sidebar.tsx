@@ -3,9 +3,8 @@ import SidebarCollapse from '../assets/Icons/SidebarCollapse';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import SubtleButton from './Buttons/SubtleButton';
 import componentMap from '../utils/componentMap';
-import useFieldData from '../hooks/useFieldData';
 import FieldGroup from './Fields/FieldGroup';
-import useFields from '../hooks/useFields';
+import { getFieldData, getFields } from '../utils/getFields';
 import useRename from '@/hooks/useRename';
 import { Input } from './ui/input';
 import '../App.css';
@@ -48,9 +47,9 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	useEffect(() => {
 		if (!currWidget) return;
 		const fetchFields = async () => {
-			const fieldData = await useFieldData(overlay.id, currWidget.id);
+			const fieldData = await getFieldData(overlay.id, currWidget.id);
 			setCurrWidgetFieldData(fieldData);
-			const fields = await useFields(overlay.id, currWidget.id);
+			const fields = await getFields(overlay.id, currWidget.id);
 			setCurrWidgetFields(fields);
 		};
 		fetchFields();
