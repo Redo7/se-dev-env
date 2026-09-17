@@ -125,9 +125,6 @@ importers:
       uuid:
         specifier: ^11.1.0
         version: 11.1.1
-      ws:
-        specifier: ^8.18.3
-        version: 8.21.0
     devDependencies:
       '@eslint/js':
         specifier: ^9.25.0
@@ -186,6 +183,15 @@ importers:
       vite:
         specifier: ^6.3.5
         version: 6.4.3(@types/node@24.13.2)(jiti@2.7.0)(lightningcss@1.32.0)
+      ws:
+        specifier: ^8.21.0
+        version: 8.21.0
+
+  overlays/the-ultimate-streamathon-timer-80b0af06-91ba-40a6-9db8-fc94c53b7ed0/websocket-742ed982-baa5-4a5d-9fbf-e29939fc575d:
+    dependencies:
+      ws:
+        specifier: ^8.21.0
+        version: 8.21.0
 
 packages:
 
