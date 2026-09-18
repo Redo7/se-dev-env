@@ -46,7 +46,8 @@ const Overlay = () => {
 	const { id } = useParams<{ id: string }>();
 	if (!id) return <>Incorrect Overlay ID: {id}</>;
     const [overlaySize, setOverlaySize] = useState({width: window.innerWidth, height: window.innerHeight})
-	const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+	const localStorageIsSidebarVisible = localStorage.getItem("isSidebarVisible")
+	const [isSidebarVisible, setIsSidebarVisible] = useState(localStorageIsSidebarVisible === "true");
 	const [isNavbarOver, setIsNavbarOver] = useState(false);
 	const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 	const [templates, setTemplates] = useState<Template[]>([]);
@@ -61,7 +62,6 @@ const Overlay = () => {
 	const [overlayName, setOverlayName] = useState(overlayData.name);
 	const renameTimeout = useRef<number | null>(null);
     const [latestScriptVersion, setLatestScriptVersion] = useState(1.0);
-    
 
 	document.body.setAttribute('clean-bg', 'false');
 
@@ -234,6 +234,8 @@ const Overlay = () => {
 	};
 
 	const handleSidebarToggle = () => {
+		localStorage.setItem("isSidebarVisible", String(!isSidebarVisible))
+		console.log(localStorage.getItem("isSidebarVisible"))
 		setIsSidebarVisible(!isSidebarVisible);
 	};
 
