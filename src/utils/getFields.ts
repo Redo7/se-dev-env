@@ -1,4 +1,5 @@
 export async function getFields(overlay: string, widget: string) {
+	if(overlay === "overlay-id" || !widget) return;
 	try {
 		const res = await fetch(`/api/fields/${encodeURIComponent(overlay)}/${encodeURIComponent(widget)}`, {
 			method: 'GET',
@@ -15,6 +16,7 @@ export async function getFields(overlay: string, widget: string) {
 };
 
 export async function getFieldData(overlay: string, widget: string){
+	if(overlay === "overlay-id" || !widget) return;
 	try {
 		const res = await fetch(`/api/field-data/${encodeURIComponent(overlay)}/${encodeURIComponent(widget)}`, {
 			method: 'POST',

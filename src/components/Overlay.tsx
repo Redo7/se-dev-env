@@ -55,7 +55,8 @@ const Overlay = () => {
 		id: 'overlay-id',
 		widgets: [],
 	});
-	const [activeWidget, setActiveWidget] = useState<WidgetInstance>();
+	const localStorageActiveWidget = JSON.parse(localStorage.getItem("activeWidget") ?? "")
+	const [activeWidget, setActiveWidget] = useState<WidgetInstance>(localStorageActiveWidget ?? undefined);
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [overlayName, setOverlayName] = useState(overlayData.name);
 	const renameTimeout = useRef<number | null>(null);
@@ -241,6 +242,7 @@ const Overlay = () => {
 			// console.log('Active widget clicked');
 			return;
 		}
+		localStorage.setItem("activeWidget", JSON.stringify(widget));
 		setActiveWidget(widget);
 		// Change page title to Overlay name | Widget name
 		document.title = `${overlayData.name} | ${widget.name}`;

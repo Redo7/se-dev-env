@@ -45,7 +45,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	useEffect(() => {setCurrWidget(widget)}, [widget])
 
 	useEffect(() => {
-		if (!currWidget) return;
+		if (!currWidget || !overlay) return;
 		const fetchFields = async () => {
 			const fieldData = await getFieldData(overlay.id, currWidget.id);
 			setCurrWidgetFieldData(fieldData);
@@ -67,7 +67,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 				import.meta.hot.off('iframe-content-update', () => {});
 			}
 		};
-	}, [currWidget]);
+	}, [currWidget, overlay]);
 
 	window.addEventListener("message", (event) => {
 		if (event.origin !== window.location.origin) return;
