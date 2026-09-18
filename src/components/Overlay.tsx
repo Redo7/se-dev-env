@@ -235,7 +235,6 @@ const Overlay = () => {
 
 	const handleSidebarToggle = () => {
 		localStorage.setItem("isSidebarVisible", String(!isSidebarVisible))
-		console.log(localStorage.getItem("isSidebarVisible"))
 		setIsSidebarVisible(!isSidebarVisible);
 	};
 
