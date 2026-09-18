@@ -392,12 +392,12 @@ const Overlay = () => {
                 />
                 {/* Add new button */}
                 <div className="flex gap-4 absolute OverlayButtonContainer" data-sidebar-visible={isSidebarVisible}>
-                    <IconPopupButton icon={<IconPlus />} popupItems={templates} popupPosition="top" />
+                    <IconPopupButton icon={<IconPlus />} popupItems={templates} popupPosition="top" localStorageName='addNew' />
                     <Widgetio overlay={overlayData} widgets={overlayData.widgets} onWidgetImport={getOverlayData} />
                 </div>
                 {/* Chat */}
                 <div className="chat-button absolute">
-                    <IconPopupButton icon={<MessageCircle size={16} />}>
+                    <IconPopupButton icon={<MessageCircle size={16} />} localStorageName='chatPopup'>
                         {(closePopup) => <Chat closePopup={closePopup} />}
                     </IconPopupButton>
                 </div>

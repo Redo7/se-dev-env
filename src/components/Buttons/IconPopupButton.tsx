@@ -17,14 +17,20 @@ interface Props {
 	popupPosition?: 'top' | 'bottom' | 'left' | 'right';
 	disabled?: boolean;
 	onClose?: () => void;
+	localStorageName: string;
 }
 
-const IconPopupButton = ({ children, icon, popupItems, popupPosition }: Props) => {
-	const [isPopupVisible, setIsPopupVisible] = useState(false);
+const IconPopupButton = ({ children, icon, popupItems, popupPosition, localStorageName }: Props) => {
+	const localStorageIsPopupVisible = localStorage.getItem(localStorageName)
+	const [isPopupVisible, setIsPopupVisible] = useState(localStorageIsPopupVisible === "true");
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const nameRef = useRef<HTMLInputElement>(null);
 	const popupRef = useRef<HTMLDivElement>(null);
-	const closePopup = () => setIsPopupVisible(false);
+
+	const closePopup = () => {
+		localStorage.setItem(localStorageName, "false")
+		setIsPopupVisible(false);
+	}
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
@@ -34,6 +40,7 @@ const IconPopupButton = ({ children, icon, popupItems, popupPosition }: Props) =
 				!(event.target as HTMLElement).closest('[data-radix-popper-content-wrapper]')
 			) {
 				if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+					localStorage.setItem(localStorageName, "false")
 					setIsPopupVisible(false);
 				}
 			}
@@ -72,7 +79,10 @@ const IconPopupButton = ({ children, icon, popupItems, popupPosition }: Props) =
 			<button
 				className="regular depth-shadow"
 				ref={buttonRef}
-				onClick={() => setIsPopupVisible(!isPopupVisible)}>
+				onClick={() => {
+					localStorage.setItem(localStorageName, String(!isPopupVisible))
+					setIsPopupVisible(!isPopupVisible)
+				}}>
 				{icon}
 			</button>
 			{isPopupVisible && children && <>{children(closePopup)}</>}
@@ -119,6 +129,7 @@ const IconPopupButton = ({ children, icon, popupItems, popupPosition }: Props) =
 										e.stopPropagation();
 										if (nameRef.current) {
 											item.action(nameRef.current.value);
+											localStorage.setItem(localStorageName, "false")
 											setIsPopupVisible(false);
 										}
 									}}
