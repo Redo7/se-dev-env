@@ -289,6 +289,7 @@ app.delete('/api/delete/', async (req, res) => {
 	let currWidgetsArray = await fetchOverlayData(overlayID);
 	let target;
 	try {
+		// Find what the target is, and perform appropriate changes
 		if (widgetID) {
 			target = join(__dirname, 'overlays', overlayID, widgetID);
 			const updatedWidgetsArray = {
@@ -299,8 +300,15 @@ app.delete('/api/delete/', async (req, res) => {
 		} else {
 			target = join(__dirname, 'overlays', overlayID);
 		}
-		fs.rmSync(target, { recursive: true, force: true });
 
+		// Check if overlay/widget exists in the filesystem
+		if (fs.existsSync(target)) {
+			fs.rmSync(target, { recursive: true, force: true });
+		} else {
+			console.log(`${target} was scheduled for deletion, but was not found on the filesystem. Its entry will be removed.`)
+		}
+		
+		// Delete the appropriate entry from deletionData
 		let deletionData = JSON.parse(fs.readFileSync(deletionDataPath));
 		if (Object.keys(deletionData[overlayID].widgets).length <= 1) {
 			delete deletionData[overlayID];
@@ -310,8 +318,8 @@ app.delete('/api/delete/', async (req, res) => {
 			);
 			deletionData[overlayID].widgets = updatedDeletionDataWidgets;
 		}
-		fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, '\t'), 'utf-8');
 
+		fs.writeFileSync(deletionDataPath, JSON.stringify(deletionData, null, '\t'), 'utf-8');
 		res.status(200).send();
 	} catch (error) {
 		console.error(error);
