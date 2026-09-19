@@ -5,7 +5,8 @@ import { useState } from "react";
 function useChatMessages() {
   const { emotes } = useEmotes();
   const [currentHistoryState, setCurrentHistoryState] = useState<number>(-1);
-  const [chatHistory, setChatHistory] = useState<string[]>([]);
+  const localStorageChatHistory = JSON.parse(localStorage.getItem("chatHistory") ?? "[]")
+  const [chatHistory, setChatHistory] = useState<string[]>(localStorageChatHistory);
 
   function sendChatMessage(username: string, message: string) {
     if (!emotes) return;
@@ -56,6 +57,7 @@ function useChatMessages() {
       },
     };
     sendMessageToWidgets(detail);
+	localStorage.setItem("chatHistory", JSON.stringify([message, ...chatHistory]))
     setChatHistory([message, ...chatHistory]);
     setCurrentHistoryState(-1);
   }
