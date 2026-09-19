@@ -1,11 +1,9 @@
 import { toast } from 'sonner';
 import type { OverlayInstance } from '../types/';
 
-const useWidgetExport = async (overlay: OverlayInstance, widgetID: string, widgetName: string) => {
+const useWidgetExport = async (overlay: OverlayInstance, widgetID: string, widgetName: string, minify: boolean, obfuscate: boolean) => {
 	const res = await fetch(
-		`/api/widget-io-export/${encodeURIComponent(overlay.id)}/${encodeURIComponent(widgetID)}/${encodeURIComponent(
-			widgetName
-		)}/`
+		`/api/widget-io-export/${encodeURIComponent(overlay.id)}/${encodeURIComponent(widgetID)}/${encodeURIComponent(widgetName)}/${minify}/${obfuscate}`
 	);
 	if (!res.ok) {
 		console.error('Failed to fetch export:', res.statusText);

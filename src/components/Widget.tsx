@@ -144,6 +144,9 @@ const Widget = ({
 	// That way there won't be a need to click the button multiple times
 	const [widgetZIndex, setWidgetZIndex] = useState(zIndex);
 
+	const localStorageMinify = (localStorage.getItem("minify") ?? "false") === "true" 
+	const localStorageObfuscate = (localStorage.getItem("obfuscate") ?? "false") === "true"
+
 	const getOnWidgetLoadData = useCallback(async () => {
 		const onWidgetLoadObject = await getOnWidgetLoadObject(overlay.id, widgetIdRef.current);
 		setOnWidgetLoadData(onWidgetLoadObject);
@@ -634,7 +637,7 @@ const Widget = ({
 						<DropdownMenuItem onClick={() => setCopyToDialogOpen(true)}>
 							<FolderOutput /> Copy to...
 						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name)}>
+						<DropdownMenuItem onClick={() => useWidgetExport(overlay, id, name, (localStorage.getItem("minify") ?? "true") === "true", (localStorage.getItem("obfuscate") ?? "true") === "true")}>
 							<Download /> Export
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => handleScreenshot()}>

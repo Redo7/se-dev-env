@@ -12,6 +12,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
 import useWidgetExport from '@/hooks/useWidgetExport';
+import { Checkbox } from './ui/checkbox';
 
 interface Props {
 	overlay: OverlayInstance;
@@ -23,9 +24,13 @@ const Widgetio = ({ overlay, widgets, onWidgetImport }: Props) => {
 	const [listOpen, setListOpen] = useState(false);
 	const [exportWidget, setExportWidget] = useState('');
 	const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+	const localStorageMinify = (localStorage.getItem("minify") ?? "true") === "true" 
+	const localStorageObfuscate = (localStorage.getItem("obfuscate") ?? "true") === "true" 
+	const [minify, setMinify] = useState(localStorageMinify)
+	const [obfuscate, setObfuscate] = useState(localStorageObfuscate)
 
 	const handleWidgetExport = async (widget: WidgetInstance) => {
-		await useWidgetExport(overlay, widget.id, widget.name);
+		await useWidgetExport(overlay, widget.id, widget.name, minify, obfuscate);
 	};
 
 	async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -119,6 +124,24 @@ const Widgetio = ({ overlay, widgets, onWidgetImport }: Props) => {
 									</Command>
 								</PopoverContent>
 							</Popover>
+							<hr className='mt-2'/>
+							<div className="flex gap-2 mt-2 w-full items-center">
+								<p className="text-[10px] opacity-50 mr-auto">Export settings:</p>
+								<span className="flex items-center gap-1">
+									<Checkbox name="minify" checked={minify} onClick={() => {
+										localStorage.setItem("minify", String(!minify))
+										setMinify(!minify)
+									}} />
+									<Label htmlFor='minify' className='mb-0!'>Minify</Label>
+								</span>
+								<span className="flex items-center gap-1">
+									<Checkbox name="obfuscate" checked={obfuscate} onClick={() => {
+										localStorage.setItem("obfuscate", String(!obfuscate))
+										setObfuscate(!obfuscate)
+									}}/>
+									<Label htmlFor='obfuscate' className='mb-0!'>Obfuscate</Label>
+								</span>
+							</div>
 						</AccordionContent>
 					</AccordionItem>
 				</Accordion>

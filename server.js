@@ -1,4 +1,6 @@
 import express from 'express';
+import { minify } from 'terser';
+import JavaScriptObfuscator from 'javascript-obfuscator';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join, basename } from 'path';
@@ -78,6 +80,29 @@ function queueWrite(key, writeOperation) {
 
 	writeQueues.set(key, newQueue);
 	return newQueue;
+}
+
+async function postProcessJS(code, shouldMinify, shouldObfuscate) {
+	let processed = code;
+
+	if (shouldMinify) {
+		const minified = await minify(processed, {
+			compress: true,
+			mangle: true,
+		});
+		processed = minified.code || processed;
+	}
+
+	if (shouldObfuscate) {
+		const obfuscated = JavaScriptObfuscator.obfuscate(processed, {
+			compact: false,
+			controlFlowFlattening: true,
+			stringArray: true,
+		});
+		processed = obfuscated.getObfuscatedCode();
+	}
+
+	return processed;
 }
 
 // API
@@ -544,8 +569,8 @@ app.get('/api/SE_API/get/:key', async (req, res) => {
 	}
 });
 
-app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName', async (req, res) => {
-	const { overlayID, widgetID, widgetName } = req.params;
+app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName/:minify/:obfuscate', async (req, res) => {
+	const { overlayID, widgetID, widgetName, minify, obfuscate } = req.params;
 	const filePath = join(__dirname, 'overlays', overlayID, `${widgetID}`, 'src');
 	const to_zip = fs.readdirSync(filePath);
 	const manifestExists = fs.existsSync(join(filePath, "manifest"))
@@ -571,9 +596,12 @@ app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName', async (req, re
 		}
 
 		const finalJS = jsContent.join("\n")
-		zip.addFile('js.txt', Buffer.from(finalJS, 'utf-8'));
+		const postProcessed = await postProcessJS(finalJS, minify === "true", obfuscate === "true")
+		zip.addFile('js.txt', Buffer.from(postProcessed, 'utf-8'));
 	} else {
-		zip.addLocalFile(join(filePath, 'js.js'), '', 'js.txt');
+		const jsContent = fs.readFileSync(join(filePath, 'js.js'), 'utf-8');
+		const postProcessed = await postProcessJS(jsContent, minify === "true", obfuscate === "true");
+		zip.addFile('js.txt', Buffer.from(postProcessed, 'utf-8'));
 	}
 	zip.addLocalFile(join(filePath, 'fields.json'), '', 'fields.txt');
 	zip.addLocalFile(join(filePath, 'data.json'), '', 'data.txt');
