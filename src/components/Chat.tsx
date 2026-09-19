@@ -69,7 +69,7 @@ const Chat = ({ closePopup }: Props) => {
           {chatHistory.map((message: string, index: number) => {
             return (
               <div key={index}>
-                <span className="font-[700]">{user.name}</span>:
+                <span className="font-[700]">{user.name}: </span>
                 <span className="text-zinc-300 break-all">{message}</span>
               </div>
             );
