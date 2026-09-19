@@ -548,12 +548,33 @@ app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName', async (req, re
 	const { overlayID, widgetID, widgetName } = req.params;
 	const filePath = join(__dirname, 'overlays', overlayID, `${widgetID}`, 'src');
 	const to_zip = fs.readdirSync(filePath);
+	const manifestExists = fs.existsSync(join(filePath, "manifest"))
 
 	const zip = new AdmZip();
 	if(to_zip.includes("assets")) zip.addLocalFolder(join(filePath, 'assets'), 'assets');
 	zip.addLocalFile(join(filePath, 'html.html'), '', 'html.txt');
 	zip.addLocalFile(join(filePath, 'css.css'), '', 'css.txt');
-	zip.addLocalFile(join(filePath, 'js.js'), '', 'js.txt');
+	if(manifestExists){
+		const manifest = fs.readFileSync(join(filePath, "manifest"), 'utf-8')
+			.split('\n')
+			.map(line => line.trim())
+			.filter(line => line && !line.startsWith('#') || line && !line.startsWith("//"));
+
+		const jsContent = []
+		for(const line of manifest){
+			const partial = join(filePath, line)
+			if (!fs.existsSync(partial)) {
+			  throw new Error(`File not found: ${partial}`);
+			}
+			const partialContent = fs.readFileSync(partial, 'utf-8');
+			jsContent.push(`// ${line}\n${partialContent}\n`);
+		}
+
+		const finalJS = jsContent.join("\n")
+		zip.addFile('js.txt', Buffer.from(finalJS, 'utf-8'));
+	} else {
+		zip.addLocalFile(join(filePath, 'js.js'), '', 'js.txt');
+	}
 	zip.addLocalFile(join(filePath, 'fields.json'), '', 'fields.txt');
 	zip.addLocalFile(join(filePath, 'data.json'), '', 'data.txt');
 	zip.addLocalFile(join(__dirname, 'data', 'widget.ini'));
