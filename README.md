@@ -59,8 +59,10 @@ npm i
 -   [x] On-screen console toasts
 -   [ ] [widget.io](https://chromewebstore.google.com/detail/widgetio/fcgbjpajcfjnjgfdeookpnoefgcliljj)
     -   [x] Import
+        -   [ ] Drag and drop
     -   [x] Export
-        -   [ ] Obfuscate
+        -   [x] Minify
+        -   [x] Obfuscate
 -   [x] Finish home screen design
     -   [x] Add search
     -   [x] Add sort
@@ -104,3 +106,7 @@ npm i
 -   [x] Run script
 -   [x] Automatic widget layering onClick
 -   [x] Add toasts to the app
+-   [ ] Refactor
+    -   [ ] Rewrite API (REST + Axios)
+    -   [ ] HMR
+    -   [ ] Widget communication
