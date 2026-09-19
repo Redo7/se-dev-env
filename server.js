@@ -82,7 +82,7 @@ function queueWrite(key, writeOperation) {
 	return newQueue;
 }
 
-async function postProcessJS(code, shouldMinify, shouldObfuscate) {
+async function postProcessJS(code, shouldMinify, shouldObfuscate, hasHeader, filePath) {
 	let processed = code;
 
 	if (shouldMinify) {
@@ -100,6 +100,10 @@ async function postProcessJS(code, shouldMinify, shouldObfuscate) {
 			stringArray: true,
 		});
 		processed = obfuscated.getObfuscatedCode();
+	}
+
+	if (hasHeader) {
+		processed  = [fs.readFileSync(join(filePath, "_header.js")), processed].join("\n")
 	}
 
 	return processed;
@@ -587,6 +591,7 @@ app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName/:minify/:obfusca
 
 		const jsContent = []
 		for(const line of manifest){
+			if(line === "_header.js") continue;
 			const partial = join(filePath, line)
 			if (!fs.existsSync(partial)) {
 			  throw new Error(`File not found: ${partial}`);
@@ -596,7 +601,7 @@ app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName/:minify/:obfusca
 		}
 
 		const finalJS = jsContent.join("\n")
-		const postProcessed = await postProcessJS(finalJS, minify === "true", obfuscate === "true")
+		const postProcessed = await postProcessJS(finalJS, minify === "true", obfuscate === "true", fs.existsSync(join(filePath, "_header.js")), filePath)
 		zip.addFile('js.txt', Buffer.from(postProcessed, 'utf-8'));
 	} else {
 		const jsContent = fs.readFileSync(join(filePath, 'js.js'), 'utf-8');
