@@ -27,7 +27,8 @@ import { Button } from './ui/button';
 const HomeScreen = () => {
 	const [overlays, setOverlays] = useState<OverlayInstance[]>([]);
 	const [filterInput, setFilterInput] = useState('');
-	const [sortOrder, setSortOrder] = useState('A-Z');
+	const localStorageSortOrder = localStorage.getItem("sortOrder") ?? "A-Z"
+	const [sortOrder, setSortOrder] = useState(localStorageSortOrder);
 	const [createPopoverOpen, setCreatePopoverOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const nameRef = useRef<HTMLInputElement>(null);
@@ -192,7 +193,10 @@ const HomeScreen = () => {
 									<p className="text-sm">{sortOrder}</p>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent>
-									<DropdownMenuRadioGroup value={sortOrder} onValueChange={setSortOrder}>
+									<DropdownMenuRadioGroup value={sortOrder} onValueChange={(value) => {
+										localStorage.setItem("sortOrder", value)
+										setSortOrder(value)
+									}}>
 										<DropdownMenuLabel className="text-[0.75rem] opacity-50 px-1.5 flex gap-1 items-center">
 											<BookA size={12} strokeWidth={1.5} /> Alphabetical
 										</DropdownMenuLabel>
