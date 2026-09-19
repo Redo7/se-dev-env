@@ -85,14 +85,6 @@ function queueWrite(key, writeOperation) {
 async function postProcessJS(code, shouldMinify, shouldObfuscate, hasHeader, filePath) {
 	let processed = code;
 
-	if (shouldMinify) {
-		const minified = await minify(processed, {
-			compress: true,
-			mangle: true,
-		});
-		processed = minified.code || processed;
-	}
-
 	if (shouldObfuscate) {
 		const obfuscated = JavaScriptObfuscator.obfuscate(processed, {
 			compact: false,
@@ -100,6 +92,14 @@ async function postProcessJS(code, shouldMinify, shouldObfuscate, hasHeader, fil
 			stringArray: true,
 		});
 		processed = obfuscated.getObfuscatedCode();
+	}
+
+	if (shouldMinify) {
+		const minified = await minify(processed, {
+			compress: true,
+			mangle: true,
+		});
+		processed = minified.code || processed;
 	}
 
 	if (hasHeader) {
@@ -605,7 +605,7 @@ app.get('/api/widget-io-export/:overlayID/:widgetID/:widgetName/:minify/:obfusca
 		zip.addFile('js.txt', Buffer.from(postProcessed, 'utf-8'));
 	} else {
 		const jsContent = fs.readFileSync(join(filePath, 'js.js'), 'utf-8');
-		const postProcessed = await postProcessJS(jsContent, minify === "true", obfuscate === "true");
+		const postProcessed = await postProcessJS(jsContent, minify === "true", obfuscate === "true", fs.existsSync(join(filePath, "_header.js")), filePath);
 		zip.addFile('js.txt', Buffer.from(postProcessed, 'utf-8'));
 	}
 	zip.addLocalFile(join(filePath, 'fields.json'), '', 'fields.txt');
