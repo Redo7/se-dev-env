@@ -40,6 +40,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 	const [currWidgetFieldData, setCurrWidgetFieldData] = useState<StreamElementsConfig | undefined>();
 	const [widgetName, setWidgetName] = useState(currWidget ? currWidget.name : 'No widget selected');
 	const renameTimeout = useRef<number | null>(null);
+	const sidebarContentRef = useRef<HTMLDivElement>(null);
 	const rename = useRename();
 
 	useEffect(() => {setCurrWidget(widget)}, [widget])
@@ -51,6 +52,14 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 			setCurrWidgetFieldData(fieldData);
 			const fields = await getFields(overlay.id, currWidget.id);
 			setCurrWidgetFields(fields);
+
+			// Scroll back to saved position after fields are fetched
+			const localStorageScrollPosition = localStorage.getItem("sidebarScrollPosition");
+			setTimeout(() => {
+				if (localStorageScrollPosition && sidebarContentRef.current) {
+					sidebarContentRef.current.scrollTop = parseInt(localStorageScrollPosition, 10);
+				}
+			}, 300) // Wait 300ms for field group animation to expand 
 		};
 		fetchFields();
 		setWidgetName(currWidget.name);
@@ -110,6 +119,12 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 		}, 500);
 	};
 
+	const handleScroll = () => {
+		if (sidebarContentRef.current) {
+			localStorage.setItem( "sidebarScrollPosition", sidebarContentRef.current.scrollTop.toString());
+		}
+	};
+
 	return (
 		<div className="sidebar depth-shadow" data-sidebar-visible={isVisible}>
 			<div className="sidebar-heading flex">
@@ -127,7 +142,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 					<SidebarCollapse />
 				</SubtleButton>
 			</div>
-			<div className="sidebar-fields-container">
+			<div ref={sidebarContentRef} className="sidebar-fields-container" onScroll={handleScroll}>
 				{currWidgetFieldData &&
 					Object.entries(groupedFields).map(([groupName, fieldsInGroup]) => (
 						<FieldGroup key={groupName} name={groupName} widget={widget}>
