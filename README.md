@@ -49,9 +49,13 @@ npm i
 # Using the app
 
 1. Make a new overlay
-2. Make or Import a new widget
+2. Create a widget by clicking the `+` button in the bottom left corner of the overlay. Or, import one via the widget.io menu; the button is on the right of the `+`
+    - Widget.io works only with widgets which were exported with it since it checks for an `.ini` file inside of the uploaded `.zip` (this will be changed to an automatic detection in the future)
+        - The `.ini` file just tells the function which files belong where. If you need, the file it uses is present in `/data/widget.ini` 
 3. Hover over the widget and click the 3 dots to open the context menu
-4. Click `Open in Editor` to open the widgets files in VSCode (for now just VSCode)
+4. Click `Open in Editor` to open the widgets files in VSCode
+    - For now the `Open in Editor` function is hardcoded to open VSCode. More editors will be supported in the future.
+    - To edit the widget files in other editors, navigate to `/overlays/{overlay_name-uuid}/{widget_name-uuid}/src`
 
 # 1.0 Release Roadmap
 
