@@ -1,49 +1,53 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './fields.css';
+import type { WidgetInstance } from '@/types/index';
+import { getOpenFieldGroups, toggleFieldGroup } from '@/utils/openFieldGroups';
 
 interface Props {
 	children: React.ReactNode;
 	name: string;
+	widget: WidgetInstance | undefined;
 }
 
-const FieldGroup = ({ children, name }: Props) => {
-	const [isAccordionExpanded, setIsAccordionExpanded] = useState(false);
+const FieldGroup = ({ children, name, widget }: Props) => {
+	const fieldGroupID = `${widget?.id}-${name[0].toLowerCase() + name.replaceAll(" ", "").slice(1)}`
 	const [maxHeight, setMaxHeight] = useState<string>('0px');
 	const contentRef = useRef<HTMLDivElement>(null);
 	const resizeObserverRef = useRef<ResizeObserver | null>(null);
+	const [openIds, setOpenIds] = useState<Set<string>>(getOpenFieldGroups);
 
 	const updateMaxHeight = useCallback(() => {
 		if (!contentRef.current) return;
 		
-		if (isAccordionExpanded) {
-			// Measure the content height
-			const scrollHeight = contentRef.current.scrollHeight;
-			setMaxHeight(`${scrollHeight}px`);
-		} else {
-			setMaxHeight('0px');
-		}
-	}, [isAccordionExpanded]);
+		const scrollHeight = contentRef.current.scrollHeight;
+		const newHeight = `${scrollHeight}px`;
+		
+		setMaxHeight(prev => prev === newHeight ? prev : newHeight);
+	}, []);
 
-	const toggleAccordion = useCallback(() => {
-		setIsAccordionExpanded(prev => !prev);
+	const handleFieldGroupToggle = useCallback((isOpen: boolean) => {
+		toggleFieldGroup(fieldGroupID, isOpen)
+		setOpenIds(getOpenFieldGroups());
 	}, []);
 
 	// Update max-height when expansion state changes
 	useEffect(() => {
-		// Small delay to ensure DOM is ready
-		const timer = setTimeout(() => {
-			updateMaxHeight();
-		}, 10);
-
-		return () => clearTimeout(timer);
-	}, [isAccordionExpanded, updateMaxHeight]);
+		if (openIds.has(fieldGroupID)) {
+			const timer = setTimeout(() => {
+				updateMaxHeight();
+			}, 10);
+			return () => clearTimeout(timer);
+		} else {
+			setMaxHeight('0px');
+		}
+	}, [openIds, fieldGroupID, updateMaxHeight]);
 
 	// Set up ResizeObserver to watch for content changes
 	useEffect(() => {
 		if (!contentRef.current) return;
 
 		resizeObserverRef.current = new ResizeObserver(() => {
-			if (isAccordionExpanded) {
+			if (openIds.has(fieldGroupID)) {
 				updateMaxHeight();
 			}
 		});
@@ -56,7 +60,7 @@ const FieldGroup = ({ children, name }: Props) => {
 		return () => {
 			observer.disconnect();
 		};
-	}, [isAccordionExpanded, updateMaxHeight]);
+	}, [openIds, updateMaxHeight]);
 
 	// Public method to trigger height recalculation
 	const recalcHeight = useCallback(() => {
@@ -90,7 +94,7 @@ const FieldGroup = ({ children, name }: Props) => {
 
 	return (
 		<div className="field-group">
-			<button className="field-group-btn" onClick={toggleAccordion}>
+			<button className="field-group-btn" onClick={() => handleFieldGroupToggle(!openIds.has(fieldGroupID))}>
 				{name}
 			</button>
 			<div
@@ -101,7 +105,7 @@ const FieldGroup = ({ children, name }: Props) => {
 					overflow: 'hidden',
 					transition: 'max-height 0.3s ease-in-out'
 				}}
-				data-is-expanded={isAccordionExpanded}>
+				data-is-expanded={openIds.has(fieldGroupID)}>
 				{children}
 			</div>
 		</div>

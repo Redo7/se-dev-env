@@ -130,7 +130,7 @@ const Sidebar = ({ isVisible, overlay, widget, onToggle }: Props) => {
 			<div className="sidebar-fields-container">
 				{currWidgetFieldData &&
 					Object.entries(groupedFields).map(([groupName, fieldsInGroup]) => (
-						<FieldGroup key={groupName} name={groupName}>
+						<FieldGroup key={groupName} name={groupName} widget={widget}>
 							{fieldsInGroup.map(({ fieldName, fieldConfig }) => {
 								const componentName =
 									fieldConfig.type.toLowerCase() === 'googlefont'
