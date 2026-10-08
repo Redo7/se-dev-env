@@ -15,20 +15,21 @@ const FieldGroup = ({ children, name, widget }: Props) => {
 	const contentRef = useRef<HTMLDivElement>(null);
 	const resizeObserverRef = useRef<ResizeObserver | null>(null);
 	const [openIds, setOpenIds] = useState<Set<string>>(getOpenFieldGroups);
+	const isOpen = openIds.has(fieldGroupID);
 
 	const updateMaxHeight = useCallback(() => {
-		if (!contentRef.current) return;
+		if (!contentRef.current || !isOpen) return;
 		
 		const scrollHeight = contentRef.current.scrollHeight;
 		const newHeight = `${scrollHeight}px`;
 		
 		setMaxHeight(prev => prev === newHeight ? prev : newHeight);
-	}, []);
+	}, [isOpen]);
 
 	const handleFieldGroupToggle = useCallback((isOpen: boolean) => {
 		toggleFieldGroup(fieldGroupID, isOpen)
 		setOpenIds(getOpenFieldGroups());
-	}, []);
+	}, [fieldGroupID]);
 
 	// Update max-height when expansion state changes
 	useEffect(() => {
@@ -60,7 +61,7 @@ const FieldGroup = ({ children, name, widget }: Props) => {
 		return () => {
 			observer.disconnect();
 		};
-	}, [openIds, updateMaxHeight]);
+	}, [openIds, updateMaxHeight, fieldGroupID]);
 
 	// Public method to trigger height recalculation
 	const recalcHeight = useCallback(() => {
@@ -92,6 +93,8 @@ const FieldGroup = ({ children, name, widget }: Props) => {
 		}
 	}, [recalcHeight]);
 
+	if(!widget?.id) return null;
+
 	return (
 		<div className="field-group">
 			<button className="field-group-btn" onClick={() => handleFieldGroupToggle(!openIds.has(fieldGroupID))}>
@@ -101,7 +104,7 @@ const FieldGroup = ({ children, name, widget }: Props) => {
 				ref={contentRef}
 				className="field-group-accordion"
 				style={{ 
-					maxHeight: maxHeight,
+					maxHeight: isOpen ? maxHeight : '0px',
 					overflow: 'hidden',
 					transition: 'max-height 0.3s ease-in-out'
 				}}
