@@ -36,7 +36,8 @@ const AlertPopover = ({ listener, icon, onPopoverToggle }: Props) => {
 
     const handleCustomInput = (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (event.key === 'Enter') {
-            dispatchAlert(parseInt(customInputValue));
+			const customVal = parseInt(customInputValue);
+            dispatchAlert(!isNaN(customVal) ? customVal : 'random');
           }
     }
 
