@@ -56,7 +56,7 @@ const Overlay = () => {
 		id: 'overlay-id',
 		widgets: [],
 	});
-	const localStorageActiveWidget = JSON.parse(localStorage.getItem("activeWidget") ?? "")
+	const localStorageActiveWidget = JSON.parse(localStorage.getItem("activeWidget") ?? "{}")
 	const [activeWidget, setActiveWidget] = useState<WidgetInstance>(localStorageActiveWidget ?? undefined);
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [overlayName, setOverlayName] = useState(overlayData.name);
